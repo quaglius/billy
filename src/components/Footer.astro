@@ -1,21 +1,41 @@
 ---
-import { INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL } from '../lib/site';
+import { INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL, NAV } from '../lib/site';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <a class="site-footer__logo" href="/">
-      <img src="/marca/logo-horizontal-oscuro.svg" alt="Guille Nuesch" height="36" />
-    </a>
-    <nav aria-label="Redes">
-      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
-      {' · '}
-      <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">YouTube</a>
-      {' · '}
-      <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-      {' · '}
-      <a href="/ayuda">Si necesitás ayuda</a>
-    </nav>
+    <div class="site-footer__col">
+      <a class="site-footer__logo" href="/">
+        <img src="/marca/logo-horizontal.svg" alt="Guille Nuesch" height="36" />
+      </a>
+      <p class="site-footer__desc">
+        Salud mental y prevención de consumos problemáticos en el trabajo. Charlas, talleres y programas en plantas, sindicatos y ART.
+      </p>
+    </div>
+    <div class="site-footer__col">
+      <h2>Sitio</h2>
+      <nav aria-label="Pie">
+        {NAV.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+    </div>
+    <div class="site-footer__col">
+      <h2>Recursos</h2>
+      <nav aria-label="Recursos">
+        <a href="/cursos">Cursos</a>
+        <a href="/blog">Blog</a>
+        <a href="/ayuda">Si necesitás ayuda</a>
+      </nav>
+    </div>
+    <div class="site-footer__col">
+      <h2>Seguime</h2>
+      <div class="site-footer__social">
+        <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">Ig</a>
+        <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" aria-label="YouTube">Yt</a>
+        <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a>
+      </div>
+    </div>
   </div>
   <div class="site-footer__copy">© {year} Guille Nuesch</div>
 </footer>

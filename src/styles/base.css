@@ -91,19 +91,35 @@ img {
 }
 
 .site-footer {
-  background: var(--tj-color-theme-dark);
-  color: var(--tj-color-common-white-2);
-  padding: 48px 15px 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--tj-color-theme-bg);
+  color: var(--tj-color-text-body);
+  padding: 64px 15px 0;
 }
 
 .site-footer__inner {
   max-width: 1320px;
   margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 32px;
-  justify-content: space-between;
-  padding-bottom: 40px;
+  padding-bottom: 48px;
+}
+
+.site-footer__col h2 {
+  font-size: 16px;
+  margin: 0 0 16px;
+}
+
+.site-footer__col nav {
+  display: grid;
+  gap: 10px;
+}
+
+.site-footer__desc {
+  margin: 16px 0 0;
+  max-width: 280px;
+  color: var(--tj-color-common-black-2);
 }
 
 .site-footer__logo img {
@@ -112,7 +128,7 @@ img {
 }
 
 .site-footer a {
-  color: var(--tj-color-common-white);
+  color: var(--tj-color-heading-primary);
   text-decoration: none;
 }
 
@@ -120,9 +136,32 @@ img {
   color: var(--tj-color-theme-primary);
 }
 
+.site-footer__social {
+  display: flex;
+  gap: 10px;
+}
+
+.site-footer__social a {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 18, 41, 0.3);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.site-footer__social a:hover {
+  background: var(--tj-color-theme-primary);
+  color: #fff;
+}
+
 .site-footer__copy {
-  border-top: 1px solid var(--tj-color-border-1);
-  padding: 16px 15px;
+  background: var(--tj-color-theme-dark);
+  border-top: 0;
+  padding: 28px 15px;
   text-align: center;
   font-size: 14px;
   color: var(--tj-color-common-white-2);
@@ -487,6 +526,10 @@ html.js .wow:not(.animated) {
 }
 
 @media (min-width: 768px) {
+  .site-footer__inner {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  }
+
   .hero__grid {
     grid-template-columns: minmax(0, 600px) minmax(0, 630px);
     justify-content: space-between;
@@ -534,7 +577,7 @@ html.js .wow:not(.animated) {
 }
 
 @media (max-width: 1024px) {
-  .hero-shapes-img {
+  .hero .hero-shapes-img {
     display: none;
   }
 }
