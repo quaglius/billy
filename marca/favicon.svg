@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Guille Nuesch">
+  <title>Guille Nuesch</title>
+  <circle cx="60" cy="60" r="60" fill="#051229"/>
+  <rect x="26" y="30" width="68" height="46" rx="16" fill="#f7f7f7"/>
+  <path d="M36 76 L34 90 L54 76 Z" fill="#f7f7f7"/>
+  <path fill="none" stroke="#0075ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" d="M42 56 55 68 80 40"/>
+</svg>
