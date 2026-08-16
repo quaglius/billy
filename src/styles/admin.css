@@ -586,15 +586,63 @@
   font-size: 12px;
 }
 
-.curso-banco,
+.curso-act,
 .curso-obs {
   margin-top: 56px;
   padding-top: 32px;
   border-top: 1px solid var(--tj-color-border-2);
 }
 
-.curso-banco h2 {
+.curso-act h2,
+.curso-act h3 {
   margin-bottom: 8px;
+}
+
+.curso-act h3 {
+  margin-top: 40px;
+}
+
+.act-card__acciones--secundarias {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--tj-color-border-2);
+}
+
+.act-card__acciones--secundarias form {
+  display: inline-flex;
+}
+
+.act-card__editar {
+  width: 100%;
+}
+
+.act-card__editar summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tj-color-theme-primary);
+  list-style: none;
+}
+
+.act-card__editar summary::-webkit-details-marker {
+  display: none;
+}
+
+.act-card__editar summary::before {
+  content: '+ ';
+}
+
+.act-card__editar[open] summary::before {
+  content: '– ';
+}
+
+.act-card__editar .admin-form {
+  margin: 14px 0 10px;
+  max-width: none;
+}
+
+.act-card__editar > form:last-child button {
+  margin-top: 4px;
 }
 
 .curso-obs h2 {
@@ -994,8 +1042,8 @@
 .act-card__acciones {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
-  margin-top: auto;
 }
 
 .act-card__acciones .admin-btn-secondary {

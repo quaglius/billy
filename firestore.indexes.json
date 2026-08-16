@@ -12,16 +12,8 @@
       "collectionGroup": "actividades",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "encuentroId", "order": "ASCENDING" },
+        { "fieldPath": "cursoId", "order": "ASCENDING" },
         { "fieldPath": "orden", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "actividades",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "encuentroId", "order": "ASCENDING" },
-        { "fieldPath": "activa", "order": "ASCENDING" }
       ]
     },
     {
@@ -30,14 +22,6 @@
       "fields": [
         { "fieldPath": "actividadId", "order": "ASCENDING" },
         { "fieldPath": "creadoEn", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "actividades_curso",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "cursoId", "order": "ASCENDING" },
-        { "fieldPath": "orden", "order": "ASCENDING" }
       ]
     },
     {

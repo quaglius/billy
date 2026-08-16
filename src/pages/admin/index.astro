@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import AdminChrome from '../../components/AdminChrome.astro';
 import { db } from '../../lib/firebase-admin';
 import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../lib/encuentro';
-import { etiquetaInstancia, rutasInstancia } from '../../lib/admin-instancia';
+import { etiquetaInstancia } from '../../lib/admin-instancia';
 
 let proximos: {
   id: string;
@@ -12,8 +12,7 @@ let proximos: {
   estado: string;
   instanciaId: string;
   instanciaNombre: string;
-  rutaActividades: string;
-  rutaVivo: string;
+  rutaCurso: string;
 }[] = [];
 let conteos = { cursos: 0, empresas: 0, instancias: 0, posts: 0 };
 let errorCarga = '';
@@ -43,7 +42,6 @@ try {
       const fechaHora = fechaDeDoc(data.fechaHora);
       const instanciaId = String(data.instanciaId ?? '');
       const inst = instMap.get(instanciaId);
-      const rutas = rutasInstancia(instanciaId, d.id);
       return {
         id: d.id,
         titulo: String(data.titulo ?? 'Encuentro'),
@@ -52,8 +50,7 @@ try {
         estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null, ahora),
         instanciaId,
         instanciaNombre: inst ? etiquetaInstancia(inst) : 'Instancia',
-        rutaActividades: rutas.actividades,
-        rutaVivo: rutas.vivo,
+        rutaCurso: inst ? `/admin/cursos/${String(inst.cursoId ?? '')}` : '/admin/cursos',
       };
     })
     .filter((e) => e.estado !== 'completado')
@@ -94,8 +91,7 @@ const secciones = [
               <p class="dash-encuentro__meta">{e.instanciaNombre} · {e.fechaTexto}</p>
             </div>
             <div class="dash-encuentro__acciones">
-              <a href={e.rutaActividades} class="admin-btn-secondary">Actividades</a>
-              <a href={e.rutaVivo} class="admin-btn-primario">En vivo</a>
+              <a href={e.rutaCurso} class="admin-btn-primario">Ver preguntas y QRs</a>
             </div>
           </article>
         ))}

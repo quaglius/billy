@@ -10,16 +10,12 @@ export function rutasInstancia(instanciaId: string, encuentroId?: string) {
     cronograma: base,
     duplicar: `${base}/duplicar`,
     encuentro,
-    actividades: encuentro ? `${encuentro}/actividades` : '',
-    vivo: encuentro ? `${encuentro}/vivo` : '',
-    vivoDe: (actividadId: string) => (encuentro ? `${encuentro}/vivo?actividad=${actividadId}` : ''),
-    imprimirDe: (actividadId: string) => (encuentro ? `${encuentro}/imprimir?actividad=${actividadId}` : ''),
   };
 }
 
 export type Miga = { href?: string; label: string };
 
-type PaginaInstancia = 'listado' | 'cronograma' | 'duplicar' | 'encuentro' | 'actividades' | 'vivo';
+type PaginaInstancia = 'listado' | 'cronograma' | 'duplicar' | 'encuentro';
 
 export function migasInstancia(args: {
   pagina: PaginaInstancia;
@@ -48,14 +44,6 @@ export function migasInstancia(args: {
     return [admin, listado, inst, { label: 'Duplicar' }];
   }
 
-  const encuentroHref = `/admin/instancias/${instanciaId}/encuentros/${args.encuentroId ?? ''}`;
   const encuentroLabel = args.encuentroLabel || 'Encuentro';
-
-  if (args.pagina === 'encuentro') {
-    return [admin, listado, inst, cronograma, { label: encuentroLabel }];
-  }
-  if (args.pagina === 'actividades') {
-    return [admin, listado, inst, cronograma, { href: encuentroHref, label: encuentroLabel }, { label: 'Actividades' }];
-  }
-  return [admin, listado, inst, cronograma, { href: encuentroHref, label: encuentroLabel }, { label: 'En vivo' }];
+  return [admin, listado, inst, cronograma, { label: encuentroLabel }];
 }

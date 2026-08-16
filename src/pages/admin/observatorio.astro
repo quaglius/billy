@@ -42,7 +42,6 @@ try {
       tipo: String(data.tipo ?? ''),
       consigna: String(data.consigna ?? ''),
       opciones: Array.isArray(data.opciones) ? data.opciones.map(String) : null,
-      activa: Boolean(data.activa),
     };
   });
 

@@ -5,6 +5,7 @@ import AdminCampo from '../../../components/AdminCampo.astro';
 import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
 import { OBS_MIN, armarDashboard, etiquetaTipo, type ActividadObs, type RespuestaObs } from '../../../lib/observatorio';
+import { qrDataUrl, urlParticipante, urlSitio } from '../../../lib/qr';
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin/cursos');
@@ -15,6 +16,7 @@ const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 const objetivos = Array.isArray(c.objetivos) ? c.objetivos.join('\n') : '';
 const temario = Array.isArray(c.temario) ? c.temario.join('\n') : '';
+const site = urlSitio(Astro.site);
 
 const TIPO_LABEL: Record<string, string> = {
   si_no: 'Sí / No',
@@ -25,28 +27,31 @@ const TIPO_LABEL: Record<string, string> = {
   texto_libre: 'Texto libre — nube de palabras',
 };
 
-const bancoSnap = await db().collection('actividades_curso').where('cursoId', '==', id).orderBy('orden').get();
-const banco = bancoSnap.docs.map((d) => {
-  const b = d.data();
-  return {
-    id: d.id,
-    tipo: String(b.tipo ?? ''),
-    tipoLabel: TIPO_LABEL[String(b.tipo ?? '')] ?? String(b.tipo ?? ''),
-    consigna: String(b.consigna ?? ''),
-    orden: Number(b.orden ?? 0),
-  };
-});
-const okBanco = Astro.url.searchParams.get('okBanco');
-const errorBanco = Astro.url.searchParams.get('errorBanco');
+const actSnap = await db().collection('actividades').where('cursoId', '==', id).orderBy('orden').get();
+const actividades = await Promise.all(
+  actSnap.docs.map(async (d) => {
+    const data = d.data();
+    const codigo = String(data.codigo ?? '');
+    const link = urlParticipante(site, codigo);
+    return {
+      id: d.id,
+      tipo: String(data.tipo ?? ''),
+      tipoLabel: TIPO_LABEL[String(data.tipo ?? '')] ?? String(data.tipo ?? ''),
+      consigna: String(data.consigna ?? ''),
+      opciones: Array.isArray(data.opciones) ? data.opciones.join('\n') : '',
+      orden: Number(data.orden ?? 0),
+      codigo,
+      link,
+      qr: await qrDataUrl(link, 420),
+    };
+  }),
+);
 
 let dashCurso = null;
 let errorObs = '';
 try {
-  const [actsSnap, respSnap] = await Promise.all([
-    db().collection('actividades').where('cursoId', '==', id).get(),
-    db().collection('respuestas').where('cursoId', '==', id).get(),
-  ]);
-  const actividades: ActividadObs[] = actsSnap.docs.map((d) => {
+  const respSnap = await db().collection('respuestas').where('cursoId', '==', id).get();
+  const actividadesObs: ActividadObs[] = actSnap.docs.map((d) => {
     const data = d.data();
     return {
       id: d.id,
@@ -54,7 +59,6 @@ try {
       tipo: String(data.tipo ?? ''),
       consigna: String(data.consigna ?? ''),
       opciones: Array.isArray(data.opciones) ? data.opciones.map(String) : null,
-      activa: Boolean(data.activa),
     };
   });
   const respuestas: RespuestaObs[] = respSnap.docs.map((d) => {
@@ -68,7 +72,7 @@ try {
   dashCurso = armarDashboard({
     filtros: { cursoId: id, desde: '', hasta: '' },
     cursos: [{ id, titulo: String(c.titulo ?? '') }],
-    actividades,
+    actividades: actividadesObs,
     respuestas,
   });
 } catch (err) {
@@ -78,8 +82,10 @@ try {
 <Layout title={`Editar curso — ${c.titulo}`} noindex={true} whatsapp={false}>
   <AdminChrome titulo={`Editar: ${c.titulo}`}>
     <p><a href="/admin/cursos">← Cursos</a> · slug <code>{c.slug}</code></p>
-    {ok && <p class="admin-ok">Guardado.</p>}
-    {error && <p class="admin-alert">Falta el título.</p>}
+    {ok === '1' && <p class="admin-ok">Guardado.</p>}
+    {ok === 'editada' && <p class="admin-ok">Actividad actualizada.</p>}
+    {ok === 'eliminada' && <p class="admin-ok">Actividad eliminada.</p>}
+    {error && <p class="admin-alert">Falta un campo obligatorio.</p>}
     <form class="admin-form" method="post" action="/api/admin/cursos">
       <input type="hidden" name="id" value={id} />
       <AdminCampo titulo="Título" ayuda="Nombre público del curso-tipo, como se ve en el catálogo.">
@@ -119,38 +125,101 @@ try {
       <button type="submit">Guardar</button>
     </form>
 
-    <section class="curso-banco">
-      <h2>Banco de preguntas de este curso</h2>
+    <section class="curso-act">
+      <h2>Actividades de este curso</h2>
       <p class="admin-section-nota">
-        Cargá acá las preguntas típicas de este curso, una sola vez. Después, cuando armes el
-        cronograma de una instancia (una cursada concreta para una empresa), las importás al
-        encuentro que corresponda con un click — cada instancia se queda con su propia copia,
-        con su propio código y QR, para que las respuestas de una cursada nunca se mezclen con
-        las de otra.
+        Cada pregunta tiene un QR y un código <strong>fijos, para siempre</strong> — imprimilo una
+        vez y usalo en todas las cursadas de este curso, sea cual sea la organización o la fecha.
+        Antes de proyectar una en una charla nueva, tocá <strong>Renovar</strong> en esa tarjeta:
+        la pantalla en vivo arranca a contar de cero, pero nada se borra — el historial completo
+        sigue sumando acá abajo y en el Observatorio.
       </p>
-      {okBanco === 'eliminada' && <p class="admin-ok">Pregunta eliminada del banco.</p>}
-      {okBanco === '1' && <p class="admin-ok">Pregunta agregada al banco.</p>}
-      {errorBanco && <p class="admin-alert">Falta la consigna.</p>}
 
-      {banco.length > 0 ? (
-        <div class="banco-list">
-          {banco.map((b) => (
-            <div class="banco-list__item">
-              <span class="banco-item__tipo">{b.tipoLabel}</span>
-              <span>{b.consigna}</span>
-              <form method="post" action="/api/admin/actividades-curso/eliminar" onsubmit="return confirm('¿Sacar esta pregunta del banco? No borra las copias que ya se usaron en instancias.')">
-                <input type="hidden" name="id" value={b.id} />
-                <input type="hidden" name="cursoId" value={id} />
-                <button type="submit" class="admin-link-danger">Eliminar</button>
-              </form>
-            </div>
+      {actividades.length > 0 ? (
+        <div class="act-grid">
+          {actividades.map((a) => (
+            <article class="act-card">
+              <header class="act-card__head">
+                <span class="act-card__orden">#{a.orden}</span>
+                <span class="act-card__tipo">{a.tipoLabel}</span>
+              </header>
+              <h3 class="act-card__consigna">{a.consigna}</h3>
+              <div class="act-card__join">
+                <img
+                  class="act-card__qr-mini"
+                  src={a.qr}
+                  width="88"
+                  height="88"
+                  alt={`QR para participar: ${a.consigna}`}
+                  data-qr-abrir
+                  data-consigna={a.consigna}
+                  data-codigo={a.codigo}
+                  data-link={a.link}
+                  data-qr={a.qr}
+                />
+                <div>
+                  <p class="act-card__codigo">{a.codigo}</p>
+                  <p class="act-card__url">{a.link.replace(/^https?:\/\//, '')}</p>
+                </div>
+              </div>
+              <div class="act-card__acciones">
+                <button type="button" class="admin-btn-secondary" data-qr-abrir data-consigna={a.consigna} data-codigo={a.codigo} data-link={a.link} data-qr={a.qr}>
+                  Ver QR grande
+                </button>
+                <button type="button" class="admin-btn-secondary" data-qr-descargar data-consigna={a.consigna} data-codigo={a.codigo} data-link={a.link} data-qr={a.qr}>
+                  Descargar QR
+                </button>
+                <a class="admin-btn-primario" href={`/admin/vivo/${a.id}`}>Ir en vivo</a>
+              </div>
+              <div class="act-card__acciones act-card__acciones--secundarias">
+                <form method="post" action="/api/admin/actividades/renovar" onsubmit={`return confirm('Esto arranca de cero el conteo en vivo de "${a.consigna.replace(/'/g, "\\'")}" para la próxima vez que la proyectes. No borra nada del historial ni del Observatorio. ¿Renovar?')`}>
+                  <input type="hidden" name="id" value={a.id} />
+                  <input type="hidden" name="volverA" value={`/admin/cursos/${id}`} />
+                  <button type="submit" class="admin-btn-secondary">Renovar</button>
+                </form>
+                <details class="act-card__editar">
+                  <summary>Editar</summary>
+                  <form class="admin-form" method="post" action="/api/admin/actividades/editar">
+                    <input type="hidden" name="id" value={a.id} />
+                    <input type="hidden" name="cursoId" value={id} />
+                    <AdminCampo titulo="Tipo" ayuda="Cambiar el tipo puede dejar sin sentido las opciones cargadas — revisalas si lo cambiás.">
+                      <select name="tipo">
+                        <option value="si_no" selected={a.tipo === 'si_no'}>Sí / No</option>
+                        <option value="seleccion_unica" selected={a.tipo === 'seleccion_unica'}>Opción única</option>
+                        <option value="seleccion_multiple" selected={a.tipo === 'seleccion_multiple'}>Varias opciones</option>
+                        <option value="numero" selected={a.tipo === 'numero'}>Número</option>
+                        <option value="fecha" selected={a.tipo === 'fecha'}>Fecha</option>
+                        <option value="texto_libre" selected={a.tipo === 'texto_libre'}>Texto libre</option>
+                      </select>
+                    </AdminCampo>
+                    <AdminCampo titulo="Consigna" ayuda="El código y el QR no cambian al editar el texto.">
+                      <textarea name="consigna" rows="3" required>{a.consigna}</textarea>
+                    </AdminCampo>
+                    <AdminCampo titulo="Opciones" ayuda="Una por línea. Solo para opción única o varias opciones.">
+                      <textarea name="opciones" rows="4">{a.opciones}</textarea>
+                    </AdminCampo>
+                    <button type="submit">Guardar cambios</button>
+                  </form>
+                  <form method="post" action="/api/admin/actividades/eliminar" onsubmit="return confirm('¿Eliminar esta actividad? El QR deja de funcionar. Las respuestas ya registradas no se borran.')">
+                    <input type="hidden" name="id" value={a.id} />
+                    <input type="hidden" name="cursoId" value={id} />
+                    <button type="submit" class="admin-link-danger">Eliminar actividad</button>
+                  </form>
+                </details>
+              </div>
+            </article>
           ))}
         </div>
       ) : (
-        <p>Todavía no hay preguntas en el banco. Cargá la primera abajo.</p>
+        <p>Todavía no hay actividades en este curso. Cargá la primera abajo.</p>
       )}
 
-      <form class="admin-form" method="post" action="/api/admin/actividades-curso">
+      <h3>Nueva actividad</h3>
+      <p class="admin-section-nota">
+        Se crea con su código y su QR ya listos, para siempre. Ese mismo QR es el que vas a
+        imprimir y reutilizar en cualquier cursada de este curso.
+      </p>
+      <form class="admin-form" method="post" action="/api/admin/actividades">
         <input type="hidden" name="cursoId" value={id} />
         <AdminCampo
           titulo="Tipo"
@@ -171,17 +240,17 @@ try {
         <AdminCampo titulo="Opciones" ayuda="Solo para opción única o varias opciones: una por línea. En Sí/No, número, fecha o texto libre, dejalo vacío.">
           <textarea name="opciones" rows="4"></textarea>
         </AdminCampo>
-        <button type="submit">Agregar al banco</button>
+        <button type="submit">Crear</button>
       </form>
     </section>
 
     <section class="curso-obs">
       <h2>Estadísticas de este curso</h2>
       <p class="admin-section-nota">
-        El agregado de todas las respuestas anónimas de todas las instancias que usaron este curso —
-        no de esta plantilla en particular, sino de cada vez que se dictó. Nunca muestra empresa ni
-        persona. Es el mismo umbral que en el Observatorio: hace falta al menos {OBS_MIN} respuestas
-        por consigna para ver el detalle. <a href={`/admin/observatorio?curso=${id}`}>Ver en el Observatorio completo →</a>
+        El agregado histórico de todas las respuestas anónimas, sumando todas las veces que se
+        dictó este curso, sin importar cuántas veces se haya tocado "Renovar" en el medio. Nunca
+        muestra empresa ni persona. Hace falta al menos {OBS_MIN} respuestas por consigna para
+        ver el detalle. <a href={`/admin/observatorio?curso=${id}`}>Ver en el Observatorio completo →</a>
       </p>
       {errorObs && <p class="admin-alert">{errorObs}</p>}
       {dashCurso && dashCurso.kpis.respuestasEnRango === 0 && !errorObs && (
@@ -256,4 +325,14 @@ try {
       )}
     </section>
   </AdminChrome>
+
+  <dialog id="qr-dialog" class="qr-dialog">
+    <button type="button" class="qr-dialog__cerrar" data-qr-cerrar aria-label="Cerrar">✕</button>
+    <img id="qr-dialog-img" class="qr-dialog__img" alt="" />
+    <p id="qr-dialog-consigna" class="qr-dialog__consigna"></p>
+    <p id="qr-dialog-codigo" class="qr-dialog__codigo"></p>
+    <p id="qr-dialog-url" class="qr-dialog__url"></p>
+  </dialog>
 </Layout>
+
+<script src="/admin/qr-tarjetas.js" defer></script>

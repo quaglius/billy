@@ -700,6 +700,27 @@ body.is-vivo {
   color: #051229;
 }
 
+.vivo__reset-btn {
+  background: transparent !important;
+  border: 1px solid rgba(0, 117, 255, 0.5) !important;
+  color: #fff !important;
+}
+
+.vivo__reset-btn:hover {
+  background: var(--tj-color-theme-primary) !important;
+  border-color: var(--tj-color-theme-primary) !important;
+}
+
+.vivo__reset-ok {
+  margin: -8px 0 20px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(0, 117, 255, 0.15);
+  color: #fff;
+  font-size: 14px;
+  width: fit-content;
+}
+
 .vivo__picker {
   max-width: 720px;
   margin: 40px auto;

@@ -30,7 +30,13 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const id = `${actividadId}_${tokenNavegador}`;
+  // El código anti-doble-voto incluye la "sesión" actual de la actividad (ver Renovar): si
+  // Guillermo renueva la pantalla para un grupo nuevo, la misma persona puede volver a
+  // responder — cada renovación abre una ventana de voto nueva, aunque el QR sea el mismo de
+  // siempre.
+  const sesionDesde = act.data()!.sesionDesde ?? act.data()!.creadoEn;
+  const sesionMs = sesionDesde && typeof sesionDesde.toMillis === 'function' ? sesionDesde.toMillis() : 0;
+  const id = `${actividadId}_${sesionMs}_${tokenNavegador}`;
   const existente = await db().collection('respuestas').doc(id).get();
   if (existente.exists) {
     return new Response(JSON.stringify({ estado: 'ya_registrada' }), {

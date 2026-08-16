@@ -16,7 +16,6 @@ export type ActividadObs = {
   tipo: string;
   consigna: string;
   opciones: string[] | null;
-  activa: boolean;
 };
 
 export type RespuestaObs = {

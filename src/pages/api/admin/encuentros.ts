@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { FieldValue } from 'firebase-admin/firestore';
 import { db } from '../../../lib/firebase-admin';
 
 function redirect(to: string) {
@@ -27,27 +26,14 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (action === 'eliminar') {
-      const acts = await db().collection('actividades').where('encuentroId', '==', encuentroId).get();
-      const batch = db().batch();
-      acts.docs.forEach((doc) => batch.delete(doc.ref));
-      batch.delete(enc.ref);
-      await batch.commit();
+      // Las actividades ya no cuelgan del encuentro (viven del curso, con QR permanente),
+      // así que borrar un encuentro solo borra el encuentro: nada de preguntas ni respuestas.
+      await enc.ref.delete();
       return redirect(`${cronograma}?ok=eliminado`);
     }
 
     const archivado = action === 'archivar';
     await enc.ref.update({ archivado });
-    if (archivado) {
-      const acts = await db().collection('actividades').where('encuentroId', '==', encuentroId).get();
-      const activas = acts.docs.filter((doc) => doc.data().activa);
-      if (activas.length > 0) {
-        const batch = db().batch();
-        activas.forEach((doc) => {
-          batch.update(doc.ref, { activa: false, cerradaEn: FieldValue.serverTimestamp() });
-        });
-        await batch.commit();
-      }
-    }
     return redirect(`${cronograma}?ok=${archivado ? 'archivado' : 'restaurado'}`);
   }
 

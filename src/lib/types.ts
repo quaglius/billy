@@ -69,30 +69,20 @@ export type Encuentro = {
   archivado: boolean;
 };
 
-// Banco de preguntas reutilizable a nivel de Curso (plantilla). No tiene código ni QR propio:
-// se clona a un encuentro concreto (ver Actividad) cuando se arma o edita una instancia.
-export type ActividadCurso = {
-  id: string;
-  cursoId: string;
-  tipo: TipoActividad;
-  consigna: string;
-  opciones: string[] | null;
-  orden: number;
-  creadoEn: Date;
-};
-
+// Pregunta de un curso, con QR y código PERMANENTES: se imprime una vez y se reutiliza en
+// todas las cursadas de ese curso, sin importar la organización o la fecha. `sesionDesde`
+// marca desde cuándo cuentan las respuestas para la pantalla en vivo (ver "Renovar" en
+// vivo.astro): al tocarlo se pone en `now()` y el conteo en vivo arranca de nuevo, pero el
+// Observatorio sigue sumando TODO el historial, ignorando este campo.
 export type Actividad = {
   id: string;
-  encuentroId: string;
-  instanciaId: string;
   cursoId: string;
   codigo: string;
   tipo: TipoActividad;
   consigna: string;
   opciones: string[] | null;
   orden: number;
-  activa: boolean;
-  cerradaEn: Date | null;
+  sesionDesde: Date;
   creadoEn: Date;
 };
 
