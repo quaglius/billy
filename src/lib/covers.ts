@@ -81,10 +81,11 @@ export function coverPositionForCurso(formato: string, imagenPortadaUrl?: string
   return imagenPortadaUrl ? CENTRO : coverPositionForFormato(formato);
 }
 
+/** La imagen elegida en el admin gana siempre; el mapa por slug es solo un default para posts sin elegir. */
 export function coverMeta(slug: string, imagenPortadaUrl?: string | null): CoverMeta {
+  if (imagenPortadaUrl) return { src: imagenPortadaUrl, position: CENTRO };
   const mapped = POST_COVERS[slug];
   if (mapped) return mapped;
-  if (imagenPortadaUrl) return { src: imagenPortadaUrl, position: CENTRO };
   let n = 0;
   for (let i = 0; i < slug.length; i += 1) n += slug.charCodeAt(i);
   return { src: BLOG_COVERS[n % BLOG_COVERS.length]!, position: CENTRO };
