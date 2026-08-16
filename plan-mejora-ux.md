@@ -103,4 +103,6 @@ Estados obligatorios en cada flujo: **hover, focus-visible, empty, loading (si h
 6. Vivo / responder si entra  
 7. Footer / about / GO TOP si entra  
 
+**Hecho en la sesión del 16 ago (tarde):** vivo proyección, `/a/[codigo]` tap 56px, footer 4 col, Sobre mí composición, GO TOP, Observatorio barras, duplicar con conteo, skip-link/focus tokens. Instagram pendiente no está en home.
+
 Commits frecuentes, push cada 3–4 a `main`. Sin Netlify CLI.

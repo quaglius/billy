@@ -38,13 +38,19 @@ try {
   <AdminChrome titulo="Observatorio">
     <p>Agregados por curso. Nunca se muestra la empresa.</p>
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
-    <ul>
-      {bloques.map((b) => (
-        <li>
-          {b.consigna}
-          {b.listo ? ` — ${b.total} respuestas` : ' — Todavía no hay suficientes respuestas acumuladas para este dato (mínimo 30).'}
-        </li>
-      ))}
-    </ul>
+    {bloques.map((b) => (
+      <div class="obs-item">
+        <div class="obs-item__meta">
+          <span>{b.consigna}</span>
+          <span>{b.listo ? `${b.total} respuestas` : `${b.total}/${MIN}`}</span>
+        </div>
+        <div class="obs-track" aria-hidden="true">
+          <div class:list={['obs-fill', b.listo && 'is-ready']} style={`width: ${Math.min(100, Math.round((b.total / MIN) * 100))}%`}></div>
+        </div>
+        {!b.listo && (
+          <p>Todavía no hay suficientes respuestas acumuladas para este dato (mínimo 30).</p>
+        )}
+      </div>
+    ))}
   </AdminChrome>
 </Layout>

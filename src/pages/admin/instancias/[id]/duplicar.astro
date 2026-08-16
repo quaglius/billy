@@ -9,13 +9,21 @@ if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
 const empSnap = await db().collection('empresas').orderBy('nombre').get();
 const empresas = empSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
+const encSnap = await db().collection('encuentros').where('instanciaId', '==', id).get();
+let actividadesN = 0;
+for (const enc of encSnap.docs) {
+  const acts = await db().collection('actividades').where('encuentroId', '==', enc.id).get();
+  actividadesN += acts.size;
+}
+const encuentrosN = encSnap.size;
 const error = Astro.url.searchParams.get('error');
 ---
-<Layout title="Duplicar instancia" noindex={true}>
+<Layout title="Duplicar instancia" noindex={true} whatsapp={false}>
   <div class="page-shell gn-prose">
     <p><a href="/admin/instancias">← Instancias</a></p>
     <h1>Duplicar {inst.slug}</h1>
     <p>Se copia el contenido del curso. Elegí la organización nueva y las fechas.</p>
+    <p>Se van a copiar <strong>{encuentrosN} encuentros</strong> y <strong>{actividadesN} actividades</strong> (con códigos nuevos).</p>
     {error && <p>Faltan la empresa o la fecha de inicio.</p>}
     <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
       <input type="hidden" name="id" value={id} />
