@@ -1,10 +1,24 @@
 ---
 import Layout from '../../../../../../layouts/Layout.astro';
+import AdminBreadcrumb from '../../../../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../../../../lib/firebase-admin';
 import QRCode from 'qrcode';
+import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../../../lib/admin-instancia';
 
 const { id, encuentroId } = Astro.params;
 if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
+
+const [enc, instDoc] = await Promise.all([
+  db().collection('encuentros').doc(encuentroId).get(),
+  db().collection('instancias').doc(id).get(),
+]);
+if (!enc.exists || !instDoc.exists) return Astro.redirect('/admin/instancias');
+const e = enc.data()!;
+if (String(e.instanciaId) !== id) return Astro.redirect(`/admin/instancias/${id}`);
+
+const nombre = etiquetaInstancia(instDoc.data()!);
+const titulo = String(e.titulo ?? 'Encuentro');
+const rutas = rutasInstancia(id, encuentroId);
 
 const actSnap = await db()
   .collection('actividades')
@@ -41,12 +55,25 @@ if (urlParticipante) {
 <Layout title="En vivo" noindex={true} whatsapp={false} chrome={false}>
   <div class="vivo">
     <header class="vivo__bar">
-      <a href={`/admin/instancias/${id}/encuentros/${encuentroId}`}>Actividades</a>
-      {activa && (
-        <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
-          Imprimir
-        </a>
-      )}
+      <AdminBreadcrumb
+        tone="vivo"
+        crumbs={migasInstancia({
+          pagina: 'vivo',
+          instanciaId: id,
+          instanciaLabel: nombre,
+          encuentroId,
+          encuentroLabel: titulo,
+        })}
+      />
+      <div class="vivo__bar-acciones">
+        <a href={rutas.actividades}>Actividades</a>
+        <a href={rutas.encuentro}>Editar</a>
+        {activa && (
+          <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
+            Imprimir
+          </a>
+        )}
+      </div>
     </header>
 
     {activa ? (

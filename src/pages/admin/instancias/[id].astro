@@ -1,14 +1,18 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../lib/firebase-admin';
-import { estadoEncuentro } from '../../../lib/encuentro';
+import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../../lib/encuentro';
+import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../lib/admin-instancia';
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin/instancias');
 const doc = await db().collection('instancias').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
+const nombre = etiquetaInstancia(inst);
+const rutas = rutasInstancia(id);
 
 const encSnap = await db()
   .collection('encuentros')
@@ -18,64 +22,127 @@ const encSnap = await db()
 
 const encuentros = encSnap.docs.map((d) => {
   const data = d.data();
-  const fechaHora = data.fechaHora?.toDate?.() ?? new Date(data.fechaHora);
+  const fechaHora = fechaDeDoc(data.fechaHora);
   return {
     id: d.id,
     titulo: String(data.titulo ?? ''),
     orden: Number(data.orden ?? 0),
     fechaHora,
+    fechaTexto: formatFechaEncuentro(fechaHora),
     duracionMinutos: data.duracionMinutos ?? null,
     estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null),
+    archivado: Boolean(data.archivado),
   };
 });
+const vigentes = encuentros.filter((e) => !e.archivado);
+const archivados = encuentros.filter((e) => e.archivado);
+const proximoOrden = encuentros.reduce((max, e) => Math.max(max, e.orden), 0) + 1;
 const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
+const mensajesOk: Record<string, string> = {
+  '1': 'Guardado.',
+  archivado: 'Encuentro archivado. Ya no aparece en el cronograma.',
+  restaurado: 'Encuentro restaurado al cronograma.',
+  eliminado: 'Encuentro eliminado.',
+};
 ---
-<Layout title={`Instancia — ${inst.slug}`} noindex={true} whatsapp={false}>
-  <AdminChrome titulo={String(inst.slug)}>
-    {ok && <p class="admin-ok">Guardado.</p>}
+<Layout title={`Cronograma — ${nombre}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Cronograma">
+    <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'cronograma', instanciaId: id, instanciaLabel: nombre })} />
+    {ok && mensajesOk[ok] && <p class="admin-ok">{mensajesOk[ok]}</p>}
     {error && <p class="admin-alert">Faltan el título o la fecha.</p>}
-    <p>
-      Visibilidad:
-      <span class:list={['pill-estado', inst.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
-        {inst.visibilidad}
+    <p class="admin-meta">
+      <span>{nombre}</span>
+      <span>
+        Visibilidad:
+        <span class:list={['pill-estado', inst.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
+          {inst.visibilidad}
+        </span>
       </span>
-      {' · '}
-      <a href={`/admin/instancias/${id}/duplicar`}>Duplicar</a>
+      <a href={rutas.duplicar}>Duplicar instancia</a>
     </p>
-    <h2>Cronograma</h2>
-    {encuentros.length > 0 ? (
+    <p>Para cambiar título, fecha u orden, entrá a <strong>Editar</strong>. El nombre del encuentro también abre esa ficha.</p>
+
+    {vigentes.length > 0 ? (
       <table class="admin-table">
         <thead>
-          <tr><th>#</th><th>Encuentro</th><th>Estado</th><th></th></tr>
+          <tr><th>#</th><th>Encuentro</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody>
-          {encuentros.map((e) => (
-            <tr>
-              <td>{e.orden}</td>
-              <td>{e.titulo}</td>
-              <td>
-                <span class:list={['pill-estado', e.estado === 'en_curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                  {e.estado}
-                </span>
-              </td>
-              <td><a href={`/admin/instancias/${id}/encuentros/${e.id}`}>Actividades</a></td>
-            </tr>
-          ))}
+          {vigentes.map((e) => {
+            const r = rutasInstancia(id, e.id);
+            return (
+              <tr>
+                <td>{e.orden}</td>
+                <td class="admin-table__titulo">
+                  <a href={r.encuentro}>{e.titulo}</a>
+                </td>
+                <td>{e.fechaTexto}</td>
+                <td>
+                  <span class:list={['pill-estado', e.estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                    {e.estado}
+                  </span>
+                </td>
+                <td class="admin-table__acciones">
+                  <a href={r.encuentro}>Editar</a>
+                  <a href={r.actividades}>Actividades</a>
+                  <a href={r.vivo}>En vivo</a>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     ) : (
-      <p>No hay encuentros todavía.</p>
+      <p>No hay encuentros en el cronograma. Creá el primero con el formulario de abajo.</p>
+    )}
+
+    {archivados.length > 0 && (
+      <>
+        <h2>Archivados</h2>
+        <p>No se muestran en el cronograma activo. Se pueden restaurar o eliminar.</p>
+        <table class="admin-table admin-table--muted">
+          <thead>
+            <tr><th>#</th><th>Encuentro</th><th>Fecha</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            {archivados.map((e) => {
+              const r = rutasInstancia(id, e.id);
+              return (
+                <tr>
+                  <td>{e.orden}</td>
+                  <td class="admin-table__titulo">
+                    <a href={r.encuentro}>{e.titulo}</a>
+                  </td>
+                  <td>{e.fechaTexto}</td>
+                  <td class="admin-table__acciones">
+                    <a href={r.encuentro}>Editar</a>
+                    <form method="post" action="/api/admin/encuentros">
+                      <input type="hidden" name="instanciaId" value={id} />
+                      <input type="hidden" name="id" value={e.id} />
+                      <input type="hidden" name="_action" value="restaurar" />
+                      <button type="submit">Restaurar</button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </>
     )}
 
     <h2>Nuevo encuentro</h2>
+    <p>Al crear se abre la ficha del encuentro, donde se edita, se archiva y se entra a las actividades.</p>
     <form class="admin-form" method="post" action="/api/admin/encuentros">
       <input type="hidden" name="instanciaId" value={id} />
-      <label>Orden <input type="number" name="orden" value={encuentros.length + 1} required /></label>
+      <input type="hidden" name="_action" value="crear" />
+      <label>Orden <input type="number" name="orden" value={proximoOrden} required /></label>
       <label>Título <input type="text" name="titulo" required /></label>
       <label>Fecha y hora <input type="datetime-local" name="fechaHora" required /></label>
       <label>Duración (minutos) <input type="number" name="duracionMinutos" value="120" /></label>
-      <button type="submit">Crear</button>
+      <label>Descripción <textarea name="descripcion" rows="3"></textarea></label>
+      <button type="submit">Crear encuentro</button>
     </form>
   </AdminChrome>
 </Layout>

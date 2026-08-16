@@ -1,29 +1,41 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
 import AdminChrome from '../../../../components/AdminChrome.astro';
+import AdminBreadcrumb from '../../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../../lib/firebase-admin';
+import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../lib/admin-instancia';
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin/instancias');
 const doc = await db().collection('instancias').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
+const nombre = etiquetaInstancia(inst);
+const rutas = rutasInstancia(id);
 const empSnap = await db().collection('empresas').orderBy('nombre').get();
 const empresas = empSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
 const encSnap = await db().collection('encuentros').where('instanciaId', '==', id).get();
+const encVigentes = encSnap.docs.filter((enc) => !enc.data().archivado);
 let actividadesN = 0;
-for (const enc of encSnap.docs) {
+for (const enc of encVigentes) {
   const acts = await db().collection('actividades').where('encuentroId', '==', enc.id).get();
   actividadesN += acts.size;
 }
-const encuentrosN = encSnap.size;
+const encuentrosN = encVigentes.length;
 const error = Astro.url.searchParams.get('error');
 ---
-<Layout title="Duplicar instancia" noindex={true} whatsapp={false}>
-  <AdminChrome titulo={`Duplicar ${inst.slug}`}>
-    <p><a href="/admin/instancias">← Instancias</a></p>
+<Layout title={`Duplicar — ${nombre}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo={`Duplicar ${nombre}`}>
+    <AdminBreadcrumb
+      slot="breadcrumb"
+      crumbs={migasInstancia({ pagina: 'duplicar', instanciaId: id, instanciaLabel: nombre })}
+    />
+    <p class="admin-links">
+      <a href={rutas.cronograma}>← Cronograma</a>
+      <a href="/admin/instancias">Instancias</a>
+    </p>
     <p>Se copia el contenido del curso. Elegí la organización nueva y las fechas.</p>
-    <p>Se van a copiar <strong>{encuentrosN} encuentros</strong> y <strong>{actividadesN} actividades</strong> (con códigos nuevos).</p>
+    <p>Se van a copiar <strong>{encuentrosN} encuentros</strong> y <strong>{actividadesN} actividades</strong> (con códigos nuevos). Los encuentros archivados no se copian.</p>
     {error && <p class="admin-alert">Faltan la empresa o la fecha de inicio.</p>}
     <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
       <input type="hidden" name="id" value={id} />

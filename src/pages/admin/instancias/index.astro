@@ -1,11 +1,14 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../lib/firebase-admin';
+import { etiquetaInstancia, migasInstancia } from '../../../lib/admin-instancia';
 
 let instancias: {
   id: string;
   slug: string;
+  nombre: string;
   visibilidad: string;
   cursoId: string;
   empresaId: string;
@@ -26,6 +29,7 @@ try {
     return {
       id: d.id,
       slug: String(data.slug ?? ''),
+      nombre: etiquetaInstancia(data),
       visibilidad: String(data.visibilidad ?? 'privada'),
       cursoId: String(data.cursoId ?? ''),
       empresaId: String(data.empresaId ?? ''),
@@ -37,6 +41,7 @@ try {
 ---
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
   <AdminChrome titulo="Instancias">
+    <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'listado' })} />
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Instancia creada.</p>}
     {Astro.url.searchParams.get('error') === 'slug' && <p class="admin-alert">Ese slug ya está en uso.</p>}
@@ -44,12 +49,14 @@ try {
     {instancias.length > 0 && (
       <table class="admin-table">
         <thead>
-          <tr><th>Slug</th><th>Curso</th><th>Empresa</th><th>Visibilidad</th><th></th></tr>
+          <tr><th>Instancia</th><th>Curso</th><th>Empresa</th><th>Visibilidad</th><th>Acciones</th></tr>
         </thead>
         <tbody>
           {instancias.map((i) => (
             <tr>
-              <td><a href={`/admin/instancias/${i.id}`}>{i.slug}</a></td>
+              <td class="admin-table__titulo">
+                <a href={`/admin/instancias/${i.id}`}>{i.nombre}</a>
+              </td>
               <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
               <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
               <td>
@@ -57,7 +64,10 @@ try {
                   {i.visibilidad}
                 </span>
               </td>
-              <td><a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a></td>
+              <td class="admin-table__acciones">
+                <a href={`/admin/instancias/${i.id}`}>Cronograma</a>
+                <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
+              </td>
             </tr>
           ))}
         </tbody>

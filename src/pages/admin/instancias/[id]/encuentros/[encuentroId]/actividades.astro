@@ -1,0 +1,114 @@
+---
+import Layout from '../../../../../../layouts/Layout.astro';
+import AdminChrome from '../../../../../../components/AdminChrome.astro';
+import AdminBreadcrumb from '../../../../../../components/AdminBreadcrumb.astro';
+import { db } from '../../../../../../lib/firebase-admin';
+import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../../../lib/admin-instancia';
+
+const { id, encuentroId } = Astro.params;
+if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
+
+const [enc, instDoc] = await Promise.all([
+  db().collection('encuentros').doc(encuentroId).get(),
+  db().collection('instancias').doc(id).get(),
+]);
+if (!enc.exists || !instDoc.exists) return Astro.redirect(`/admin/instancias/${id ?? ''}`);
+const e = enc.data()!;
+if (String(e.instanciaId) !== id) return Astro.redirect(`/admin/instancias/${id}`);
+
+const inst = instDoc.data()!;
+const nombre = etiquetaInstancia(inst);
+const titulo = String(e.titulo ?? 'Encuentro');
+const rutas = rutasInstancia(id, encuentroId);
+
+const actSnap = await db()
+  .collection('actividades')
+  .where('encuentroId', '==', encuentroId)
+  .orderBy('orden')
+  .get();
+const actividades = actSnap.docs.map((d) => {
+  const data = d.data();
+  return {
+    id: d.id,
+    consigna: String(data.consigna ?? ''),
+    tipo: String(data.tipo ?? ''),
+    codigo: String(data.codigo ?? ''),
+    activa: Boolean(data.activa),
+    orden: Number(data.orden ?? 0),
+  };
+});
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
+---
+<Layout title={`Actividades — ${titulo}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Actividades">
+    <AdminBreadcrumb
+      slot="breadcrumb"
+      crumbs={migasInstancia({
+        pagina: 'actividades',
+        instanciaId: id,
+        instanciaLabel: nombre,
+        encuentroId,
+        encuentroLabel: titulo,
+      })}
+    />
+    <p class="admin-links">
+      <a href={rutas.encuentro}>← Editar encuentro</a>
+      <a href={rutas.vivo}>Pantalla en vivo</a>
+    </p>
+    {ok && <p class="admin-ok">Actividad creada.</p>}
+    {error && <p class="admin-alert">Falta la consigna.</p>}
+    {actividades.length > 0 ? (
+      <table class="admin-table">
+        <thead>
+          <tr><th>#</th><th>Consigna</th><th>Tipo</th><th>Código</th><th></th></tr>
+        </thead>
+        <tbody>
+          {actividades.map((a) => (
+            <tr>
+              <td>{a.orden}</td>
+              <td>{a.consigna}</td>
+              <td>{a.tipo}</td>
+              <td>{a.codigo}</td>
+              <td>
+                {a.activa ? (
+                  <span class="pill-estado pill-estado--ok">activa</span>
+                ) : (
+                  <form method="post" action="/api/admin/actividades/activar">
+                    <input type="hidden" name="actividadId" value={a.id} />
+                    <input type="hidden" name="encuentroId" value={encuentroId} />
+                    <input type="hidden" name="instanciaId" value={id} />
+                    <button type="submit">Activar</button>
+                  </form>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p>No hay actividades todavía.</p>
+    )}
+
+    <h2>Nueva actividad</h2>
+    <form class="admin-form" method="post" action="/api/admin/actividades">
+      <input type="hidden" name="encuentroId" value={encuentroId} />
+      <input type="hidden" name="instanciaId" value={id} />
+      <label>Orden <input type="number" name="orden" value={actividades.length + 1} required /></label>
+      <label>
+        Tipo
+        <select name="tipo">
+          <option value="si_no">si_no</option>
+          <option value="seleccion_unica">seleccion_unica</option>
+          <option value="seleccion_multiple">seleccion_multiple</option>
+          <option value="numero">numero</option>
+          <option value="fecha">fecha</option>
+          <option value="texto_libre">texto_libre</option>
+        </select>
+      </label>
+      <label>Consigna <textarea name="consigna" rows="3" required></textarea></label>
+      <label>Opciones (una por línea, si aplica) <textarea name="opciones" rows="4"></textarea></label>
+      <button type="submit">Crear</button>
+    </form>
+  </AdminChrome>
+</Layout>
