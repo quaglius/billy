@@ -6,14 +6,21 @@ const { codigo } = Astro.params;
 let consigna = '';
 let encontrada = false;
 let activa = false;
+let tipo = 'si_no';
+let opciones: string[] = [];
+let actividadId = '';
 
 if (codigo) {
   const snap = await db().collection('actividades').where('codigo', '==', codigo).limit(1).get();
   if (!snap.empty) {
     encontrada = true;
-    const a = snap.docs[0]!.data();
+    const doc = snap.docs[0]!;
+    actividadId = doc.id;
+    const a = doc.data();
     consigna = String(a.consigna ?? '');
     activa = Boolean(a.activa);
+    tipo = String(a.tipo ?? 'si_no');
+    opciones = Array.isArray(a.opciones) ? a.opciones.map(String) : [];
   }
 }
 ---
@@ -31,8 +38,85 @@ if (codigo) {
     {encontrada && activa && (
       <>
         <h1>{consigna}</h1>
-        <p>El formulario de respuesta se completa en el próximo paso del motor en vivo.</p>
+        <form id="form-respuesta" class="admin-form">
+          <input type="hidden" name="actividadId" value={actividadId} />
+          {tipo === 'si_no' && (
+            <div class="si-no">
+              <button type="button" data-valor="true">Sí</button>
+              <button type="button" data-valor="false">No</button>
+            </div>
+          )}
+          {tipo === 'seleccion_unica' &&
+            opciones.map((op) => (
+              <label><input type="radio" name="opcion" value={op} required /> {op}</label>
+            ))}
+          {tipo === 'seleccion_multiple' &&
+            opciones.map((op) => (
+              <label><input type="checkbox" name="opciones" value={op} /> {op}</label>
+            ))}
+          {tipo === 'numero' && <label>Número <input type="number" name="numero" required /></label>}
+          {tipo === 'fecha' && <label>Fecha <input type="date" name="fecha" required /></label>}
+          {tipo === 'texto_libre' && (
+            <label>Tu respuesta <textarea name="texto" maxlength="60" rows="2" required></textarea></label>
+          )}
+          {tipo !== 'si_no' && <button type="submit">Enviar</button>}
+        </form>
+        <p id="msg" hidden></p>
       </>
     )}
   </div>
 </Layout>
+
+{encontrada && activa && (
+  <script define:vars={{ tipo, actividadId }}>
+    const KEY = 'gn_token_navegador';
+    if (!localStorage.getItem(KEY)) localStorage.setItem(KEY, crypto.randomUUID());
+    const token = localStorage.getItem(KEY);
+    const form = document.getElementById('form-respuesta');
+    const msg = document.getElementById('msg');
+
+    function mostrar(texto) {
+      if (form) form.hidden = true;
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = texto;
+      }
+    }
+
+    async function enviar(valor) {
+      try {
+        const res = await fetch('/api/responder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actividadId, tokenNavegador: token, valor }),
+        });
+        const data = await res.json();
+        if (data.estado === 'ya_registrada') {
+          mostrar('Ya registramos tu respuesta para esta actividad. Gracias por participar.');
+        } else if (data.estado === 'cerrada') {
+          mostrar('Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.');
+        } else {
+          mostrar('Gracias por participar.');
+        }
+      } catch {
+        mostrar('Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.');
+      }
+    }
+
+    document.querySelectorAll('.si-no button').forEach((btn) => {
+      btn.addEventListener('click', () => enviar({ valor: btn.dataset.valor === 'true' }));
+    });
+
+    form?.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(form);
+      let valor;
+      if (tipo === 'seleccion_unica') valor = { opcion: String(fd.get('opcion') ?? '') };
+      else if (tipo === 'seleccion_multiple') valor = { opciones: fd.getAll('opciones').map(String) };
+      else if (tipo === 'numero') valor = { valor: Number(fd.get('numero')) };
+      else if (tipo === 'fecha') valor = { valor: String(fd.get('fecha') ?? '') };
+      else valor = { valor: String(fd.get('texto') ?? '').slice(0, 60) };
+      enviar(valor);
+    });
+  </script>
+)}

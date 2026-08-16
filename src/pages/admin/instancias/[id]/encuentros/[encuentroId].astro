@@ -35,6 +35,14 @@ const actividades = actSnap.docs.map((d) => {
         <li>
           {a.orden}. {a.consigna} ({a.tipo}) — código {a.codigo}
           {a.activa ? ' · activa' : ''}
+          {!a.activa && (
+            <form method="post" action="/api/admin/actividades/activar">
+              <input type="hidden" name="actividadId" value={a.id} />
+              <input type="hidden" name="encuentroId" value={encuentroId} />
+              <input type="hidden" name="instanciaId" value={id} />
+              <button type="submit">Activar</button>
+            </form>
+          )}
         </li>
       ))}
     </ul>

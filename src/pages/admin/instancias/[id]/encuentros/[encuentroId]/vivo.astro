@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../../../../layouts/Layout.astro';
 import { db } from '../../../../../../lib/firebase-admin';
+import QRCode from 'qrcode';
 
 const { id, encuentroId } = Astro.params;
 if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
@@ -18,11 +19,19 @@ const actividades = actSnap.docs.map((d) => {
     codigo: String(data.codigo ?? ''),
     activa: Boolean(data.activa),
     tipo: String(data.tipo ?? ''),
+    orden: Number(data.orden ?? 0),
   };
 });
 const activa = actividades.find((a) => a.activa);
-const site = Astro.site ? Astro.site.toString().replace(/\/$/, '') : '';
+const siguiente = activa
+  ? actividades.find((a) => a.orden > activa.orden)
+  : actividades[0];
+const site = (Astro.site?.toString() ?? 'https://guillenuesch.netlify.app').replace(/\/$/, '');
 const urlParticipante = activa ? `${site}/a/${activa.codigo}` : '';
+let qrSvg = '';
+if (urlParticipante) {
+  qrSvg = await QRCode.toString(urlParticipante, { type: 'svg', margin: 1, width: 280 });
+}
 ---
 <Layout title="En vivo" noindex={true}>
   <div class="page-shell gn-prose">
@@ -30,17 +39,86 @@ const urlParticipante = activa ? `${site}/a/${activa.codigo}` : '';
     <h1>Pantalla en vivo</h1>
     {activa ? (
       <>
-        <p class="hero-title">{activa.codigo}</p>
+        <div class="vivo-qr">
+          <div set:html={qrSvg} />
+          <p class="hero-title">{activa.codigo}</p>
+        </div>
         <p>{activa.consigna}</p>
-        {urlParticipante && (
-          <p>
-            <a href={`/a/${activa.codigo}`}>{urlParticipante}</a>
-          </p>
+        <div id="grafico" data-actividad={activa.id} data-tipo={activa.tipo}></div>
+        <form method="post" action="/api/admin/actividades/cerrar">
+          <input type="hidden" name="actividadId" value={activa.id} />
+          <input type="hidden" name="encuentroId" value={encuentroId} />
+          <input type="hidden" name="instanciaId" value={id} />
+          <button type="submit">Cerrar actividad</button>
+        </form>
+        {siguiente && (
+          <form method="post" action="/api/admin/actividades/activar">
+            <input type="hidden" name="actividadId" value={siguiente.id} />
+            <input type="hidden" name="encuentroId" value={encuentroId} />
+            <input type="hidden" name="instanciaId" value={id} />
+            <button type="submit">Siguiente actividad</button>
+          </form>
         )}
-        <p>Los gráficos en vivo se actualizan por sondeo. Próximo paso: QR y resultados.</p>
+        <p>
+          <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
+            Imprimir consigna
+          </a>
+        </p>
       </>
     ) : (
-      <p>No hay actividad activa. Activá una desde la lista de actividades.</p>
+      <>
+        <p>No hay actividad activa.</p>
+        {actividades[0] && (
+          <form method="post" action="/api/admin/actividades/activar">
+            <input type="hidden" name="actividadId" value={actividades[0].id} />
+            <input type="hidden" name="encuentroId" value={encuentroId} />
+            <input type="hidden" name="instanciaId" value={id} />
+            <button type="submit">Activar</button>
+          </form>
+        )}
+      </>
     )}
   </div>
 </Layout>
+
+{activa && (
+  <script>
+    const el = document.getElementById('grafico');
+    if (!el) {
+      /* noop */
+    } else {
+      const idAct = el.dataset.actividad;
+      let ultimo = '';
+      async function tick() {
+        try {
+          const res = await fetch(`/api/actividad/${idAct}/resultados`);
+          if (!res.ok) return;
+          const data = await res.json();
+          const serial = JSON.stringify(data);
+          if (serial === ultimo) return;
+          ultimo = serial;
+          if (data.barras) {
+            el.innerHTML = data.barras
+              .map(
+                (b) =>
+                  `<div><strong>${b.etiqueta}</strong> ${b.porcentaje}%<div style="background:#0075ff;height:12px;width:${b.porcentaje}%;border-radius:50px"></div></div>`,
+              )
+              .join('');
+          } else if (data.numero) {
+            el.innerHTML = `<p>Promedio ${data.numero.promedio.toFixed(1)} · mín ${data.numero.min} · máx ${data.numero.max}</p>`;
+          } else if (data.palabras) {
+            el.innerHTML = data.palabras
+              .map((p) => `<span style="font-size:${12 + p.cantidad * 6}px;margin:4px">${p.palabra}</span>`)
+              .join(' ');
+          } else if (data.semanas) {
+            el.innerHTML = data.semanas.map((s) => `<div>${s.semana}: ${s.cantidad}</div>`).join('');
+          }
+        } catch {
+          /* seguir mostrando el último dato */
+        }
+      }
+      tick();
+      setInterval(tick, 2000);
+    }
+  </script>
+)}
