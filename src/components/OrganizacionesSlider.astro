@@ -1,0 +1,36 @@
+---
+import { ORGANIZACIONES } from '../lib/organizaciones';
+---
+<section class="orgs page-shell wow fadeInUp" data-wow-delay="0.35s">
+  <p class="eyebrow">Organizaciones</p>
+  <h2 class="text-anim">Donde trabajó</h2>
+  <div class="org-slider">
+    <button class="org-slider__nav" type="button" data-dir="-1" aria-label="Organizaciones anteriores">
+      <span aria-hidden="true">←</span>
+    </button>
+    <div class="org-slider__viewport" tabindex="0">
+      <ul class="org-slider__track">
+        {ORGANIZACIONES.map((o) => (
+          <li class="org-slider__item">
+            <img src={o.logo} alt={o.nombre} width="80" height="80" />
+            <span>{o.corto}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <button class="org-slider__nav" type="button" data-dir="1" aria-label="Organizaciones siguientes">
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
+</section>
+<script>
+  document.querySelectorAll('.org-slider').forEach((root) => {
+    const viewport = root.querySelector<HTMLElement>('.org-slider__viewport');
+    root.querySelectorAll<HTMLButtonElement>('.org-slider__nav').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const dir = Number(btn.dataset.dir ?? 1);
+        viewport?.scrollBy({ left: dir * 220, behavior: 'smooth' });
+      });
+    });
+  });
+</script>
