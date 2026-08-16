@@ -10,64 +10,53 @@ interface Props {
 }
 
 const { pasos, prefijo = 'flujo' } = Astro.props;
-const panelId = `${prefijo}-panel`;
 ---
 <div class="flujo" data-flujo={prefijo}>
-  <div class="flujo__pasos" role="tablist" aria-label="Proceso de trabajo">
-    {pasos.map((p, i) => (
-      <button
-        type="button"
-        class="flujo__tab"
-        role="tab"
-        id={`${prefijo}-tab-${i}`}
-        aria-selected={i === 0 ? 'true' : 'false'}
-        aria-controls={panelId}
-        tabindex={i === 0 ? 0 : -1}
-        data-texto={p.texto}
+  {pasos.map((p, i) => (
+    <div class="flujo__item">
+      <h3 class="flujo__cabecera">
+        <button
+          type="button"
+          class="flujo__tab"
+          id={`${prefijo}-tab-${i}`}
+          aria-expanded={i === 0 ? 'true' : 'false'}
+          aria-controls={`${prefijo}-panel-${i}`}
+        >
+          <span class="flujo__num" aria-hidden="true">{i + 1}</span>
+          <span class="flujo__nombre">{p.titulo}</span>
+          <span class="flujo__chevron" aria-hidden="true"></span>
+        </button>
+      </h3>
+      <div
+        class="flujo__contenido"
+        id={`${prefijo}-panel-${i}`}
+        role="region"
+        aria-labelledby={`${prefijo}-tab-${i}`}
+        hidden={i === 0 ? undefined : true}
       >
-        <span class="flujo__num" aria-hidden="true">{i + 1}</span>
-        <span class="flujo__nombre">{p.titulo}</span>
-      </button>
-    ))}
-  </div>
-  <div class="flujo__detalle" role="tabpanel" id={panelId} aria-labelledby={`${prefijo}-tab-0`}>
-    <p>{pasos[0]?.texto}</p>
-  </div>
+        <div class="flujo__detalle"><p>{p.texto}</p></div>
+      </div>
+    </div>
+  ))}
 </div>
 <script>
   document.querySelectorAll<HTMLElement>('[data-flujo]').forEach((root) => {
-    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-    const panel = root.querySelector<HTMLElement>('[role="tabpanel"]');
-    const texto = panel?.querySelector('p');
-    if (!panel || !texto) return;
+    const items = [...root.querySelectorAll<HTMLElement>('.flujo__item')];
 
-    function activar(tab: HTMLButtonElement) {
-      tabs.forEach((other) => {
-        const on = other === tab;
-        other.setAttribute('aria-selected', on ? 'true' : 'false');
-        other.tabIndex = on ? 0 : -1;
-      });
-      texto.textContent = tab.dataset.texto ?? '';
-      panel.setAttribute('aria-labelledby', tab.id);
-      tab.focus();
+    function set(item: HTMLElement, abierto: boolean) {
+      const tab = item.querySelector<HTMLButtonElement>('.flujo__tab');
+      const panel = item.querySelector<HTMLElement>('.flujo__contenido');
+      if (!tab || !panel) return;
+      tab.setAttribute('aria-expanded', String(abierto));
+      panel.hidden = !abierto;
     }
 
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => activar(tab));
-    });
-
-    root.querySelector('.flujo__pasos')?.addEventListener('keydown', (ev) => {
-      const e = ev as KeyboardEvent;
-      const i = tabs.indexOf(document.activeElement as HTMLButtonElement);
-      if (i < 0) return;
-      let next = i;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % tabs.length;
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + tabs.length) % tabs.length;
-      else if (e.key === 'Home') next = 0;
-      else if (e.key === 'End') next = tabs.length - 1;
-      else return;
-      e.preventDefault();
-      activar(tabs[next]!);
+    items.forEach((item) => {
+      const tab = item.querySelector<HTMLButtonElement>('.flujo__tab');
+      tab?.addEventListener('click', () => {
+        const yaAbierto = tab.getAttribute('aria-expanded') === 'true';
+        items.forEach((other) => set(other, other === item && !yaAbierto));
+      });
     });
   });
 </script>
