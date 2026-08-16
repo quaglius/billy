@@ -1,0 +1,59 @@
+﻿<svg width="80" height="81" viewBox="0 0 80 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path stroke="currentcolor"
+      d="M 40.5,5.5 L 40.5,5.5 A 35,35,0,0,1,75.5,40.5 L 75.5,40.5 A 35,35,0,0,1,40.5,75.5 L 40.5,75.5 A 35,35,0,0,1,5.5,40.5 L 5.5,40.5 A 35,35,0,0,1,40.5,5.5"
+      class="GAqZQeDS_0"></path>
+   <path stroke="currentcolor"
+      d="M 40.5,13.5 L 40.5,13.5 A 27,27,0,0,1,67.5,40.5 L 67.5,40.5 A 27,27,0,0,1,40.5,67.5 L 40.5,67.5 A 27,27,0,0,1,13.5,40.5 L 13.5,40.5 A 27,27,0,0,1,40.5,13.5"
+      class="GAqZQeDS_1"></path>
+   <path stroke="currentcolor"
+      d="M 40.5,22.5 L 40.5,22.5 A 18,18,0,0,1,58.5,40.5 L 58.5,40.5 A 18,18,0,0,1,40.5,58.5 L 40.5,58.5 A 18,18,0,0,1,22.5,40.5 L 22.5,40.5 A 18,18,0,0,1,40.5,22.5"
+      class="GAqZQeDS_2"></path>
+   <path stroke="currentcolor"
+      d="M 40.5,37.5 L 40.5,37.5 A 19,19,0,0,1,59.5,56.5 L 59.5,56.5 A 19,19,0,0,1,40.5,75.5 L 40.5,75.5 A 19,19,0,0,1,21.5,56.5 L 21.5,56.5 A 19,19,0,0,1,40.5,37.5"
+      class="GAqZQeDS_3"></path>
+   <style data-made-with="vivus-instant">
+      .GAqZQeDS_0 {
+         stroke-dasharray: 220 222;
+         stroke-dashoffset: 221;
+         animation: GAqZQeDS_draw 2000ms ease-in-out 0ms forwards;
+      }
+
+      .GAqZQeDS_1 {
+         stroke-dasharray: 170 172;
+         stroke-dashoffset: 171;
+         animation: GAqZQeDS_draw 2000ms ease-in-out 333ms forwards;
+      }
+
+      .GAqZQeDS_2 {
+         stroke-dasharray: 114 116;
+         stroke-dashoffset: 115;
+         animation: GAqZQeDS_draw 2000ms ease-in-out 666ms forwards;
+      }
+
+      .GAqZQeDS_3 {
+         stroke-dasharray: 120 122;
+         stroke-dashoffset: 121;
+         animation: GAqZQeDS_draw 2000ms ease-in-out 1000ms forwards;
+      }
+
+      @keyframes GAqZQeDS_draw {
+         100% {
+            stroke-dashoffset: 0;
+         }
+      }
+
+      @keyframes GAqZQeDS_fade {
+         0% {
+            stroke-opacity: 1;
+         }
+
+         94.44444444444444% {
+            stroke-opacity: 1;
+         }
+
+         100% {
+            stroke-opacity: 0;
+         }
+      }
+   </style>
+</svg>

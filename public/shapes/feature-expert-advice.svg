@@ -1,0 +1,91 @@
+﻿<svg width="80" height="81" viewBox="0 0 80 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path
+      d="M55.9566 12.5783L48.228 7.7002L40.0008 2.9502L7.0918 21.9502V59.9502L40.0008 78.9502L72.9097 59.9502V21.9502L64.6825 17.2002L60.5689 14.8252"
+      stroke="currentcolor" stroke-width="0.997241" class="GZoqilTp_0"></path>
+   <path
+      d="M29.9767 66.0692L33.319 67.9975L40.0037 71.854L66.7422 56.4279V25.5758L40.0037 10.1497L13.2651 25.5758V56.4279L19.9498 60.2844L25.5437 63.4383"
+      stroke="currentcolor" stroke-width="0.997241" class="GZoqilTp_1"></path>
+   <path
+      d="M45.2607 37.9136V43.9868L40.001 47.022L34.7432 43.9868V37.9136L40.001 34.8774L45.2607 37.9136Z"
+      stroke="currentcolor" stroke-width="0.997241" class="GZoqilTp_2"></path>
+   <path
+      d="M40.0009 38.4575L42.16 39.7041V42.1972L40.0009 43.4437L37.8418 42.1972V39.7041L40.0009 38.4575Z"
+      fill="currentcolor" class="GZoqilTp_3"></path>
+   <path stroke="currentcolor" stroke-width="0.997241" d="M39.5053,35.1326L39.5053,21.005"
+      class="GZoqilTp_4"></path>
+   <path stroke="currentcolor" stroke-width="0.997241" d="M45.8203,40.4516L59.9479,40.4516"
+      class="GZoqilTp_5"></path>
+   <path stroke="currentcolor" stroke-width="0.997241" d="M20.0527,40.4516L34.1803,40.4516"
+      class="GZoqilTp_6"></path>
+   <path stroke="currentcolor" stroke-width="0.997241" d="M40.3295,60.895L40.3295,46.7674"
+      class="GZoqilTp_7"></path>
+   <style data-made-with="vivus-instant">
+      .GZoqilTp_0 {
+         stroke-dasharray: 223 225;
+         stroke-dashoffset: 224;
+         animation: GZoqilTp_draw 2000ms ease-in-out 0ms forwards;
+      }
+
+      .GZoqilTp_1 {
+         stroke-dasharray: 181 183;
+         stroke-dashoffset: 182;
+         animation: GZoqilTp_draw 2000ms ease-in-out 142ms forwards;
+      }
+
+      .GZoqilTp_2 {
+         stroke-dasharray: 37 39;
+         stroke-dashoffset: 38;
+         animation: GZoqilTp_draw 2000ms ease-in-out 285ms forwards;
+      }
+
+      .GZoqilTp_3 {
+         stroke-dasharray: 15 17;
+         stroke-dashoffset: 16;
+         animation: GZoqilTp_draw 2000ms ease-in-out 428ms forwards;
+      }
+
+      .GZoqilTp_4 {
+         stroke-dasharray: 15 17;
+         stroke-dashoffset: 16;
+         animation: GZoqilTp_draw 2000ms ease-in-out 571ms forwards;
+      }
+
+      .GZoqilTp_5 {
+         stroke-dasharray: 15 17;
+         stroke-dashoffset: 16;
+         animation: GZoqilTp_draw 2000ms ease-in-out 714ms forwards;
+      }
+
+      .GZoqilTp_6 {
+         stroke-dasharray: 15 17;
+         stroke-dashoffset: 16;
+         animation: GZoqilTp_draw 2000ms ease-in-out 857ms forwards;
+      }
+
+      .GZoqilTp_7 {
+         stroke-dasharray: 15 17;
+         stroke-dashoffset: 16;
+         animation: GZoqilTp_draw 2000ms ease-in-out 1000ms forwards;
+      }
+
+      @keyframes GZoqilTp_draw {
+         100% {
+            stroke-dashoffset: 0;
+         }
+      }
+
+      @keyframes GZoqilTp_fade {
+         0% {
+            stroke-opacity: 1;
+         }
+
+         94.44444444444444% {
+            stroke-opacity: 1;
+         }
+
+         100% {
+            stroke-opacity: 0;
+         }
+      }
+   </style>
+</svg>

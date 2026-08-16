@@ -1,27 +1,50 @@
 ---
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import Layout from '../layouts/Layout.astro';
 import BotonPrimario from '../components/BotonPrimario.astro';
-import { WHATSAPP_URL } from '../lib/site';
+import {
+  WHATSAPP_URL,
+  INSTAGRAM_URL,
+  INSTAGRAM_HANDLE,
+  INSTAGRAM_BIO_SUGERIDA,
+  SITE_URL,
+} from '../lib/site';
 
 export const prerender = true;
+
+const heroSrc = existsSync(path.join(process.cwd(), 'public/fotos/guille/hero-brazos-cruzados.png'))
+  ? '/fotos/guille/hero-brazos-cruzados.png'
+  : null;
 
 const pilares = [
   {
     titulo: 'Escuchar',
     texto: 'Diagnóstico inicial de la organización, con mandos y delegados.',
+    icono: '/shapes/feature-expert-advice.svg',
   },
   {
     titulo: 'Nombrar',
     texto: 'Abrir el tema sin estigmatizar: consumo y salud mental en palabras.',
+    icono: '/shapes/feature-quick-solutions.svg',
   },
   {
     titulo: 'Equipar',
     texto: 'Herramientas concretas para delegados, mandos medios y trabajadores.',
+    icono: '/shapes/feature-strategic-planning.svg',
   },
   {
     titulo: 'Sostener',
     texto: 'Seguimiento en el tiempo, no una charla suelta.',
+    icono: '/shapes/feature-efficient-operations.svg',
   },
+];
+
+const igPilares = [
+  { titulo: 'Del campo', texto: 'El encuentro de la semana y qué se trabajó.' },
+  { titulo: 'Señales', texto: 'Cómo detectar, qué decir, qué no decir, cómo acompañar sin diagnosticar.' },
+  { titulo: 'Tus derechos', texto: 'Normativa en criollo: Ley 26.657, licencias, CyMAT, protocolo SRT.' },
+  { titulo: '25 años', texto: 'Frases, aprendizajes y anécdotas de trayectoria.' },
 ];
 
 const productos = [
@@ -63,30 +86,39 @@ const testimonios = [
 <Layout title="Guille Nuesch — Salud mental en el trabajo">
   <section class="hero">
     <div class="hero__grid page-shell">
-      <div>
+      <div class="wow fadeInUp" data-wow-delay="0.2s">
         <p class="eyebrow">Salud mental en el trabajo</p>
-        <h1 class="hero-title">Prevención de consumos problemáticos en el <span>trabajo</span></h1>
+        <h1 class="hero-title text-anim">Prevención de consumos problemáticos en el <span>trabajo</span></h1>
         <p class="hero-lead">Lo peor que podemos hacer, es no hacer nada.</p>
         <BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" />
       </div>
-      <div class="hero__photo">
-        <img src="/fotos/guille/hero-brazos-cruzados.png" alt="Guillermo Nuesch" />
+      <div class="hero__photo wow fadeInUp" data-wow-delay="0.5s">
+        <img class="hero-shapes-img" src="/shapes/h5-hero-shape-1.svg" alt="" aria-hidden="true" />
+        {heroSrc ? (
+          <img class="hero-cutout" src={heroSrc} alt="Guillermo Nuesch" width="531" height="531" />
+        ) : (
+          <div class="hero-placeholder">
+            Foto de portada pendiente
+            <small>Colocar public/fotos/guille/hero-brazos-cruzados.png — no se inventa recorte.</small>
+          </div>
+        )}
       </div>
     </div>
   </section>
 
-  <section class="features">
+  <section class="features wow fadeInUp" data-wow-delay="0.4s">
     {pilares.map((p) => (
       <div class="feature-item">
+        <img class="feature-item__icon" src={p.icono} alt="" width="64" height="64" />
         <h2>{p.titulo}</h2>
         <p>{p.texto}</p>
       </div>
     ))}
   </section>
 
-  <section class="page-shell">
+  <section class="page-shell wow fadeInUp" data-wow-delay="0.3s">
     <p class="eyebrow">Cómo trabajo</p>
-    <h2>Un proceso, no una charla suelta</h2>
+    <h2 class="text-anim">Un proceso, no una charla suelta</h2>
     <ol class="pasos">
       {pilares.map((p, i) => (
         <li>
@@ -98,9 +130,9 @@ const testimonios = [
     <p><a href="/sobre-mi">Ver el método completo</a></p>
   </section>
 
-  <section class="page-shell">
+  <section class="page-shell wow fadeInUp" data-wow-delay="0.5s">
     <p class="eyebrow">Productos</p>
-    <h2>Encuentro, Taller y Programa</h2>
+    <h2 class="text-anim">Encuentro, Taller y Programa</h2>
     <div class="productos">
       {productos.map((p) => (
         <article class="producto">
@@ -114,9 +146,9 @@ const testimonios = [
     <p><a href="/cursos">Ver cursos</a></p>
   </section>
 
-  <section class="page-shell">
+  <section class="page-shell wow fadeInUp" data-wow-delay="0.6s">
     <p class="eyebrow">Testimonios</p>
-    <h2>Lo que dicen las organizaciones</h2>
+    <h2 class="text-anim">Lo que dicen las organizaciones</h2>
     <div class="testimonios">
       {testimonios.map((t) => (
         <blockquote>
@@ -129,13 +161,52 @@ const testimonios = [
 
   <section class="page-shell">
     <p class="eyebrow">Blog</p>
-    <h2>Notas recientes</h2>
+    <h2 class="text-anim">Notas recientes</h2>
     <p>Todavía no hay notas publicadas. Los borradores se cargan desde el panel.</p>
     <p><a href="/blog">Ir al blog</a></p>
   </section>
 
+  <section class="ig-home page-shell wow fadeInUp" data-wow-delay="0.5s">
+    <p class="eyebrow">Instagram</p>
+    <h2 class="text-anim">{INSTAGRAM_HANDLE}</h2>
+    <p>Salud mental en el trabajo. Charlas, talleres y programas en plantas, sindicatos y ART.</p>
+    <p>
+      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Ver en Instagram</a>
+    </p>
+
+    <aside class="ig-pendiente">
+      <p><strong>PENDIENTE — aplicar en la cuenta real (no se puede hacer desde el código):</strong></p>
+      <ul>
+        <li>Foto de perfil: exportar <code>marca/favicon.svg</code> a PNG 512×512 (ver marca/README.md)</li>
+        <li>Bio a pegar: “{INSTAGRAM_BIO_SUGERIDA}”</li>
+        <li>Link del sitio en el campo web: {SITE_URL}</li>
+      </ul>
+    </aside>
+
+    <div class="ig-pilares">
+      {igPilares.map((p) => (
+        <article>
+          <h3>{p.titulo}</h3>
+          <p>{p.texto}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="ig-feed-placeholder">
+      <p>
+        <strong>PENDIENTE — feed embebido.</strong>
+        Hasta que la cuenta tenga foto y bio actualizadas, no se muestran posts reales. El handle del plan es {INSTAGRAM_HANDLE}.
+      </p>
+      <div class="ig-feed-grid" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </section>
+
   <section class="page-shell cta-final">
-    <h2>Si estás buscando generar un impacto real en tu equipo de trabajo, podemos trabajar juntos.</h2>
+    <h2 class="text-anim">Si estás buscando generar un impacto real en tu equipo de trabajo, podemos trabajar juntos.</h2>
     <BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" />
   </section>
 </Layout>

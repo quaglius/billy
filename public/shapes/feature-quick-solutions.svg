@@ -1,0 +1,68 @@
+﻿<svg width="81" height="81" viewBox="0 0 81 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path stroke="currentcolor" stroke-width="1.01408"
+      d="M5.00704 5.00704 L75.99294 5.00704 L75.99294 75.99294 L5.00704 75.99294 Z"
+      class="bQDqtfGb_0"></path>
+   <path
+      d="M29.8525 5.00684H75.9932V51.1475C75.9932 64.869 64.869 75.9932 51.1475 75.9932H5.00684V29.8525C5.00684 16.131 16.131 5.00684 29.8525 5.00684Z"
+      stroke="currentcolor" stroke-width="1.01408" class="bQDqtfGb_1"></path>
+   <path transform="rotate(-90 21.2258 43.0137)" stroke="currentcolor" stroke-width="1.01408"
+      d="M21.2258 43.0137 L41.9925 43.0137 L41.9925 63.7804 L21.2258 63.7804 Z"
+      class="bQDqtfGb_2"></path>
+   <path transform="rotate(-90 29.6067 51.3907)" stroke="currentcolor" stroke-width="1.01408"
+      d="M29.6067 51.3907 L50.373400000000004 51.3907 L50.373400000000004 72.1574 L29.6067 72.1574 Z"
+      class="bQDqtfGb_3"></path>
+   <path transform="rotate(-90 37.9875 59.7679)" stroke="currentcolor" stroke-width="1.01408"
+      d="M37.9875 59.7679 L58.7542 59.7679 L58.7542 80.5346 L37.9875 80.5346 Z"
+      class="bQDqtfGb_4"></path>
+   <style data-made-with="vivus-instant">
+      .bQDqtfGb_0 {
+         stroke-dasharray: 284 286;
+         stroke-dashoffset: 285;
+         animation: bQDqtfGb_draw 2000ms ease-in-out 0ms forwards;
+      }
+
+      .bQDqtfGb_1 {
+         stroke-dasharray: 263 265;
+         stroke-dashoffset: 264;
+         animation: bQDqtfGb_draw 2000ms ease-in-out 250ms forwards;
+      }
+
+      .bQDqtfGb_2 {
+         stroke-dasharray: 84 86;
+         stroke-dashoffset: 85;
+         animation: bQDqtfGb_draw 2000ms ease-in-out 500ms forwards;
+      }
+
+      .bQDqtfGb_3 {
+         stroke-dasharray: 84 86;
+         stroke-dashoffset: 85;
+         animation: bQDqtfGb_draw 2000ms ease-in-out 750ms forwards;
+      }
+
+      .bQDqtfGb_4 {
+         stroke-dasharray: 84 86;
+         stroke-dashoffset: 85;
+         animation: bQDqtfGb_draw 2000ms ease-in-out 1000ms forwards;
+      }
+
+      @keyframes bQDqtfGb_draw {
+         100% {
+            stroke-dashoffset: 0;
+         }
+      }
+
+      @keyframes bQDqtfGb_fade {
+         0% {
+            stroke-opacity: 1;
+         }
+
+         94.44444444444444% {
+            stroke-opacity: 1;
+         }
+
+         100% {
+            stroke-opacity: 0;
+         }
+      }
+   </style>
+</svg>

@@ -1,0 +1,47 @@
+﻿<svg width="80" height="81" viewBox="0 0 80 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+   <path d="M64 10L77.5 39L64 70.5H35L48.5 39L35 10H14.5L2 39L14.5 70.5H25"
+      stroke="currentcolor" class="idsUcHxq_0"></path>
+   <path d="M32 39.1488L27.9355 48H21.7634L18 39.1488L21.7634 31H27.9355L32 39.1488Z"
+      stroke="currentcolor" class="idsUcHxq_1"></path>
+   <path d="M54.7559 39.4811L63.9362 39.4361L49.9626 70.6671" stroke="currentcolor"
+      class="idsUcHxq_2"></path>
+   <style data-made-with="vivus-instant">
+      .idsUcHxq_0 {
+         stroke-dasharray: 258 260;
+         stroke-dashoffset: 259;
+         animation: idsUcHxq_draw 2000ms ease-in-out 0ms forwards;
+      }
+
+      .idsUcHxq_1 {
+         stroke-dasharray: 50 52;
+         stroke-dashoffset: 51;
+         animation: idsUcHxq_draw 2000ms ease-in-out 500ms forwards;
+      }
+
+      .idsUcHxq_2 {
+         stroke-dasharray: 44 46;
+         stroke-dashoffset: 45;
+         animation: idsUcHxq_draw 2000ms ease-in-out 1000ms forwards;
+      }
+
+      @keyframes idsUcHxq_draw {
+         100% {
+            stroke-dashoffset: 0;
+         }
+      }
+
+      @keyframes idsUcHxq_fade {
+         0% {
+            stroke-opacity: 1;
+         }
+
+         94.44444444444444% {
+            stroke-opacity: 1;
+         }
+
+         100% {
+            stroke-opacity: 0;
+         }
+      }
+   </style>
+</svg>
