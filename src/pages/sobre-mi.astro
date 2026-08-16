@@ -1,0 +1,130 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BotonPrimario from '../components/BotonPrimario.astro';
+import { WHATSAPP_URL } from '../lib/site';
+
+const pasos = [
+  {
+    nombre: 'Escuchar',
+    texto:
+      'Diagnóstico inicial de la organización: representaciones sociales, condiciones de trabajo, reuniones exploratorias con mandos y delegados.',
+  },
+  {
+    nombre: 'Nombrar',
+    texto:
+      'La charla o taller de sensibilización inicial: poner en palabras lo que antes era tabú (consumo, salud mental), abrir el tema sin estigmatizar.',
+  },
+  {
+    nombre: 'Equipar',
+    texto:
+      'El programa extendido: herramientas concretas para delegados, mandos medios y trabajadores (escucha activa, señales de alerta, protocolos de derivación).',
+  },
+  {
+    nombre: 'Sostener',
+    texto:
+      'Seguimiento en el tiempo, no una intervención única. El espacio de cursos y las actividades en vivo permiten sostener el vínculo entre encuentros.',
+  },
+];
+
+const productos = [
+  {
+    nombre: 'Encuentro',
+    formato: '90 min a media jornada',
+    paraQuien: 'Toda la planta, sin distinción de rango',
+    queSeLleva: 'Sensibilización + actividades en vivo + página de recursos',
+  },
+  {
+    nombre: 'Taller de delegados y mandos medios',
+    formato: '1-2 jornadas',
+    paraQuien: 'Delegados, supervisores, RRHH',
+    queSeLleva: 'Herramientas de detección, escucha y derivación + protocolo básico',
+  },
+  {
+    nombre: 'Programa',
+    formato: '2-3 meses, encuentros quincenales',
+    paraQuien: 'Organización completa',
+    queSeLleva:
+      'Diagnóstico, ciclo de encuentros, protocolo de actuación propio, certificados y reporte agregado',
+  },
+];
+
+const organizaciones = [
+  'AECN (Asociación de Empleados de Casinos Nacionales)',
+  'AGOEC',
+  'ARBA',
+  'ASFA (Asociación de Señaleros de Ferrocarriles Argentinos)',
+  'Astilleros Río Santiago',
+  'CableVisión',
+  'CEAMSE',
+  'Coopelectric Olavarría',
+  'EDEA S.A. (Empresa Distribuidora de Energía Eléctrica)',
+  'Hospital Dr. Arturo Oñativia',
+  'Hospital Interzonal El Cruce',
+  'Hospital Zonal General de Agudos Dr. Lúcio Meléndez',
+  'Hospitales SAMIC',
+  'Iglesia Evangélica Menonita Argentina',
+  'La Fraternidad',
+  'Línea Belgrano Norte',
+  'Línea Belgrano Sur',
+  'Línea Roca',
+  'Loterías y Casinos',
+  'Metrovías',
+  'Ministerio de Economía de la Provincia de Buenos Aires',
+  'Obras Sanitarias del Municipio de General Pueyrredón',
+  'Peugeot Argentina',
+  'Provincia ART',
+  'Registro de la Propiedad',
+  'Servicio Penitenciario (Batán Unidad 15 y 50)',
+  'Sindicato de Trabajadores de Obras Sanitarias',
+  'SSP (Sindicato de Salud Pública de la Provincia de Buenos Aires)',
+  'TECSAN',
+  'Vialidad Nacional',
+  'YPF',
+];
+---
+<Layout title="Sobre mí — Guille Nuesch">
+  <article class="page-shell gn-prose">
+    <p class="eyebrow">Sobre mí</p>
+    <h1>Guillermo “Billy” Nuesch</h1>
+    <p>Capacitador externo en Salud Mental y Prevención de Consumos Problemáticos en los ámbitos laborales. Bienestar ocupacional.</p>
+
+    <p>
+      Vivimos un tiempo donde las organizaciones laborales enfrentan desafíos vinculados al estrés, la salud mental y los consumos problemáticos. En este contexto, todas las acciones preventivas tienen como premisa acompañar a las organizaciones a construir entornos laborales más saludables, abordando dos desafíos cada vez más presentes: la salud mental y los consumos problemáticos.
+    </p>
+    <p>
+      Desde hace 25 años acompaña a organizaciones laborales públicas, privadas y agrupaciones gremiales —cada una con sus propias especificidades— brindando espacios de reflexión que promueven un entorno saludable. Esto impacta no solo en la salud del trabajador, sino en los resultados esperados de acuerdo al servicio que la empresa ofrece.
+    </p>
+    <p>
+      Se desempeña como capacitador externo, brindando charlas y programas diseñados para generar conciencia, prevenir riesgos y promover hábitos saludables dentro de los equipos de trabajo. Sus intervenciones están pensadas para ser claras, cercanas y aplicables, ayudando a que líderes y colaboradores reconozcan señales de alerta para actuar de manera responsable y oportuna, fomentando una cultura de cuidado y bienestar.
+    </p>
+
+    <blockquote>“LO PEOR QUE PODEMOS HACER, ES NO HACER NADA”</blockquote>
+
+    <h2>Cómo trabajo — método de 4 pasos</h2>
+    <ol class="pasos">
+      {pasos.map((paso, i) => (
+        <li>
+          <strong>{i + 1}. {paso.nombre}</strong>
+          <p>{paso.texto}</p>
+        </li>
+      ))}
+    </ol>
+
+    <h2>Los tres productos</h2>
+    {productos.map((p) => (
+      <section>
+        <h3>{p.nombre}</h3>
+        <p><strong>Formato:</strong> {p.formato}</p>
+        <p><strong>Para quién:</strong> {p.paraQuien}</p>
+        <p><strong>Qué se lleva:</strong> {p.queSeLleva}</p>
+      </section>
+    ))}
+
+    <h2>Organizaciones donde trabajó</h2>
+    <ul class="org-list">
+      {organizaciones.map((o) => <li>{o}</li>)}
+    </ul>
+
+    <BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" />
+  </article>
+</Layout>

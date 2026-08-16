@@ -1,0 +1,139 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BotonPrimario from '../components/BotonPrimario.astro';
+import { WHATSAPP_URL } from '../lib/site';
+
+const pilares = [
+  {
+    titulo: 'Escuchar',
+    texto: 'Diagnóstico inicial de la organización, con mandos y delegados.',
+  },
+  {
+    titulo: 'Nombrar',
+    texto: 'Abrir el tema sin estigmatizar: consumo y salud mental en palabras.',
+  },
+  {
+    titulo: 'Equipar',
+    texto: 'Herramientas concretas para delegados, mandos medios y trabajadores.',
+  },
+  {
+    titulo: 'Sostener',
+    texto: 'Seguimiento en el tiempo, no una charla suelta.',
+  },
+];
+
+const productos = [
+  {
+    nombre: 'Encuentro',
+    formato: '90 min a media jornada',
+    paraQuien: 'Toda la planta, sin distinción de rango',
+    queSeLleva: 'Sensibilización + actividades en vivo + página de recursos',
+  },
+  {
+    nombre: 'Taller',
+    formato: '1-2 jornadas',
+    paraQuien: 'Delegados, supervisores, RRHH',
+    queSeLleva: 'Herramientas de detección, escucha y derivación + protocolo básico',
+  },
+  {
+    nombre: 'Programa',
+    formato: '2-3 meses, encuentros quincenales',
+    paraQuien: 'Organización completa',
+    queSeLleva: 'Diagnóstico, ciclo de encuentros, protocolo de actuación propio, certificados y reporte agregado',
+  },
+];
+
+const testimonios = [
+  {
+    cita: 'Guillermo nos ayudó a abrir un tema que durante años fue tabú en el sindicato. Los delegados hoy tienen herramientas concretas para acompañar a un compañero, y eso cambió la forma en que se manejan los conflictos en planta.',
+    organizacion: 'SITOS',
+  },
+  {
+    cita: 'Lo contratamos para una charla puntual y terminamos armando un programa de varios meses. La diferencia con otras capacitaciones es que no se queda en la teoría: da herramientas que los mandos medios usan al día siguiente.',
+    organizacion: 'Fundación Provincia ART',
+  },
+  {
+    cita: 'Trabajamos con Guillermo desde hace años en distintas líneas. Lo que más valoramos es la cercanía: entiende la realidad del trabajador ferroviario, no llega con un power point genérico.',
+    organizacion: 'Trenes Argentinos Línea Roca',
+  },
+];
+---
+<Layout title="Guille Nuesch — Salud mental en el trabajo">
+  <section class="hero">
+    <div class="hero__grid page-shell">
+      <div>
+        <p class="eyebrow">Salud mental en el trabajo</p>
+        <h1 class="hero-title">Prevención de consumos problemáticos en el <span>trabajo</span></h1>
+        <p class="hero-lead">Lo peor que podemos hacer, es no hacer nada.</p>
+        <BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" />
+      </div>
+      <div class="hero__photo">
+        <img src="/fotos/guille/hero-brazos-cruzados.png" alt="Guillermo Nuesch" />
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    {pilares.map((p) => (
+      <div class="feature-item">
+        <h2>{p.titulo}</h2>
+        <p>{p.texto}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="page-shell">
+    <p class="eyebrow">Cómo trabajo</p>
+    <h2>Un proceso, no una charla suelta</h2>
+    <ol class="pasos">
+      {pilares.map((p, i) => (
+        <li>
+          <strong>{i + 1}. {p.titulo}</strong>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ol>
+    <p><a href="/sobre-mi">Ver el método completo</a></p>
+  </section>
+
+  <section class="page-shell">
+    <p class="eyebrow">Productos</p>
+    <h2>Encuentro, Taller y Programa</h2>
+    <div class="productos">
+      {productos.map((p) => (
+        <article class="producto">
+          <h3>{p.nombre}</h3>
+          <p>{p.formato}</p>
+          <p>{p.paraQuien}</p>
+          <p>{p.queSeLleva}</p>
+        </article>
+      ))}
+    </div>
+    <p><a href="/cursos">Ver cursos</a></p>
+  </section>
+
+  <section class="page-shell">
+    <p class="eyebrow">Testimonios</p>
+    <h2>Lo que dicen las organizaciones</h2>
+    <div class="testimonios">
+      {testimonios.map((t) => (
+        <blockquote>
+          <p>{t.cita}</p>
+          <footer>{t.organizacion}</footer>
+        </blockquote>
+      ))}
+    </div>
+  </section>
+
+  <section class="page-shell">
+    <p class="eyebrow">Blog</p>
+    <h2>Notas recientes</h2>
+    <p>Todavía no hay notas publicadas. Los borradores se cargan desde el panel.</p>
+    <p><a href="/blog">Ir al blog</a></p>
+  </section>
+
+  <section class="page-shell cta-final">
+    <h2>Si estás buscando generar un impacto real en tu equipo de trabajo, podemos trabajar juntos.</h2>
+    <BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" />
+  </section>
+</Layout>

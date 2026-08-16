@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+---
+<Layout title={`Nota — ${slug}`}>
+  <div class="page-shell gn-prose">
+    <h1>Nota</h1>
+    <p>El cuerpo se renderiza cuando el post exista en Firestore y esté publicado.</p>
+  </div>
+</Layout>

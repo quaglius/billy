@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+---
+<Layout title={`Curso — ${slug}`} noindex={true}>
+  <div class="page-shell gn-prose">
+    <h1>Curso</h1>
+    <p>Esta instancia se carga desde Firestore cuando el panel y el seed estén listos.</p>
+  </div>
+</Layout>
