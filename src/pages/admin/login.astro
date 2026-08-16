@@ -1,20 +1,22 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 ---
-<Layout title="Entrar — Admin" noindex={true}>
-  <div class="page-shell">
-    <h1>Panel de administración</h1>
-    {Astro.url.searchParams.get('error') && <p>Usuario o contraseña incorrectos.</p>}
-    <form class="admin-form" method="post" action="/api/login">
-      <label>
-        Usuario
-        <input type="text" name="username" autocomplete="username" required />
-      </label>
-      <label>
-        Contraseña
-        <input type="password" name="password" autocomplete="current-password" required />
-      </label>
-      <button type="submit">Entrar</button>
-    </form>
+<Layout title="Entrar — Admin" noindex={true} whatsapp={false}>
+  <div class="admin-login">
+    <div class="admin-login__card">
+      <h1>Panel de administración</h1>
+      {Astro.url.searchParams.get('error') && <p class="admin-alert">Usuario o contraseña incorrectos.</p>}
+      <form class="admin-form" method="post" action="/api/login">
+        <label>
+          Usuario
+          <input type="text" name="username" autocomplete="username" required />
+        </label>
+        <label>
+          Contraseña
+          <input type="password" name="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
   </div>
 </Layout>

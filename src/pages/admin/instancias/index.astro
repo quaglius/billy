@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let instancias: {
@@ -34,26 +35,31 @@ try {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las instancias.';
 }
 ---
-<Layout title="Instancias — Admin" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin">← Panel</a></p>
-    <h1>Instancias</h1>
-    {errorCarga && <p>{errorCarga}</p>}
-    <ul>
-      {instancias.map((i) => (
-        <li>
-          <a href={`/admin/instancias/${i.id}`}>{i.slug}</a>
-          {' — '}
-          {cursos.get(i.cursoId) ?? i.cursoId}
-          {' · '}
-          {empresas.get(i.empresaId) ?? i.empresaId}
-          {' · '}
-          {i.visibilidad}
-          {' · '}
-          <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
-        </li>
-      ))}
-    </ul>
+<Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Instancias">
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+    {instancias.length > 0 && (
+      <table class="admin-table">
+        <thead>
+          <tr><th>Slug</th><th>Curso</th><th>Empresa</th><th>Visibilidad</th><th></th></tr>
+        </thead>
+        <tbody>
+          {instancias.map((i) => (
+            <tr>
+              <td><a href={`/admin/instancias/${i.id}`}>{i.slug}</a></td>
+              <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
+              <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
+              <td>
+                <span class:list={['pill-estado', i.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                  {i.visibilidad}
+                </span>
+              </td>
+              <td><a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
     {instancias.length === 0 && !errorCarga && <p>No hay instancias todavía.</p>}
 
     <h2>Nueva instancia</h2>
@@ -96,5 +102,5 @@ try {
       <label>Fecha fin <input type="date" name="fechaFin" /></label>
       <button type="submit">Crear</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

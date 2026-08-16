@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AdminChrome from '../../components/AdminChrome.astro';
 import { db } from '../../lib/firebase-admin';
 
 const MIN = 30;
@@ -33,12 +34,10 @@ try {
   errorCarga = err instanceof Error ? err.message : 'No se pudo cargar el Observatorio.';
 }
 ---
-<Layout title="Observatorio — Admin" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin">← Panel</a></p>
-    <h1>Observatorio</h1>
+<Layout title="Observatorio — Admin" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Observatorio">
     <p>Agregados por curso. Nunca se muestra la empresa.</p>
-    {errorCarga && <p>{errorCarga}</p>}
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     <ul>
       {bloques.map((b) => (
         <li>
@@ -47,5 +46,5 @@ try {
         </li>
       ))}
     </ul>
-  </div>
+  </AdminChrome>
 </Layout>

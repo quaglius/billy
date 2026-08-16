@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let posts: { id: string; titulo: string; slug: string; estado: string }[] = [];
@@ -16,20 +17,29 @@ try {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los posts.';
 }
 ---
-<Layout title="Posts — Admin" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin">← Panel</a></p>
-    <h1>Posts</h1>
-    {errorCarga && <p>{errorCarga}</p>}
-    <ul>
-      {posts.map((p) => (
-        <li>
-          <a href={`/admin/posts/${p.id}`}>{p.titulo}</a>
-          {' — '}
-          {p.estado}
-        </li>
-      ))}
-    </ul>
+<Layout title="Posts — Admin" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Posts">
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {posts.length === 0 && !errorCarga && <p>No hay posts todavía. Van a cargarse con el seed.</p>}
-  </div>
+    {posts.length > 0 && (
+      <table class="admin-table">
+        <thead>
+          <tr><th>Título</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          {posts.map((p) => (
+            <tr>
+              <td>{p.titulo}</td>
+              <td>
+                <span class:list={['pill-estado', p.estado === 'publicado' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                  {p.estado}
+                </span>
+              </td>
+              <td><a href={`/admin/posts/${p.id}`}>Editar</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </AdminChrome>
 </Layout>

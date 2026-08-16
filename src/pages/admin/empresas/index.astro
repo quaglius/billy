@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let empresas: { id: string; nombre: string; slug: string }[] = [];
@@ -15,18 +16,25 @@ try {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las empresas.';
 }
 ---
-<Layout title="Empresas — Admin" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin">← Panel</a></p>
-    <h1>Empresas</h1>
-    {errorCarga && <p>{errorCarga}</p>}
-    <ul>
-      {empresas.map((e) => (
-        <li>
-          <a href={`/admin/empresas/${e.id}`}>{e.nombre}</a>
-        </li>
-      ))}
-    </ul>
+<Layout title="Empresas — Admin" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Empresas">
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+    {empresas.length > 0 && (
+      <table class="admin-table">
+        <thead>
+          <tr><th>Nombre</th><th>Slug</th><th></th></tr>
+        </thead>
+        <tbody>
+          {empresas.map((e) => (
+            <tr>
+              <td>{e.nombre}</td>
+              <td>{e.slug}</td>
+              <td><a href={`/admin/empresas/${e.id}`}>Editar</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
     {empresas.length === 0 && !errorCarga && <p>No hay empresas todavía.</p>}
 
     <h2>Nueva empresa</h2>
@@ -39,5 +47,5 @@ try {
       <label>Notas internas <textarea name="notasInternas" rows="3"></textarea></label>
       <button type="submit">Crear</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

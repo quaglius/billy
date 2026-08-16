@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let cursos: { id: string; titulo: string; slug: string; formato: string; publicado: boolean }[] = [];
@@ -20,21 +21,30 @@ try {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los cursos.';
 }
 ---
-<Layout title="Cursos — Admin" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin">← Panel</a></p>
-    <h1>Cursos</h1>
-    {errorCarga && <p>{errorCarga}</p>}
-    <ul>
-      {cursos.map((c) => (
-        <li>
-          <a href={`/admin/cursos/${c.id}`}>{c.titulo}</a>
-          {' — '}
-          {c.formato}
-          {c.publicado ? ' · publicado' : ' · borrador'}
-        </li>
-      ))}
-    </ul>
+<Layout title="Cursos — Admin" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Cursos">
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+    {cursos.length > 0 && (
+      <table class="admin-table">
+        <thead>
+          <tr><th>Título</th><th>Formato</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          {cursos.map((c) => (
+            <tr>
+              <td>{c.titulo}</td>
+              <td>{c.formato}</td>
+              <td>
+                <span class:list={['pill-estado', c.publicado ? 'pill-estado--ok' : 'pill-estado--off']}>
+                  {c.publicado ? 'publicado' : 'borrador'}
+                </span>
+              </td>
+              <td><a href={`/admin/cursos/${c.id}`}>Editar</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
     {cursos.length === 0 && !errorCarga && <p>No hay cursos todavía.</p>}
 
     <h2>Nuevo curso</h2>
@@ -57,5 +67,5 @@ try {
       <label><input type="checkbox" name="publicado" /> Publicado</label>
       <button type="submit">Crear</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

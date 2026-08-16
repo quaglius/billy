@@ -1,25 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-
-const links = [
-  { href: '/admin/cursos', label: 'Cursos' },
-  { href: '/admin/empresas', label: 'Empresas' },
-  { href: '/admin/instancias', label: 'Instancias' },
-  { href: '/admin/posts', label: 'Posts' },
-  { href: '/admin/observatorio', label: 'Observatorio' },
-];
+import AdminChrome from '../../components/AdminChrome.astro';
 ---
-<Layout title="Admin — Guille Nuesch" noindex={true}>
-  <div class="page-shell gn-prose">
-    <h1>Lo de hoy</h1>
+<Layout title="Admin — Guille Nuesch" noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Lo de hoy">
     <p>Panel de administración. El próximo encuentro con QR aparece acá cuando haya instancias cargadas.</p>
-    <nav class="admin-nav">
-      {links.map((l) => (
-        <a href={l.href}>{l.label}</a>
-      ))}
-    </nav>
-    <form method="post" action="/api/logout">
-      <button class="admin-logout" type="submit">Salir</button>
-    </form>
-  </div>
+  </AdminChrome>
 </Layout>
