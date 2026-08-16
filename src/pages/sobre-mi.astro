@@ -98,7 +98,9 @@ const organizaciones = [
       <div class="about-photo">
         <img class="hero-shapes-img" src="/shapes/h5-hero-shape-1.svg" alt="" aria-hidden="true" />
         {aboutSrc && (
-          <img src={aboutSrc} alt="Guillermo Nuesch en una charla" width="640" height="640" />
+          <div class="about-photo__frame">
+            <img src={aboutSrc} alt="Guillermo Nuesch en una charla" width="640" height="640" />
+          </div>
         )}
       </div>
       <div>

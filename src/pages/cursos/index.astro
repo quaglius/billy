@@ -40,7 +40,9 @@ try {
     <div class="curso-grid">
       {cursos.map((c) => (
         <a class="curso-card" href={`/cursos/${c.slug}`}>
-          <img src={coverForFormato(c.formato)} alt="" width="640" height="400" />
+          <span class="curso-card__thumb">
+            <img src={coverForFormato(c.formato)} alt="" width="640" height="400" />
+          </span>
           <div class="curso-card__body">
             <span class="curso-card__chip">{c.formato}</span>
             <h2>{c.titulo}</h2>

@@ -143,6 +143,7 @@
   position: absolute;
   top: 24px;
   left: 24px;
+  z-index: 2;
   display: grid;
   place-items: center;
   min-width: 72px;
@@ -352,10 +353,17 @@
   transform: translateY(-4px);
 }
 
+.curso-card__thumb {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
 .curso-card img {
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
+  display: block;
 }
 
 .curso-card__body {
@@ -412,7 +420,10 @@
   font-weight: 700;
 }
 
-.post-hero::before {
+.post-hero::before,
+.post-card__thumb::before,
+.curso-card__thumb::before,
+.about-photo__frame::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -422,7 +433,10 @@
   transform: skewX(-25deg) translateX(-140%);
 }
 
-.post-hero:hover::before {
+.post-hero:hover::before,
+.post-card:hover .post-card__thumb::before,
+.curso-card:hover .curso-card__thumb::before,
+.about-photo__frame:hover::before {
   animation: shine 1s ease forwards;
 }
 
@@ -720,7 +734,14 @@ body.is-vivo {
   display: block;
 }
 
-.about-photo img {
+.about-photo__frame {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  max-width: 480px;
+}
+
+.about-photo img:not(.hero-shapes-img) {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -783,7 +804,10 @@ body.is-vivo {
 
 @media (prefers-reduced-motion: reduce) {
   .go-top__arrow,
-  .post-hero::before {
+  .post-hero::before,
+  .post-card__thumb::before,
+  .curso-card__thumb::before,
+  .about-photo__frame::before {
     animation: none !important;
   }
 }

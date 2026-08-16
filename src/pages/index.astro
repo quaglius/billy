@@ -76,14 +76,17 @@ const testimonios = [
   {
     cita: 'Guillermo nos ayudó a abrir un tema que durante años fue tabú en el sindicato. Los delegados hoy tienen herramientas concretas para acompañar a un compañero, y eso cambió la forma en que se manejan los conflictos en planta.',
     organizacion: 'SITOS',
+    inicial: 'S',
   },
   {
     cita: 'Lo contratamos para una charla puntual y terminamos armando un programa de varios meses. La diferencia con otras capacitaciones es que no se queda en la teoría: da herramientas que los mandos medios usan al día siguiente.',
     organizacion: 'Fundación Provincia ART',
+    inicial: 'F',
   },
   {
     cita: 'Trabajamos con Guillermo desde hace años en distintas líneas. Lo que más valoramos es la cercanía: entiende la realidad del trabajador ferroviario, no llega con un power point genérico.',
     organizacion: 'Trenes Argentinos Línea Roca',
+    inicial: 'T',
   },
 ];
 ---
@@ -155,7 +158,7 @@ const testimonios = [
         </article>
       ))}
     </div>
-    <p><a href="/cursos">Ver cursos</a></p>
+    <p><a class="line-hover" href="/cursos">Ver cursos</a></p>
   </section>
 
   <section class="page-shell wow fadeInUp" data-wow-delay="0.6s">
@@ -164,6 +167,10 @@ const testimonios = [
     <div class="testimonios">
       {testimonios.map((t) => (
         <blockquote>
+          <div class="testimonio__who">
+            <span class="testimonio__avatar" aria-hidden="true">{t.inicial}</span>
+            <img class="testimonio__mark" src="/marca/icono-oscuro.svg" alt="" width="28" height="28" />
+          </div>
           <p>{t.cita}</p>
           <footer>{t.organizacion}</footer>
         </blockquote>
@@ -180,7 +187,9 @@ const testimonios = [
       <div class="home-posts">
         {postsRecientes.map((p) => (
           <a class="curso-card" href={`/blog/${p.slug}`}>
-            <img src={coverForSlug(p.slug, p.imagenPortadaUrl)} alt="" width="640" height="400" />
+            <span class="curso-card__thumb">
+              <img src={coverForSlug(p.slug, p.imagenPortadaUrl)} alt="" width="640" height="400" />
+            </span>
             <div class="curso-card__body">
               <h3>{p.titulo}</h3>
               <p>{p.bajada}</p>
