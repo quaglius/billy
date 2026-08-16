@@ -7,11 +7,9 @@ import {
   WHATSAPP_URL,
   INSTAGRAM_URL,
   INSTAGRAM_HANDLE,
-  INSTAGRAM_BIO_SUGERIDA,
-  SITE_URL,
 } from '../lib/site';
-
-export const prerender = true;
+import { listarPostsPublicados } from '../lib/posts';
+import { coverForSlug } from '../lib/covers';
 
 const heroDir = path.join(process.cwd(), 'public/fotos/guille');
 const heroSrc = existsSync(path.join(heroDir, 'hero-brazos-cruzados.png'))
@@ -20,6 +18,8 @@ const heroSrc = existsSync(path.join(heroDir, 'hero-brazos-cruzados.png'))
 const heroSrc2x = existsSync(path.join(heroDir, 'hero-hires-sonrisa.png'))
   ? '/fotos/guille/hero-hires-sonrisa.png'
   : null;
+
+const postsRecientes = (await listarPostsPublicados()).slice(0, 3);
 
 const pilares = [
   {
@@ -171,11 +171,25 @@ const testimonios = [
     </div>
   </section>
 
-  <section class="page-shell">
+  <section class="page-shell wow fadeInUp" data-wow-delay="0.4s">
     <p class="eyebrow">Blog</p>
     <h2 class="text-anim">Notas recientes</h2>
-    <p>Todavía no hay notas publicadas. Los borradores se cargan desde el panel.</p>
-    <p><a href="/blog">Ir al blog</a></p>
+    {postsRecientes.length === 0 ? (
+      <p>Todavía no hay notas publicadas. Los borradores se cargan desde el panel.</p>
+    ) : (
+      <div class="home-posts">
+        {postsRecientes.map((p) => (
+          <a class="curso-card" href={`/blog/${p.slug}`}>
+            <img src={coverForSlug(p.slug, p.imagenPortadaUrl)} alt="" width="640" height="400" />
+            <div class="curso-card__body">
+              <h3>{p.titulo}</h3>
+              <p>{p.bajada}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+    <p><a class="line-hover" href="/blog">Ir al blog</a></p>
   </section>
 
   <section class="ig-home page-shell wow fadeInUp" data-wow-delay="0.5s">
@@ -183,18 +197,8 @@ const testimonios = [
     <h2 class="text-anim">{INSTAGRAM_HANDLE}</h2>
     <p>Salud mental en el trabajo. Charlas, talleres y programas en plantas, sindicatos y ART.</p>
     <p>
-      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Ver en Instagram</a>
+      <a class="line-hover" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Ver en Instagram</a>
     </p>
-
-    <aside class="ig-pendiente">
-      <p><strong>PENDIENTE — aplicar en la cuenta real (no se puede hacer desde el código):</strong></p>
-      <ul>
-        <li>Foto de perfil: exportar <code>marca/favicon.svg</code> a PNG 512×512 (ver marca/README.md)</li>
-        <li>Bio a pegar: “{INSTAGRAM_BIO_SUGERIDA}”</li>
-        <li>Link del sitio en el campo web: {SITE_URL}</li>
-      </ul>
-    </aside>
-
     <div class="ig-pilares">
       {igPilares.map((p) => (
         <article>
@@ -202,18 +206,6 @@ const testimonios = [
           <p>{p.texto}</p>
         </article>
       ))}
-    </div>
-
-    <div class="ig-feed-placeholder">
-      <p>
-        <strong>PENDIENTE — feed embebido.</strong>
-        Hasta que la cuenta tenga foto y bio actualizadas, no se muestran posts reales. El handle del plan es {INSTAGRAM_HANDLE}.
-      </p>
-      <div class="ig-feed-grid" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
     </div>
   </section>
 

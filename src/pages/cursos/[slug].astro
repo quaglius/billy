@@ -1,7 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import BotonPrimario from '../../components/BotonPrimario.astro';
 import { db } from '../../lib/firebase-admin';
 import { renderMarkdown } from '../../lib/markdown';
+import { coverForFormato } from '../../lib/covers';
+import { WHATSAPP_URL } from '../../lib/site';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/cursos');
@@ -13,12 +17,18 @@ let titulo = '';
 let descripcion = '';
 let noindex = false;
 let extra = '';
+let formato = '';
+let objetivos: string[] = [];
+let temario: string[] = [];
 
 if (!cursoSnap.empty) {
   const c = cursoSnap.docs[0]!.data();
   if (!c.publicado) return Astro.redirect('/cursos');
   titulo = String(c.titulo ?? '');
   descripcion = String(c.descripcion ?? '');
+  formato = String(c.formato ?? '');
+  objetivos = Array.isArray(c.objetivos) ? c.objetivos.map(String) : [];
+  temario = Array.isArray(c.temario) ? c.temario.map(String) : [];
 } else if (!instSnap.empty) {
   const inst = instSnap.docs[0]!;
   const data = inst.data();
@@ -29,19 +39,43 @@ if (!cursoSnap.empty) {
   titulo = String(data.tituloParticular ?? cursoData.titulo ?? '');
   descripcion = String(cursoData.descripcion ?? '');
   extra = String(data.particularidades ?? '');
+  formato = String(cursoData.formato ?? '');
+  objetivos = Array.isArray(cursoData.objetivos) ? cursoData.objetivos.map(String) : [];
+  temario = Array.isArray(cursoData.temario) ? cursoData.temario.map(String) : [];
 } else {
   return Astro.redirect('/cursos');
 }
 
 const html = renderMarkdown(descripcion);
 const extraHtml = extra ? renderMarkdown(extra) : '';
+const cover = coverForFormato(formato);
 ---
 <Layout title={titulo} noindex={noindex}>
+  <PageHeader titulo={titulo} actual={titulo} crumbs={[{ href: '/', label: 'Inicio' }, { href: '/cursos', label: 'Cursos' }]} />
   <article class="page-shell gn-prose">
-    <p class="eyebrow">Cursos</p>
-    <h1>{titulo}</h1>
+    <div class="post-hero">
+      <img src={cover} alt="" width="1200" height="630" />
+    </div>
+    {formato && <p class="curso-card__chip">{formato}</p>}
     <div set:html={html} />
     {extraHtml && <div set:html={extraHtml} />}
-    <p><a href="/ayuda">Si necesitás ayuda</a></p>
+    {objetivos.length > 0 && (
+      <>
+        <h2>Objetivos</h2>
+        <ul>
+          {objetivos.map((o) => <li>{o}</li>)}
+        </ul>
+      </>
+    )}
+    {temario.length > 0 && (
+      <>
+        <h2>Temario</h2>
+        <ul>
+          {temario.map((t) => <li>{t}</li>)}
+        </ul>
+      </>
+    )}
+    <p><BotonPrimario href={WHATSAPP_URL} texto="Escribime por WhatsApp" target="_blank" /></p>
+    <p><a class="line-hover" href="/ayuda">Si necesitás ayuda</a></p>
   </article>
 </Layout>

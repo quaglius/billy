@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import { db } from '../../lib/firebase-admin';
+import { coverForFormato } from '../../lib/covers';
 
 let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string }[] = [];
 let instancias: { slug: string; titulo: string; visibilidad: string }[] = [];
@@ -22,10 +24,7 @@ try {
     const tituloBase = cursoTitulo.get(String(data.cursoId)) ?? 'Curso';
     return {
       slug: String(data.slug ?? ''),
-      titulo:
-        visibilidad === 'anonimizada'
-          ? String(data.tituloParticular ?? tituloBase)
-          : String(data.tituloParticular ?? tituloBase),
+      titulo: String(data.tituloParticular ?? tituloBase),
       visibilidad,
     };
   });
@@ -35,29 +34,38 @@ try {
 }
 ---
 <Layout title="Cursos — Guille Nuesch">
-  <div class="page-shell gn-prose">
-    <p class="eyebrow">Cursos</p>
-    <h1>Encuentro, Taller y Programa</h1>
-    <ul>
+  <PageHeader titulo="Cursos" actual="Cursos" />
+  <div class="page-shell">
+    <p class="eyebrow">Encuentro, Taller y Programa</p>
+    <div class="curso-grid">
       {cursos.map((c) => (
-        <li>
-          <a href={`/cursos/${c.slug}`}>{c.titulo}</a>
-          <p>{c.formato} — {c.descripcionCorta}</p>
-        </li>
+        <a class="curso-card" href={`/cursos/${c.slug}`}>
+          <img src={coverForFormato(c.formato)} alt="" width="640" height="400" />
+          <div class="curso-card__body">
+            <span class="curso-card__chip">{c.formato}</span>
+            <h2>{c.titulo}</h2>
+            <p>{c.descripcionCorta}</p>
+          </div>
+        </a>
       ))}
-    </ul>
+    </div>
+    {cursos.length === 0 && (
+      <div class="empty-state">
+        <p>Los cursos se publican desde el panel.</p>
+      </div>
+    )}
     {instancias.length > 0 && (
       <>
         <h2>Cursadas visibles</h2>
         <ul>
           {instancias.map((i) => (
             <li>
-              <a href={`/cursos/${i.slug}`}>{i.titulo}</a>
+              <a class="line-hover" href={`/cursos/${i.slug}`}>{i.titulo}</a>
             </li>
           ))}
         </ul>
       </>
     )}
-    <p><a href="/ayuda">Si necesitás ayuda</a></p>
+    <p><a class="line-hover" href="/ayuda">Si necesitás ayuda</a></p>
   </div>
 </Layout>

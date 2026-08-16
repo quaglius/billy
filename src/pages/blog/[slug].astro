@@ -1,7 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import { db } from '../../lib/firebase-admin';
 import { renderMarkdown } from '../../lib/markdown';
+import { coverForSlug } from '../../lib/covers';
+import { formatFecha } from '../../lib/posts';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/blog');
@@ -14,18 +17,23 @@ if (post.estado !== 'publicado') return Astro.redirect('/blog');
 const html = renderMarkdown(String(post.cuerpoMd ?? ''));
 const titulo = String(post.titulo ?? '');
 const bajada = String(post.bajada ?? '');
-const imagen = post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null;
+const imagen = coverForSlug(slug, post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null);
+const pub = post.publicadoEn?.toDate?.() ?? null;
+const fecha = formatFecha(pub);
 ---
 <Layout title={titulo} description={bajada} ogImage={imagen}>
+  <PageHeader titulo={titulo} actual="Nota" crumbs={[{ href: '/', label: 'Inicio' }, { href: '/blog', label: 'Blog' }]} />
   <article class="page-shell gn-prose">
-    <p class="eyebrow">Blog</p>
-    <h1>{titulo}</h1>
+    <div class="post-hero">
+      <img src={imagen} alt="" width="1200" height="630" />
+    </div>
+    {fecha.largo && <p class="post-meta">{fecha.largo}</p>}
     <p>{bajada}</p>
     <div set:html={html} />
-    <aside>
-      <img src="/fotos/guille/blog-laptop.png" alt="Guillermo Nuesch" width="120" height="120" />
+    <aside class="author-box">
+      <img src="/fotos/guille/avatar-sonrisa.png" alt="Guillermo Nuesch" width="88" height="88" />
       <p>Por Guillermo Nuesch, capacitador en Salud Mental y Prevención de Consumos Problemáticos en el ámbito laboral · 25 años de trayectoria</p>
     </aside>
-    <p><a href="/ayuda">Si necesitás ayuda</a></p>
+    <p><a class="line-hover" href="/ayuda">Si necesitás ayuda</a></p>
   </article>
 </Layout>
