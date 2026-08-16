@@ -4,11 +4,12 @@ Sistema de logo e iconografía para el sitio. Reutiliza 1:1 los tokens de color 
 
 ## El concepto
 
-Un ícono, no un monograma. En vez de las iniciales "GN" (que ya usa medio internet), el mark es **una burbuja de diálogo con un check adentro**: el espacio de charla + la señal de "tu respuesta fue escuchada". Encaja con tres cosas a la vez:
+Un ícono, no un monograma. En vez de las iniciales "GN" (que ya usa medio internet), el mark es **dos personas que construyen un espacio de conversación, con una señal de avance en el centro**. La forma azul termina en una cola de diálogo: no representa una consulta aislada, sino una conversación que sostiene. Encaja con cuatro cosas a la vez:
 
-1. Es lo que Guillermo hace literalmente: abrir espacios de conversación en el trabajo.
-2. Conecta con el primer paso del método (*Escuchar*, ver [estrategia-sitio-web.md](../estrategia-sitio-web.md)).
-3. Anticipa visualmente el diferencial real del sitio — las actividades en vivo con respuesta y resultado — sin necesidad de dibujar un QR en el logo.
+1. Pone a las personas antes que a la herramienta o la institución.
+2. Es lo que Guillermo hace literalmente: abrir y sostener espacios de conversación en el trabajo.
+3. Conecta con el método completo: escuchar, nombrar, equipar y sostener.
+4. Anticipa el diferencial del sitio — participación con respuesta y avance concreto — sin caer en cerebros, corazones, manos ni cruces médicas.
 
 Es deliberadamente simple: a 16px (tamaño real de pestaña de navegador) un ícono con muchos detalles se vuelve una mancha. Este se lee incluso ahí.
 
@@ -16,7 +17,7 @@ Es deliberadamente simple: a 16px (tamaño real de pestaña de navegador) un íc
 
 | Archivo | Uso |
 |---|---|
-| `favicon.svg` | **El archivo para la pestaña del navegador**, ícono de app y como base del avatar de redes (círculo navy `#051229` + mark en `#f7f7f7` + check en `#0075ff`). Ya trae fondo, no necesita nada más encima. |
+| `favicon.svg` | **El archivo para la pestaña del navegador**, ícono de app y base del avatar de redes (círculo navy `#051229`, figura clara y figura azul). Ya trae fondo, no necesita nada más encima. |
 | `icono-oscuro.svg` | Mark solo, sin fondo, trazo oscuro. Para usar sobre fondos claros (`#f7f7f7`, `#e1e8f0`, blanco). |
 | `icono-claro.svg` | Mark solo, sin fondo, trazo claro. Para usar sobre fondos oscuros (`#051229`). |
 | `logo-horizontal.svg` | Ícono + "Guille Nuesch" + tagline "Salud mental en el trabajo". Para el **header** (fondo claro). |

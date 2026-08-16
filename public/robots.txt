@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /admin
+Disallow: /a/
+Disallow: /api/
+Disallow: /empezar-aca
+
+Sitemap: https://guillenuesch.netlify.app/sitemap.xml

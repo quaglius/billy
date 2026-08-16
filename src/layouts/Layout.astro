@@ -27,6 +27,18 @@ const {
   whatsapp = true,
   chrome = true,
 } = Astro.props;
+
+const tituloCompleto = title.toLowerCase().includes('guille nuesch') ? title : `${title} | Guille Nuesch`;
+const site = (Astro.site?.toString() ?? 'https://guillenuesch.netlify.app').replace(/\/$/, '');
+const canonical = `${site}${Astro.url.pathname}`;
+const ogImageAbs = ogImage
+  ? (ogImage.startsWith('http') ? ogImage : `${site}${ogImage}`)
+  : `${site}/fotos/guille/hero-brazos-cruzados.png`;
+
+// Analytics nunca en /admin ni en el login: es panel privado de Guillermo, no tráfico a medir.
+const esAdmin = Astro.url.pathname === '/admin' || Astro.url.pathname.startsWith('/admin/');
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined;
+const analyticsActivo = Boolean(gaId) && !esAdmin;
 ---
 <!doctype html>
 <html lang="es">
@@ -34,19 +46,66 @@ const {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/marca/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Libre+Franklin:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
       rel="stylesheet"
     />
-    <title>{title}</title>
+    <title>{tituloCompleto}</title>
     <meta name="description" content={description} />
-    <meta property="og:title" content={title} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Guille Nuesch" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={description} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:image" content={ogImageAbs} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
     {noindex && <meta name="robots" content="noindex" />}
+    {analyticsActivo && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', gaId);
+          window.trackEvent = function (nombre, params) {
+            try {
+              gtag('event', nombre, params || {});
+            } catch (e) {
+              /* GA bloqueado o no disponible: no romper la página por esto */
+            }
+          };
+          // Tageo delegado: WhatsApp (incluye la propia página de QR /a/[codigo]) y redes,
+          // sin tener que instrumentar cada botón por separado.
+          document.addEventListener('click', function (ev) {
+            const a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+            if (!a) return;
+            const href = a.href || '';
+            if (href.indexOf('wa.me') !== -1) {
+              window.trackEvent('whatsapp_click', { link_url: href, page_path: location.pathname });
+            } else if (/instagram\.com|facebook\.com|youtube\.com|linkedin\.com/.test(href)) {
+              const red = href.indexOf('instagram') !== -1
+                ? 'instagram'
+                : href.indexOf('facebook') !== -1
+                  ? 'facebook'
+                  : href.indexOf('youtube') !== -1
+                    ? 'youtube'
+                    : 'linkedin';
+              window.trackEvent('social_click', { red: red, page_path: location.pathname });
+            }
+          });
+        </script>
+      </>
+    )}
   </head>
   <body class:list={[!chrome && 'is-vivo']}>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>

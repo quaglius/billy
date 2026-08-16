@@ -10,7 +10,10 @@ import { WHATSAPP_URL } from '../../lib/site';
 const posts = await listarPostsPublicados();
 const recientes = posts.slice(0, 3);
 ---
-<Layout title="Blog — Guille Nuesch">
+<Layout
+  title="Blog"
+  description="Notas sobre salud mental laboral, prevención de consumos problemáticos, sindicatos y el mundo del trabajo en Argentina, escritas por Guillermo Nuesch."
+>
   <PageHeader titulo="Blog" actual="Blog" />
   <div class="blog-layout page-shell">
     <div class="blog-main">

@@ -76,7 +76,11 @@ if (codigo) {
 </Layout>
 
 {encontrada && (
-  <script define:vars={{ tipo, actividadId }}>
+  <script define:vars={{ tipo, actividadId, codigo }}>
+    if (window.trackEvent) {
+      window.trackEvent('participar_vista', { actividad_id: actividadId, codigo: codigo, tipo: tipo });
+    }
+
     const KEY = 'gn_token_navegador';
     if (!localStorage.getItem(KEY)) localStorage.setItem(KEY, crypto.randomUUID());
     const token = localStorage.getItem(KEY);
@@ -109,6 +113,9 @@ if (codigo) {
         } else if (data.estado === 'cerrada') {
           mostrar('No pudimos registrar tu respuesta. Probá de nuevo en un momento.');
         } else {
+          if (window.trackEvent) {
+            window.trackEvent('respuesta_enviada', { actividad_id: actividadId, codigo: codigo, tipo: tipo });
+          }
           mostrar('¡Gracias por participar! Ya podés mirar la pantalla.');
         }
       } catch {

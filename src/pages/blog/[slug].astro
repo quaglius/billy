@@ -20,12 +20,32 @@ const bajada = String(post.bajada ?? '');
 const cover = coverMeta(slug, post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null);
 const pub = post.publicadoEn?.toDate?.() ?? null;
 const fecha = formatFecha(pub);
+
+const site = (Astro.site?.toString() ?? 'https://guillenuesch.netlify.app').replace(/\/$/, '');
+const isoPublicado = pub ? pub.toISOString() : undefined;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: titulo,
+  description: bajada,
+  image: [`${site}${cover.src}`],
+  datePublished: isoPublicado,
+  dateModified: isoPublicado,
+  author: { '@type': 'Person', name: 'Guillermo Nuesch' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Guille Nuesch',
+    logo: { '@type': 'ImageObject', url: `${site}/marca/favicon.svg` },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': `${site}/blog/${slug}` },
+};
 ---
 <Layout title={titulo} description={bajada} ogImage={cover.src}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <PageHeader titulo={titulo} actual="Nota" crumbs={[{ href: '/', label: 'Inicio' }, { href: '/blog', label: 'Blog' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
-      <img src={cover.src} alt="" width="1200" height="630" style={`object-position: ${cover.position}`} />
+      <img src={cover.src} alt={titulo} width="1200" height="630" style={`object-position: ${cover.position}`} />
     </div>
     {fecha.largo && <p class="post-meta">{fecha.largo}</p>}
     <p>{bajada}</p>

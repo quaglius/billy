@@ -51,7 +51,7 @@ const extraHtml = extra ? renderMarkdown(extra) : '';
 const cover = coverForFormato(formato);
 const coverPos = coverPositionForFormato(formato);
 ---
-<Layout title={titulo} noindex={noindex}>
+<Layout title={titulo} description={descripcion.slice(0, 160)} ogImage={cover} noindex={noindex}>
   <PageHeader titulo={titulo} actual={titulo} crumbs={[{ href: '/', label: 'Inicio' }, { href: '/cursos', label: 'Cursos' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
