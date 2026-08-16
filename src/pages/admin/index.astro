@@ -1,0 +1,12 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Admin — Guille Nuesch" noindex={true}>
+  <div class="page-shell">
+    <h1>Panel</h1>
+    <p>Sesión activa. Esta es una página de prueba protegida.</p>
+    <form method="post" action="/api/logout">
+      <button class="admin-logout" type="submit">Salir</button>
+    </form>
+  </div>
+</Layout>
