@@ -1,0 +1,45 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "encuentros",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "instanciaId", "order": "ASCENDING" },
+        { "fieldPath": "orden", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "actividades",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "encuentroId", "order": "ASCENDING" },
+        { "fieldPath": "orden", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "actividades",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "encuentroId", "order": "ASCENDING" },
+        { "fieldPath": "activa", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "respuestas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "actividadId", "order": "ASCENDING" },
+        { "fieldPath": "creadoEn", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado", "order": "ASCENDING" },
+        { "fieldPath": "publicadoEn", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
