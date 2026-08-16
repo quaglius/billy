@@ -3,13 +3,15 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import Layout from '../layouts/Layout.astro';
 import BotonPrimario from '../components/BotonPrimario.astro';
+import ProcesoTrabajo from '../components/ProcesoTrabajo.astro';
+import OrganizacionesSlider from '../components/OrganizacionesSlider.astro';
 import {
   WHATSAPP_URL,
   INSTAGRAM_URL,
   INSTAGRAM_HANDLE,
 } from '../lib/site';
 import { listarPostsPublicados } from '../lib/posts';
-import { coverForSlug } from '../lib/covers';
+import { coverMeta, CURSO_COVERS } from '../lib/covers';
 
 const heroDir = path.join(process.cwd(), 'public/fotos/guille');
 const heroSrc = existsSync(path.join(heroDir, 'hero-brazos-cruzados.png'))
@@ -51,24 +53,33 @@ const igPilares = [
   { titulo: '25 años', texto: 'Frases, aprendizajes y anécdotas de trayectoria.' },
 ];
 
-const productos = [
+const servicios = [
   {
     nombre: 'Encuentro',
     formato: '90 min a media jornada',
     paraQuien: 'Toda la planta, sin distinción de rango',
     queSeLleva: 'Sensibilización + actividades en vivo + página de recursos',
+    foto: CURSO_COVERS.encuentro.src,
+    posicion: CURSO_COVERS.encuentro.position,
+    alt: 'Equipo de planta en un predio, con ropa de trabajo, después de una jornada de sensibilización',
   },
   {
     nombre: 'Taller',
     formato: '1-2 jornadas',
     paraQuien: 'Delegados, supervisores, RRHH',
     queSeLleva: 'Herramientas de detección, escucha y derivación + protocolo básico',
+    foto: CURSO_COVERS.taller.src,
+    posicion: CURSO_COVERS.taller.position,
+    alt: 'Taller con delegados alrededor de una mesa de trabajo',
   },
   {
     nombre: 'Programa',
     formato: '2-3 meses, encuentros quincenales',
     paraQuien: 'Organización completa',
     queSeLleva: 'Diagnóstico, ciclo de encuentros, protocolo de actuación propio, certificados y reporte agregado',
+    foto: CURSO_COVERS.programa.src,
+    posicion: CURSO_COVERS.programa.position,
+    alt: 'Cierre de un programa de prevención, con certificados',
   },
 ];
 
@@ -76,17 +87,17 @@ const testimonios = [
   {
     cita: 'Guillermo nos ayudó a abrir un tema que durante años fue tabú en el sindicato. Los delegados hoy tienen herramientas concretas para acompañar a un compañero, y eso cambió la forma en que se manejan los conflictos en planta.',
     organizacion: 'SITOS',
-    inicial: 'S',
+    logo: '/marca/ejemplo/sitos.svg',
   },
   {
     cita: 'Lo contratamos para una charla puntual y terminamos armando un programa de varios meses. La diferencia con otras capacitaciones es que no se queda en la teoría: da herramientas que los mandos medios usan al día siguiente.',
     organizacion: 'Fundación Provincia ART',
-    inicial: 'F',
+    logo: '/marca/ejemplo/fundacion-provincia-art.svg',
   },
   {
     cita: 'Trabajamos con Guillermo desde hace años en distintas líneas. Lo que más valoramos es la cercanía: entiende la realidad del trabajador ferroviario, no llega con un power point genérico.',
     organizacion: 'Trenes Argentinos Línea Roca',
-    inicial: 'T',
+    logo: '/marca/ejemplo/linea-roca.svg',
   },
 ];
 ---
@@ -131,34 +142,31 @@ const testimonios = [
     ))}
   </section>
 
-  <section class="page-shell wow fadeInUp" data-wow-delay="0.3s">
-    <p class="eyebrow">Cómo trabajo</p>
-    <h2 class="text-anim">Un proceso, no una charla suelta</h2>
-    <ol class="pasos">
-      {pilares.map((p, i) => (
-        <li>
-          <strong>{i + 1}. {p.titulo}</strong>
-          <p>{p.texto}</p>
-        </li>
-      ))}
-    </ol>
-    <p><a href="/sobre-mi">Ver el método completo</a></p>
-  </section>
+  <ProcesoTrabajo mostrarMetodoCompleto={true} prefijo="home-proceso" />
+
+  <OrganizacionesSlider />
 
   <section class="page-shell wow fadeInUp" data-wow-delay="0.5s">
-    <p class="eyebrow">Productos</p>
+    <p class="eyebrow">Servicios</p>
     <h2 class="text-anim">Encuentro, Taller y Programa</h2>
     <div class="productos">
-      {productos.map((p) => (
+      {servicios.map((p) => (
         <article class="producto">
-          <h3>{p.nombre}</h3>
-          <p>{p.formato}</p>
-          <p>{p.paraQuien}</p>
-          <p>{p.queSeLleva}</p>
+          <div class="producto__thumb">
+            <img src={p.foto} alt={p.alt} width="640" height="400" style={`object-position: ${p.posicion}`} />
+          </div>
+          <div class="producto__body">
+            <h3>{p.nombre}</h3>
+            <p>{p.formato}</p>
+            <p>{p.paraQuien}</p>
+            <p>{p.queSeLleva}</p>
+          </div>
         </article>
       ))}
     </div>
-    <p><a class="line-hover" href="/cursos">Ver cursos</a></p>
+    <p class="servicios-cta">
+      <BotonPrimario href="/cursos" texto="Ver cursos" />
+    </p>
   </section>
 
   <section class="page-shell wow fadeInUp" data-wow-delay="0.6s">
@@ -168,8 +176,7 @@ const testimonios = [
       {testimonios.map((t) => (
         <blockquote>
           <div class="testimonio__who">
-            <span class="testimonio__avatar" aria-hidden="true">{t.inicial}</span>
-            <img class="testimonio__mark" src="/marca/icono-oscuro.svg" alt="" width="28" height="28" />
+            <img class="testimonio__logo" src={t.logo} alt="" width="72" height="72" />
           </div>
           <p>{t.cita}</p>
           <footer>{t.organizacion}</footer>
@@ -188,7 +195,13 @@ const testimonios = [
         {postsRecientes.map((p) => (
           <a class="curso-card" href={`/blog/${p.slug}`}>
             <span class="curso-card__thumb">
-              <img src={coverForSlug(p.slug, p.imagenPortadaUrl)} alt="" width="640" height="400" />
+              <img
+                src={coverMeta(p.slug, p.imagenPortadaUrl).src}
+                alt=""
+                width="640"
+                height="400"
+                style={`object-position: ${coverMeta(p.slug, p.imagenPortadaUrl).position}`}
+              />
             </span>
             <div class="curso-card__body">
               <h3>{p.titulo}</h3>

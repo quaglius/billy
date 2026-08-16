@@ -1,4 +1,12 @@
 export const WHATSAPP_URL = 'https://wa.me/5491168313878';
+
+export function whatsappConTexto(texto: string): string {
+  return `${WHATSAPP_URL}?text=${encodeURIComponent(texto)}`;
+}
+
+export const WHATSAPP_METODO = whatsappConTexto(
+  'Hola Guillermo, te escribo para consultar el método de trabajo de cuatro pasos (escuchar, nombrar, equipar y sostener). ¿Podemos coordinar una charla?',
+);
 export const INSTAGRAM_URL = 'https://www.instagram.com/equilibrarprosalud';
 export const INSTAGRAM_HANDLE = '@equilibrarprosalud';
 export const SITE_URL = 'https://guillenuesch.netlify.app';

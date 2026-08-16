@@ -132,6 +132,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   transition: transform 0.4s ease;
 }
 
@@ -307,6 +308,7 @@
   width: 100%;
   max-height: 480px;
   object-fit: cover;
+  object-position: top;
   display: block;
 }
 
@@ -874,5 +876,244 @@ body.is-vivo {
   .wa-float,
   .go-top {
     display: none !important;
+  }
+}
+
+.flujo {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+}
+
+.flujo__paso {
+  position: relative;
+  padding: 0 0 28px 80px;
+}
+
+.flujo__paso:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 27px;
+  top: 56px;
+  bottom: 0;
+  width: 2px;
+  background: var(--tj-color-theme-primary);
+  opacity: 0.35;
+}
+
+.flujo__num {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--tj-color-theme-dark);
+  color: #fff;
+  font-family: var(--tj-ff-heading);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.flujo__titulo {
+  margin: 0;
+  font-size: 20px;
+}
+
+.flujo__btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  margin: 0;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  color: var(--tj-color-heading-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.flujo__btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.flujo__plus {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.flujo__plus::before,
+.flujo__plus::after {
+  content: '';
+  position: absolute;
+  background: var(--tj-color-theme-primary);
+}
+
+.flujo__plus::before {
+  left: 0;
+  right: 0;
+  top: 5px;
+  height: 2px;
+}
+
+.flujo__plus::after {
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+}
+
+.flujo__btn[aria-expanded='true'] .flujo__plus::after {
+  display: none;
+}
+
+.flujo__panel {
+  color: var(--tj-color-text-body);
+}
+
+.flujo__panel p {
+  margin: 0 0 8px;
+}
+
+.flujo-cta {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.org-slider {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.org-slider__nav {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--tj-color-border-2);
+  background: #fff;
+  color: var(--tj-color-heading-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.org-slider__nav:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.org-slider__viewport {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.org-slider__track {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 4px 16px;
+}
+
+.org-slider__item {
+  flex: 0 0 140px;
+  scroll-snap-align: start;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tj-color-heading-primary);
+}
+
+.org-slider__item img {
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+.producto {
+  padding: 0;
+  overflow: hidden;
+}
+
+.producto__thumb {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+}
+
+.producto__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.producto__body {
+  padding: 24px;
+}
+
+.servicios-cta {
+  margin-top: 32px;
+}
+
+.testimonio__logo {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .flujo {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .flujo__paso {
+    padding: 0;
+  }
+
+  .flujo__paso:not(:last-child)::before {
+    left: calc(50% + 32px);
+    right: calc(-50% + 32px);
+    top: 27px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+
+  .flujo__num {
+    position: relative;
+    margin: 0 auto 12px;
+  }
+
+  .flujo__titulo {
+    text-align: center;
+  }
+
+  .flujo__btn {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .flujo__panel {
+    text-align: left;
   }
 }

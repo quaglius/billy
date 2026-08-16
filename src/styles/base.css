@@ -496,6 +496,11 @@ html.js .wow:not(.animated) {
   transition: transform 0.3s ease;
 }
 
+.producto {
+  padding: 0;
+  overflow: hidden;
+}
+
 .producto:hover,
 .testimonios blockquote:hover {
   transform: translateY(-4px);
