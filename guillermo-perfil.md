@@ -13,7 +13,7 @@
 - **WhatsApp (contacto principal):** +54 9 11 6831-3878
 - **Canal de YouTube:** @EquilibrarSaludMentalyAdicciones — activo existente con material de los encuentros virtuales, hoy desaprovechado (ver [plan de contenido](blog-content-plan.md), sección 4.b)
 - **Instagram:** [@equilibrarprosalud](https://www.instagram.com/equilibrarprosalud)
-- **LinkedIn:** perfil activo pero con red muy chica (31 conexiones) — ver plan de crecimiento en [blog-content-plan.md](blog-content-plan.md)
+- **LinkedIn:** [guillermo-billy-nuesch-a9257b77](https://www.linkedin.com/in/guillermo-billy-nuesch-a9257b77/) — perfil activo pero con red muy chica (31 conexiones) — ver plan de crecimiento en [blog-content-plan.md](blog-content-plan.md)
 
 ## Bio / Presentación (para "Sobre mí" del sitio)
 

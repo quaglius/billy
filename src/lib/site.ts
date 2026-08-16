@@ -1,8 +1,7 @@
 export const WHATSAPP_URL = 'https://wa.me/5491168313878';
 export const INSTAGRAM_URL = 'https://www.instagram.com/equilibrarprosalud';
 export const YOUTUBE_URL = 'https://www.youtube.com/@EquilibrarSaludMentalyAdicciones';
-// DECISIÓN PENDIENTE: URL de perfil de LinkedIn de Guillermo no está en los documentos fuente.
-export const LINKEDIN_URL: string | null = null;
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/guillermo-billy-nuesch-a9257b77/';
 
 export const NAV = [
   { href: '/', label: 'Inicio' },
