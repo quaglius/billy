@@ -18,7 +18,7 @@ const links = [
   <h1>{titulo}</h1>
   <nav class="admin-chrome__nav" aria-label="Admin">
     {links.map((l) => (
-      <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>{l.label}</a>
+      <a href={l.href} aria-current={path === l.href || (l.href !== '/admin' && path.startsWith(l.href + '/')) ? 'page' : undefined}>{l.label}</a>
     ))}
     <form method="post" action="/api/logout">
       <button class="admin-logout" type="submit">Salir</button>

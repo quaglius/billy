@@ -38,6 +38,9 @@ try {
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
   <AdminChrome titulo="Instancias">
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+    {Astro.url.searchParams.get('ok') && <p class="admin-ok">Instancia creada.</p>}
+    {Astro.url.searchParams.get('error') === 'slug' && <p class="admin-alert">Ese slug ya está en uso.</p>}
+    {Astro.url.searchParams.get('error') === '1' && <p class="admin-alert">Faltan curso, empresa o slug.</p>}
     {instancias.length > 0 && (
       <table class="admin-table">
         <thead>

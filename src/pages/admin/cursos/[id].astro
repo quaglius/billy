@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -7,13 +8,35 @@ if (!id) return Astro.redirect('/admin/cursos');
 const doc = await db().collection('cursos').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/cursos');
 const c = doc.data()!;
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
+const objetivos = Array.isArray(c.objetivos) ? c.objetivos.join('\n') : '';
+const temario = Array.isArray(c.temario) ? c.temario.join('\n') : '';
 ---
-<Layout title={`Editar curso — ${c.titulo}`} noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin/cursos">← Cursos</a></p>
-    <h1>{c.titulo}</h1>
-    <p>Slug: {c.slug}</p>
-    <p>Formato: {c.formato}</p>
-    <p>{c.descripcionCorta}</p>
-  </div>
+<Layout title={`Editar curso — ${c.titulo}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo={`Editar: ${c.titulo}`}>
+    <p><a href="/admin/cursos">← Cursos</a> · slug <code>{c.slug}</code></p>
+    {ok && <p class="admin-ok">Guardado.</p>}
+    {error && <p class="admin-alert">Falta el título.</p>}
+    <form class="admin-form" method="post" action="/api/admin/cursos">
+      <input type="hidden" name="id" value={id} />
+      <label>Título <input type="text" name="titulo" value={c.titulo ?? ''} required /></label>
+      <label>Descripción corta <input type="text" name="descripcionCorta" value={c.descripcionCorta ?? ''} /></label>
+      <label>Descripción <textarea name="descripcion" rows="5">{c.descripcion ?? ''}</textarea></label>
+      <label>
+        Formato
+        <select name="formato">
+          <option value="encuentro" selected={c.formato === 'encuentro'}>encuentro</option>
+          <option value="taller" selected={c.formato === 'taller'}>taller</option>
+          <option value="programa" selected={c.formato === 'programa'}>programa</option>
+        </select>
+      </label>
+      <label>Duración <input type="text" name="duracionTexto" value={c.duracionTexto ?? ''} /></label>
+      <label>Dirigido a <input type="text" name="dirigidoA" value={c.dirigidoA ?? ''} /></label>
+      <label>Objetivos (uno por línea) <textarea name="objetivos" rows="4">{objetivos}</textarea></label>
+      <label>Temario (uno por línea) <textarea name="temario" rows="4">{temario}</textarea></label>
+      <label><input type="checkbox" name="publicado" checked={Boolean(c.publicado)} /> Publicado</label>
+      <button type="submit">Guardar</button>
+    </form>
+  </AdminChrome>
 </Layout>

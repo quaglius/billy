@@ -18,6 +18,8 @@ try {
 ---
 <Layout title="Empresas — Admin" noindex={true} whatsapp={false}>
   <AdminChrome titulo="Empresas">
+    {Astro.url.searchParams.get('ok') && <p class="admin-ok">Empresa creada.</p>}
+    {Astro.url.searchParams.get('error') && <p class="admin-alert">Falta el nombre.</p>}
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {empresas.length > 0 && (
       <table class="admin-table">

@@ -13,9 +13,28 @@ function slugify(text: string): string {
 
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
+  const id = String(form.get('id') ?? '');
   const nombre = String(form.get('nombre') ?? '').trim();
   if (!nombre) {
-    return new Response(null, { status: 303, headers: { Location: '/admin/empresas?error=1' } });
+    const back = id ? `/admin/empresas/${id}?error=1` : '/admin/empresas?error=1';
+    return new Response(null, { status: 303, headers: { Location: back } });
+  }
+
+  const payload = {
+    nombre,
+    rubro: String(form.get('rubro') ?? '') || null,
+    contactoNombre: String(form.get('contactoNombre') ?? '') || null,
+    contactoEmail: String(form.get('contactoEmail') ?? '') || null,
+    contactoTelefono: String(form.get('contactoTelefono') ?? '') || null,
+    notasInternas: String(form.get('notasInternas') ?? '') || null,
+  };
+
+  if (id) {
+    await db().collection('empresas').doc(id).update(payload);
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `/admin/empresas/${id}?ok=1` },
+    });
   }
 
   const slugBase = slugify(nombre) || 'empresa';
@@ -27,16 +46,11 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   await db().collection('empresas').add({
-    nombre,
+    ...payload,
     slug,
-    rubro: String(form.get('rubro') ?? '') || null,
     logoUrl: null,
-    contactoNombre: String(form.get('contactoNombre') ?? '') || null,
-    contactoEmail: String(form.get('contactoEmail') ?? '') || null,
-    contactoTelefono: String(form.get('contactoTelefono') ?? '') || null,
-    notasInternas: String(form.get('notasInternas') ?? '') || null,
     creadoEn: FieldValue.serverTimestamp(),
   });
 
-  return new Response(null, { status: 303, headers: { Location: '/admin/empresas' } });
+  return new Response(null, { status: 303, headers: { Location: '/admin/empresas?ok=1' } });
 };

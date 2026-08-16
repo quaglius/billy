@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -7,13 +8,23 @@ if (!id) return Astro.redirect('/admin/empresas');
 const doc = await db().collection('empresas').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/empresas');
 const e = doc.data()!;
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
 ---
-<Layout title={`Empresa — ${e.nombre}`} noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin/empresas">← Empresas</a></p>
-    <h1>{e.nombre}</h1>
-    <p>Slug: {e.slug}</p>
-    {e.rubro && <p>Rubro: {e.rubro}</p>}
-    {e.notasInternas && <p>Notas internas: {e.notasInternas}</p>}
-  </div>
+<Layout title={`Empresa — ${e.nombre}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo={`Editar: ${e.nombre}`}>
+    <p><a href="/admin/empresas">← Empresas</a> · slug <code>{e.slug}</code></p>
+    {ok && <p class="admin-ok">Guardado.</p>}
+    {error && <p class="admin-alert">Falta el nombre.</p>}
+    <form class="admin-form" method="post" action="/api/admin/empresas">
+      <input type="hidden" name="id" value={id} />
+      <label>Nombre <input type="text" name="nombre" value={e.nombre ?? ''} required /></label>
+      <label>Rubro <input type="text" name="rubro" value={e.rubro ?? ''} /></label>
+      <label>Contacto <input type="text" name="contactoNombre" value={e.contactoNombre ?? ''} /></label>
+      <label>Email (interno, nunca público) <input type="email" name="contactoEmail" value={e.contactoEmail ?? ''} /></label>
+      <label>Teléfono (interno, nunca público) <input type="text" name="contactoTelefono" value={e.contactoTelefono ?? ''} /></label>
+      <label>Notas internas <textarea name="notasInternas" rows="3">{e.notasInternas ?? ''}</textarea></label>
+      <button type="submit">Guardar</button>
+    </form>
+  </AdminChrome>
 </Layout>

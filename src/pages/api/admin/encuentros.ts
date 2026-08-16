@@ -9,7 +9,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!instanciaId || !titulo || !fechaHoraRaw) {
     return new Response(null, {
       status: 303,
-      headers: { Location: `/admin/instancias/${instanciaId || ''}` },
+      headers: { Location: `/admin/instancias/${instanciaId || ''}?error=1` },
     });
   }
 
@@ -30,6 +30,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/admin/instancias/${instanciaId}` },
+    headers: { Location: `/admin/instancias/${instanciaId}?ok=1` },
   });
 };

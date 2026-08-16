@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -7,13 +8,16 @@ if (!id) return Astro.redirect('/admin/posts');
 const doc = await db().collection('posts').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/posts');
 const p = doc.data()!;
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
 ---
-<Layout title={`Editar post — ${p.titulo}`} noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin/posts">← Posts</a></p>
-    <h1>{p.titulo}</h1>
+<Layout title={`Editar post — ${p.titulo}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo="Editar post">
+    <p><a href="/admin/posts">← Posts</a> · slug <code>{p.slug}</code></p>
+    {ok && <p class="admin-ok">Guardado.</p>}
+    {error && <p class="admin-alert">Falta el título.</p>}
     {p.slug === 'protocolo-salud-mental-laboral-srt-2026' && (
-      <p>⚠️ No publicar sin verificar el texto completo de la Resolución 8/2026 de la SRT contra el Boletín Oficial.</p>
+      <p class="admin-alert">No publicar sin verificar el texto completo de la Resolución 8/2026 de la SRT contra el Boletín Oficial.</p>
     )}
     <form class="admin-form" method="post" action="/api/admin/posts">
       <input type="hidden" name="id" value={id} />
@@ -29,5 +33,5 @@ const p = doc.data()!;
       </label>
       <button type="submit">Guardar</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

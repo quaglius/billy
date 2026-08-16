@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 import { estadoEncuentro } from '../../../lib/encuentro';
 
@@ -27,23 +28,45 @@ const encuentros = encSnap.docs.map((d) => {
     estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null),
   };
 });
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
 ---
-<Layout title={`Instancia — ${inst.slug}`} noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href="/admin/instancias">← Instancias</a></p>
-    <h1>{inst.slug}</h1>
-    <p>Visibilidad: {inst.visibilidad}</p>
+<Layout title={`Instancia — ${inst.slug}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo={String(inst.slug)}>
+    {ok && <p class="admin-ok">Guardado.</p>}
+    {error && <p class="admin-alert">Faltan el título o la fecha.</p>}
+    <p>
+      Visibilidad:
+      <span class:list={['pill-estado', inst.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
+        {inst.visibilidad}
+      </span>
+      {' · '}
+      <a href={`/admin/instancias/${id}/duplicar`}>Duplicar</a>
+    </p>
     <h2>Cronograma</h2>
-    <ul>
-      {encuentros.map((e) => (
-        <li>
-          {e.orden}. {e.titulo} — {e.estado}
-          {' · '}
-          <a href={`/admin/instancias/${id}/encuentros/${e.id}`}>Actividades</a>
-        </li>
-      ))}
-    </ul>
-    {encuentros.length === 0 && <p>No hay encuentros todavía.</p>}
+    {encuentros.length > 0 ? (
+      <table class="admin-table">
+        <thead>
+          <tr><th>#</th><th>Encuentro</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          {encuentros.map((e) => (
+            <tr>
+              <td>{e.orden}</td>
+              <td>{e.titulo}</td>
+              <td>
+                <span class:list={['pill-estado', e.estado === 'en_curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                  {e.estado}
+                </span>
+              </td>
+              <td><a href={`/admin/instancias/${id}/encuentros/${e.id}`}>Actividades</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p>No hay encuentros todavía.</p>
+    )}
 
     <h2>Nuevo encuentro</h2>
     <form class="admin-form" method="post" action="/api/admin/encuentros">
@@ -54,5 +77,5 @@ const encuentros = encSnap.docs.map((d) => {
       <label>Duración (minutos) <input type="number" name="duracionMinutos" value="120" /></label>
       <button type="submit">Crear</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

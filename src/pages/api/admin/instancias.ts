@@ -39,5 +39,5 @@ export const POST: APIRoute = async ({ request }) => {
     creadoEn: FieldValue.serverTimestamp(),
   });
 
-  return new Response(null, { status: 303, headers: { Location: '/admin/instancias' } });
+  return new Response(null, { status: 303, headers: { Location: '/admin/instancias?ok=1' } });
 };

@@ -13,17 +13,11 @@ function slugify(text: string): string {
 
 export const POST: APIRoute = async ({ request }) => {
   const form = await request.formData();
+  const id = String(form.get('id') ?? '');
   const titulo = String(form.get('titulo') ?? '').trim();
   if (!titulo) {
-    return new Response(null, { status: 303, headers: { Location: '/admin/cursos?error=1' } });
-  }
-
-  const slugBase = slugify(titulo) || 'curso';
-  let slug = slugBase;
-  let n = 1;
-  while (!(await db().collection('cursos').where('slug', '==', slug).limit(1).get()).empty) {
-    n += 1;
-    slug = `${slugBase}-${n}`;
+    const back = id ? `/admin/cursos/${id}?error=1` : '/admin/cursos?error=1';
+    return new Response(null, { status: 303, headers: { Location: back } });
   }
 
   const objetivos = String(form.get('objetivos') ?? '')
@@ -35,8 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  await db().collection('cursos').add({
-    slug,
+  const payload = {
     titulo,
     descripcionCorta: String(form.get('descripcionCorta') ?? ''),
     descripcion: String(form.get('descripcion') ?? ''),
@@ -45,12 +38,33 @@ export const POST: APIRoute = async ({ request }) => {
     dirigidoA: String(form.get('dirigidoA') ?? ''),
     objetivos,
     temario,
+    publicado: form.get('publicado') === 'on',
+    actualizadoEn: FieldValue.serverTimestamp(),
+  };
+
+  if (id) {
+    await db().collection('cursos').doc(id).update(payload);
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `/admin/cursos/${id}?ok=1` },
+    });
+  }
+
+  const slugBase = slugify(titulo) || 'curso';
+  let slug = slugBase;
+  let n = 1;
+  while (!(await db().collection('cursos').where('slug', '==', slug).limit(1).get()).empty) {
+    n += 1;
+    slug = `${slugBase}-${n}`;
+  }
+
+  await db().collection('cursos').add({
+    ...payload,
+    slug,
     imagenPortadaUrl: null,
     adjuntos: [],
-    publicado: form.get('publicado') === 'on',
     creadoEn: FieldValue.serverTimestamp(),
-    actualizadoEn: FieldValue.serverTimestamp(),
   });
 
-  return new Response(null, { status: 303, headers: { Location: '/admin/cursos' } });
+  return new Response(null, { status: 303, headers: { Location: '/admin/cursos?ok=1' } });
 };

@@ -94,6 +94,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/admin/instancias/${nueva.id}` },
+    headers: { Location: `/admin/instancias/${nueva.id}?ok=1` },
   });
 };

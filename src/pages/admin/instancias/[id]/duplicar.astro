@@ -1,5 +1,6 @@
 ---
 import Layout from '../../../../layouts/Layout.astro';
+import AdminChrome from '../../../../components/AdminChrome.astro';
 import { db } from '../../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -19,12 +20,11 @@ const encuentrosN = encSnap.size;
 const error = Astro.url.searchParams.get('error');
 ---
 <Layout title="Duplicar instancia" noindex={true} whatsapp={false}>
-  <div class="page-shell gn-prose">
+  <AdminChrome titulo={`Duplicar ${inst.slug}`}>
     <p><a href="/admin/instancias">← Instancias</a></p>
-    <h1>Duplicar {inst.slug}</h1>
     <p>Se copia el contenido del curso. Elegí la organización nueva y las fechas.</p>
     <p>Se van a copiar <strong>{encuentrosN} encuentros</strong> y <strong>{actividadesN} actividades</strong> (con códigos nuevos).</p>
-    {error && <p>Faltan la empresa o la fecha de inicio.</p>}
+    {error && <p class="admin-alert">Faltan la empresa o la fecha de inicio.</p>}
     <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
       <input type="hidden" name="id" value={id} />
       <label>
@@ -40,5 +40,5 @@ const error = Astro.url.searchParams.get('error');
       <label>Fecha de fin <input type="date" name="fechaFin" /></label>
       <button type="submit">Duplicar</button>
     </form>
-  </div>
+  </AdminChrome>
 </Layout>

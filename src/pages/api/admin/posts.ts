@@ -9,13 +9,21 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(null, { status: 303, headers: { Location: '/admin/posts' } });
   }
 
+  const titulo = String(form.get('titulo') ?? '').trim();
+  if (!titulo) {
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `/admin/posts/${id}?error=1` },
+    });
+  }
+
   const estado = String(form.get('estado') ?? 'borrador');
   const publicado = estado === 'publicado';
   await db()
     .collection('posts')
     .doc(id)
     .update({
-      titulo: String(form.get('titulo') ?? ''),
+      titulo,
       bajada: String(form.get('bajada') ?? ''),
       cuerpoMd: String(form.get('cuerpoMd') ?? ''),
       estado,
@@ -24,6 +32,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/admin/posts/${id}` },
+    headers: { Location: `/admin/posts/${id}?ok=1` },
   });
 };
