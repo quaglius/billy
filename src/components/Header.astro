@@ -8,9 +8,12 @@ const path = Astro.url.pathname;
   <a class="site-header__logo" href="/">
     <img src="/marca/logo-horizontal.svg" alt="Guille Nuesch" height="40" />
   </a>
-  <nav class="site-nav" aria-label="Principal">
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+    Menú
+  </button>
+  <nav class="site-nav" id="site-nav" aria-label="Principal">
     {NAV.map((item) => (
-      <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>
+      <a class="line-hover" href={item.href} aria-current={path === item.href ? 'page' : undefined}>
         {item.label}
       </a>
     ))}
@@ -19,3 +22,12 @@ const path = Astro.url.pathname;
     <BotonPrimario href={WHATSAPP_URL} texto="WhatsApp" variante="header" target="_blank" />
   </div>
 </header>
+<script>
+  const btn = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('site-nav');
+  btn?.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    nav?.classList.toggle('is-open', !open);
+  });
+</script>
