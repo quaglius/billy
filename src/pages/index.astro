@@ -77,17 +77,17 @@ const testimonios = [
   {
     cita: 'Guillermo nos ayudó a abrir un tema que durante años fue tabú en el sindicato. Los delegados hoy tienen herramientas concretas para acompañar a un compañero, y eso cambió la forma en que se manejan los conflictos en planta.',
     organizacion: 'SITOS',
-    logo: '/marca/ejemplo/sitos.svg',
+    logo: undefined,
   },
   {
     cita: 'Lo contratamos para una charla puntual y terminamos armando un programa de varios meses. La diferencia con otras capacitaciones es que no se queda en la teoría: da herramientas que los mandos medios usan al día siguiente.',
-    organizacion: 'Fundación Provincia ART',
-    logo: '/marca/ejemplo/fundacion-provincia-art.svg',
+    organizacion: 'Provincia ART',
+    logo: '/marca/organizaciones/provincia-art.svg',
   },
   {
     cita: 'Trabajamos con Guillermo desde hace años en distintas líneas. Lo que más valoramos es la cercanía: entiende la realidad del trabajador ferroviario, no llega con un power point genérico.',
     organizacion: 'Trenes Argentinos Línea Roca',
-    logo: '/marca/ejemplo/linea-roca.svg',
+    logo: '/marca/organizaciones/linea-roca.png',
   },
 ];
 ---
@@ -169,7 +169,11 @@ const testimonios = [
       {testimonios.map((t) => (
         <blockquote>
           <div class="testimonio__who">
-            <img class="testimonio__logo" src={t.logo} alt="" width="72" height="72" />
+            {t.logo ? (
+              <img class="testimonio__logo" src={t.logo} alt="" width="112" height="72" loading="lazy" />
+            ) : (
+              <span class="testimonio__wordmark" aria-hidden="true">{t.organizacion}</span>
+            )}
           </div>
           <p>{t.cita}</p>
           <footer>{t.organizacion}</footer>

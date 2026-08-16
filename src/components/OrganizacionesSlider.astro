@@ -9,8 +9,14 @@ import { ORGANIZACIONES } from '../lib/organizaciones';
     <div class="org-slider__viewport" tabindex="0">
       <ul class="org-slider__track">
         {ORGANIZACIONES.map((o) => (
-          <li class="org-slider__item">
-            <img src={o.logo} alt={o.nombre} width="80" height="80" />
+          <li class="org-slider__item" title={o.nombre}>
+            <div class:list={['org-slider__logo', { 'org-slider__logo--dark': o.fondoOscuro, 'org-slider__logo--wordmark': !o.logo }]}>
+              {o.logo ? (
+                <img src={o.logo} alt="" width="112" height="64" loading="lazy" />
+              ) : (
+                <span aria-hidden="true">{o.corto}</span>
+              )}
+            </div>
             <span>{o.corto}</span>
           </li>
         ))}

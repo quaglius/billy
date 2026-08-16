@@ -1,52 +1,40 @@
-export type MarcaOrg =
-  | 'union'
-  | 'rail'
-  | 'energia'
-  | 'salud'
-  | 'escudo'
-  | 'agua'
-  | 'industria'
-  | 'estado'
-  | 'oil'
-  | 'edificio';
-
 export type Organizacion = {
   nombre: string;
   corto: string;
-  color: string;
-  marca: MarcaOrg;
   logo?: string;
+  fondoOscuro?: boolean;
 };
 
 export const ORGANIZACIONES: Organizacion[] = [
-  { nombre: 'SITOS', corto: 'SITOS', color: '#0f3d2e', marca: 'agua', logo: '/marca/ejemplo/sitos.svg' },
-  { nombre: 'Fundación Provincia ART', corto: 'Provincia ART', color: '#051229', marca: 'escudo', logo: '/marca/ejemplo/fundacion-provincia-art.svg' },
-  { nombre: 'Trenes Argentinos Línea Roca', corto: 'Línea Roca', color: '#7a1020', marca: 'rail', logo: '/marca/ejemplo/linea-roca.svg' },
-  { nombre: 'AECN (Asociación de Empleados de Casinos Nacionales)', corto: 'AECN', color: '#1a365d', marca: 'edificio', logo: '/marca/ejemplo/aecn.svg' },
-  { nombre: 'AGOEC', corto: 'AGOEC', color: '#12344d', marca: 'union', logo: '/marca/ejemplo/agoec.svg' },
-  { nombre: 'ARBA', corto: 'ARBA', color: '#0b4f8a', marca: 'estado', logo: '/marca/ejemplo/arba.svg' },
-  { nombre: 'ASFA (Asociación de Señaleros de Ferrocarriles Argentinos)', corto: 'ASFA', color: '#1d3557', marca: 'rail', logo: '/marca/ejemplo/asfa.svg' },
-  { nombre: 'Astilleros Río Santiago', corto: 'Astilleros', color: '#0e4d6c', marca: 'industria', logo: '/marca/ejemplo/astilleros.svg' },
-  { nombre: 'Cablevisión', corto: 'Cablevisión', color: '#1b3a6b', marca: 'edificio', logo: '/marca/ejemplo/cablevision.svg' },
-  { nombre: 'CEAMSE', corto: 'CEAMSE', color: '#1e5a3a', marca: 'industria', logo: '/marca/ejemplo/ceamse.svg' },
-  { nombre: 'Coopelectric Olavarría', corto: 'Coopelectric', color: '#b45309', marca: 'energia', logo: '/marca/ejemplo/coopelectric.svg' },
-  { nombre: 'EDEA S.A.', corto: 'EDEA', color: '#0369a1', marca: 'energia', logo: '/marca/ejemplo/edea.svg' },
-  { nombre: 'Hospital Dr. Arturo Oñativia', corto: 'Htal. Oñativia', color: '#0f766e', marca: 'salud', logo: '/marca/ejemplo/hospital.svg' },
-  { nombre: 'Hospital Interzonal El Cruce', corto: 'Htal. El Cruce', color: '#115e59', marca: 'salud', logo: '/marca/ejemplo/hospital-cruce.svg' },
-  { nombre: 'Hospital Zonal Dr. Lúcio Meléndez', corto: 'Htal. Meléndez', color: '#134e4a', marca: 'salud', logo: '/marca/ejemplo/hospital-melendez.svg' },
-  { nombre: 'Hospitales SAMIC', corto: 'SAMIC', color: '#155e75', marca: 'salud', logo: '/marca/ejemplo/samic.svg' },
-  { nombre: 'La Fraternidad', corto: 'La Fraternidad', color: '#7f1d1d', marca: 'union', logo: '/marca/ejemplo/fraternidad.svg' },
-  { nombre: 'Línea Belgrano Norte', corto: 'Belgrano Norte', color: '#1e3a5f', marca: 'rail', logo: '/marca/ejemplo/belgrano-norte.svg' },
-  { nombre: 'Línea Belgrano Sur', corto: 'Belgrano Sur', color: '#172554', marca: 'rail', logo: '/marca/ejemplo/belgrano-sur.svg' },
-  { nombre: 'Loterías y Casinos', corto: 'Loterías', color: '#4c1d95', marca: 'edificio', logo: '/marca/ejemplo/loterias.svg' },
-  { nombre: 'Metrovías', corto: 'Metrovías', color: '#1e40af', marca: 'rail', logo: '/marca/ejemplo/metrovias.svg' },
-  { nombre: 'Ministerio de Economía PBA', corto: 'Min. Economía', color: '#1e3a8a', marca: 'estado', logo: '/marca/ejemplo/economia-pba.svg' },
-  { nombre: 'Obras Sanitarias Gral. Pueyrredón', corto: 'OSSE', color: '#0e7490', marca: 'agua', logo: '/marca/ejemplo/osse.svg' },
-  { nombre: 'Peugeot Argentina', corto: 'Peugeot', color: '#1f2937', marca: 'industria', logo: '/marca/ejemplo/peugeot.svg' },
-  { nombre: 'Registro de la Propiedad', corto: 'Registro', color: '#334155', marca: 'estado', logo: '/marca/ejemplo/registro.svg' },
-  { nombre: 'Servicio Penitenciario (Batán)', corto: 'SPF Batán', color: '#44403c', marca: 'escudo', logo: '/marca/ejemplo/penitenciario.svg' },
-  { nombre: 'SSP (Sindicato de Salud Pública PBA)', corto: 'SSP', color: '#14532d', marca: 'union', logo: '/marca/ejemplo/ssp.svg' },
-  { nombre: 'TECSAN', corto: 'TECSAN', color: '#3f6212', marca: 'industria', logo: '/marca/ejemplo/tecsan.svg' },
-  { nombre: 'Vialidad Nacional', corto: 'Vialidad', color: '#9a3412', marca: 'estado', logo: '/marca/ejemplo/vialidad.svg' },
-  { nombre: 'YPF', corto: 'YPF', color: '#1d4ed8', marca: 'oil', logo: '/marca/ejemplo/ypf.svg' },
+  { nombre: 'Sindicato de Trabajadores de Obras Sanitarias de Mar del Plata', corto: 'SITOS' },
+  { nombre: 'Provincia ART S.A.', corto: 'Provincia ART', logo: '/marca/organizaciones/provincia-art.svg' },
+  { nombre: 'Trenes Argentinos Operaciones — Línea Roca', corto: 'Línea Roca', logo: '/marca/organizaciones/linea-roca.png' },
+  { nombre: 'Asociación de Empleados de Casinos Nacionales', corto: 'AECN' },
+  { nombre: 'Asociación Gremial Obreros y Empleados de la Conservación Ecológica Ambiental y Servicios Especiales', corto: 'AGOEC', logo: '/marca/organizaciones/agoec.png' },
+  { nombre: 'Agencia de Recaudación de la Provincia de Buenos Aires', corto: 'ARBA' },
+  { nombre: 'Asociación Señaleros Ferroviarios Argentinos', corto: 'ASFA' },
+  { nombre: 'Ente Administrador del Astillero Río Santiago', corto: 'Astillero Río Santiago', logo: '/marca/organizaciones/astillero-rio-santiago.png' },
+  { nombre: 'Cablevisión Argentina — marca histórica', corto: 'Cablevisión', logo: '/marca/organizaciones/cablevision.svg' },
+  { nombre: 'Coordinación Ecológica Área Metropolitana Sociedad del Estado', corto: 'CEAMSE', logo: '/marca/organizaciones/ceamse.svg' },
+  { nombre: 'Coopelectric Olavarría', corto: 'Coopelectric', logo: '/marca/organizaciones/coopelectric.png' },
+  { nombre: 'Empresa Distribuidora de Energía Atlántica S.A.', corto: 'EDEA', logo: '/marca/organizaciones/edea.png', fondoOscuro: true },
+  { nombre: 'Hospital Zonal General de Agudos Dr. Arturo Oñativia', corto: 'Htal. Oñativia', logo: '/marca/organizaciones/hospital-onativia.jpg' },
+  { nombre: 'Hospital de Alta Complejidad en Red El Cruce Dr. Néstor Carlos Kirchner S.A.M.I.C.', corto: 'Htal. El Cruce', logo: '/marca/organizaciones/hospital-el-cruce.png', fondoOscuro: true },
+  { nombre: 'Hospital Zonal General de Agudos Dr. Lucio Meléndez', corto: 'Htal. Meléndez' },
+  { nombre: 'Servicios de Atención Médica Integral para la Comunidad', corto: 'Hospitales SAMIC' },
+  { nombre: 'Iglesia Evangélica Menonita Argentina', corto: 'IEMA' },
+  { nombre: 'Sindicato de Conductores de Trenes La Fraternidad', corto: 'La Fraternidad', logo: '/marca/organizaciones/la-fraternidad.png' },
+  { nombre: 'Línea Belgrano Norte — operada por Ferrovías S.A.C.', corto: 'Belgrano Norte', logo: '/marca/organizaciones/ferrovias.svg' },
+  { nombre: 'Línea Belgrano Sur — Trenes Argentinos Operaciones', corto: 'Belgrano Sur', logo: '/marca/organizaciones/trenes-argentinos.svg' },
+  { nombre: 'Instituto Provincial de Lotería y Casinos', corto: 'Loterías y Casinos', logo: '/marca/organizaciones/loterias-pba.webp' },
+  { nombre: 'Metrovías S.A.', corto: 'Metrovías', logo: '/marca/organizaciones/metrovias.svg' },
+  { nombre: 'Ministerio de Economía de la Provincia de Buenos Aires', corto: 'Min. Economía PBA', logo: '/marca/organizaciones/gba.svg', fondoOscuro: true },
+  { nombre: 'Obras Sanitarias Sociedad de Estado — Municipalidad de General Pueyrredon', corto: 'OSSE', logo: '/marca/organizaciones/osse.png' },
+  { nombre: 'Peugeot Argentina', corto: 'Peugeot', logo: '/marca/organizaciones/peugeot.svg' },
+  { nombre: 'Dirección Provincial del Registro de la Propiedad', corto: 'Registro PBA', logo: '/marca/organizaciones/gba.svg', fondoOscuro: true },
+  { nombre: 'Servicio Penitenciario Bonaerense — unidades de Batán', corto: 'SPB Batán', logo: '/marca/organizaciones/spb.png' },
+  { nombre: 'Sindicato de Salud Pública de la Provincia de Buenos Aires', corto: 'SSP', logo: '/marca/organizaciones/ssp.svg' },
+  { nombre: 'Tecsan Ingeniería Ambiental S.A.', corto: 'TECSAN', logo: '/marca/organizaciones/tecsan.svg' },
+  { nombre: 'Dirección Nacional de Vialidad', corto: 'Vialidad Nacional', logo: '/marca/organizaciones/vialidad-nacional.png', fondoOscuro: true },
+  { nombre: 'YPF S.A.', corto: 'YPF' },
 ];
