@@ -2,19 +2,72 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
+import RubroSelect from '../../../components/RubroSelect.astro';
+import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
+import { fechaDeDoc } from '../../../lib/encuentro';
+import { ultimosNMeses } from '../../../lib/kpis';
+import type { ChartSpec } from '../../../lib/observatorio';
 
-let empresas: { id: string; nombre: string; slug: string }[] = [];
+let empresas: { id: string; nombre: string; slug: string; rubro: string; creadoEn: Date }[] = [];
+let instanciasPorEmpresa = new Map<string, number>();
 let errorCarga = '';
 try {
-  const snap = await db().collection('empresas').orderBy('nombre').get();
-  empresas = snap.docs.map((d) => ({
-    id: d.id,
-    nombre: String(d.data().nombre ?? ''),
-    slug: String(d.data().slug ?? ''),
-  }));
+  const [snap, instSnap] = await Promise.all([
+    db().collection('empresas').orderBy('nombre').get(),
+    db().collection('instancias').get(),
+  ]);
+  empresas = snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      nombre: String(data.nombre ?? ''),
+      slug: String(data.slug ?? ''),
+      rubro: String(data.rubro ?? '') || 'Sin definir',
+      creadoEn: fechaDeDoc(data.creadoEn),
+    };
+  });
+  instSnap.docs.forEach((d) => {
+    const empId = String(d.data().empresaId ?? '');
+    instanciasPorEmpresa.set(empId, (instanciasPorEmpresa.get(empId) ?? 0) + 1);
+  });
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las empresas.';
+}
+
+const kpiTotal = empresas.length;
+const kpiConInstancias = empresas.filter((e) => (instanciasPorEmpresa.get(e.id) ?? 0) > 0).length;
+const inicioMes = new Date();
+inicioMes.setDate(1);
+inicioMes.setHours(0, 0, 0, 0);
+const kpiEsteMes = empresas.filter((e) => e.creadoEn >= inicioMes).length;
+
+const porRubro = new Map<string, number>();
+empresas.forEach((e) => porRubro.set(e.rubro, (porRubro.get(e.rubro) ?? 0) + 1));
+const rubrosTop = [...porRubro.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+const meses = ultimosNMeses(6);
+const porMes = meses.map((m) => empresas.filter((e) => m.pertenece(e.creadoEn)).length);
+
+const charts: ChartSpec[] = [];
+if (kpiTotal > 0) {
+  if (rubrosTop.length > 1) {
+    charts.push({
+      id: 'emp-chart-rubro',
+      tipo: 'bar',
+      titulo: 'Por rubro',
+      labels: rubrosTop.map(([r]) => r),
+      values: rubrosTop.map(([, n]) => n),
+      horizontal: true,
+    });
+  }
+  charts.push({
+    id: 'emp-chart-mes',
+    tipo: 'line',
+    titulo: 'Empresas cargadas por mes',
+    labels: meses.map((m) => m.etiqueta),
+    values: porMes,
+  });
 }
 ---
 <Layout title="Empresas — Admin" noindex={true} whatsapp={false}>
@@ -25,6 +78,30 @@ try {
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Empresa creada.</p>}
     {Astro.url.searchParams.get('error') && <p class="admin-alert">Falta el nombre.</p>}
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+
+    {kpiTotal > 0 && (
+      <>
+        <section class="obs-kpis" aria-label="Indicadores de empresas">
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Total</p>
+            <p class="obs-kpi__value">{kpiTotal}</p>
+            <p class="obs-kpi__hint">Empresas cargadas en total</p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Con instancias</p>
+            <p class="obs-kpi__value">{kpiConInstancias}</p>
+            <p class="obs-kpi__hint">Ya tienen al menos una cursada</p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Este mes</p>
+            <p class="obs-kpi__value">{kpiEsteMes}</p>
+            <p class="obs-kpi__hint">Empresas nuevas desde el 1°</p>
+          </article>
+        </section>
+        <ObservatorioCharts charts={charts} />
+      </>
+    )}
+
     {empresas.length > 0 && (
       <div data-table-wrap>
         <div class="admin-table-tools">
@@ -55,8 +132,8 @@ try {
       <AdminCampo titulo="Nombre" ayuda="Cómo figura la organización en el panel. No se publica si la instancia es privada o anonimizada.">
         <input type="text" name="nombre" required />
       </AdminCampo>
-      <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno. Ejemplo: ferroviario, saneamiento, sindicato.">
-        <input type="text" name="rubro" />
+      <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno. Si no está en la lista, elegí «Otro…» y escribilo.">
+        <RubroSelect />
       </AdminCampo>
       <AdminCampo titulo="Contacto" ayuda="Nombre de la persona de referencia (RRHH, delegado, etc.). Solo lo ves vos.">
         <input type="text" name="contactoNombre" />

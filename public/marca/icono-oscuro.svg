@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Icono Guille Nuesch">
-  <title>Guille Nuesch — icono</title>
-  <rect x="20" y="22" width="80" height="56" rx="20" fill="#051229"/>
-  <path d="M32 78 L30 96 L54 78 Z" fill="#051229"/>
-  <path fill="none" stroke="#0075ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M40 54 56 70 84 36"/>
+  <title>Guille Nuesch — conversación que sostiene</title>
+  <circle cx="32" cy="27" r="9" fill="#051229"/>
+  <path d="M15 79c0-25 11-39 31-39 11 0 21 5 27 13-16-1-26 7-26 21 0 11 6 19 16 23-31 3-48-5-48-18Z" fill="#051229"/>
+  <circle cx="88" cy="27" r="9" fill="#0075ff"/>
+  <path d="M105 79c0-25-11-39-31-39-11 0-21 5-27 13 16-1 26 7 26 21 0 11-6 19-16 23 10 1 18 0 25-2l10 9-2-15c10-3 15-6 15-10Z" fill="#0075ff"/>
+  <circle cx="60" cy="72" r="24" fill="#f7f7f7"/>
+  <path d="m48 72 9 9 17-19" fill="none" stroke="#051229" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

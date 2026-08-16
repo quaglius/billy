@@ -20,9 +20,12 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(null, { status: 303, headers: { Location: back } });
   }
 
+  const rubroSel = String(form.get('rubro') ?? '');
+  const rubro = rubroSel === '__otro__' ? String(form.get('rubroOtro') ?? '').trim() : rubroSel;
+
   const payload = {
     nombre,
-    rubro: String(form.get('rubro') ?? '') || null,
+    rubro: rubro || null,
     contactoNombre: String(form.get('contactoNombre') ?? '') || null,
     contactoEmail: String(form.get('contactoEmail') ?? '') || null,
     contactoTelefono: String(form.get('contactoTelefono') ?? '') || null,

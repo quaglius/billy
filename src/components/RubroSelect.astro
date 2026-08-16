@@ -1,0 +1,41 @@
+---
+import { RUBROS, RUBRO_OTRO } from '../lib/rubros';
+
+interface Props {
+  valor?: string | null;
+}
+
+const { valor = '' } = Astro.props;
+const actual = valor ?? '';
+const esConocido = RUBROS.includes(actual);
+const esOtro = Boolean(actual) && !esConocido;
+---
+<div class="rubro-select" data-rubro-select>
+  <select name="rubro">
+    <option value="" selected={!actual}>Sin definir</option>
+    {RUBROS.map((r) => (
+      <option value={r} selected={actual === r}>{r}</option>
+    ))}
+    <option value={RUBRO_OTRO} selected={esOtro}>Otro…</option>
+  </select>
+  <input
+    type="text"
+    name="rubroOtro"
+    class="rubro-select__otro"
+    placeholder="Escribí el rubro"
+    value={esOtro ? actual : ''}
+    hidden={!esOtro}
+  />
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-rubro-select]').forEach((wrap) => {
+    const select = wrap.querySelector<HTMLSelectElement>('select[name="rubro"]');
+    const otro = wrap.querySelector<HTMLInputElement>('.rubro-select__otro');
+    if (!select || !otro) return;
+    select.addEventListener('change', () => {
+      const esOtro = select.value === '__otro__';
+      otro.hidden = !esOtro;
+      if (esOtro) otro.focus();
+    });
+  });
+</script>

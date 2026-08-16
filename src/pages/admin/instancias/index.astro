@@ -2,9 +2,13 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
+import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
 import AdminCampo from '../../../components/AdminCampo.astro';
 import { etiquetaInstancia, migasInstancia } from '../../../lib/admin-instancia';
+import { fechaDeDoc } from '../../../lib/encuentro';
+import { ultimosNMeses } from '../../../lib/kpis';
+import type { ChartSpec } from '../../../lib/observatorio';
 
 let instancias: {
   id: string;
@@ -13,6 +17,7 @@ let instancias: {
   visibilidad: string;
   cursoId: string;
   empresaId: string;
+  creadoEn: Date;
 }[] = [];
 let cursos = new Map<string, string>();
 let empresas = new Map<string, string>();
@@ -34,10 +39,42 @@ try {
       visibilidad: String(data.visibilidad ?? 'privada'),
       cursoId: String(data.cursoId ?? ''),
       empresaId: String(data.empresaId ?? ''),
+      creadoEn: fechaDeDoc(data.creadoEn),
     };
   });
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las instancias.';
+}
+
+const kpiTotal = instancias.length;
+const kpiVisibles = instancias.filter((i) => i.visibilidad !== 'privada').length;
+const inicioMes = new Date();
+inicioMes.setDate(1);
+inicioMes.setHours(0, 0, 0, 0);
+const kpiEsteMes = instancias.filter((i) => i.creadoEn >= inicioMes).length;
+
+const porVisibilidad = new Map<string, number>();
+instancias.forEach((i) => porVisibilidad.set(i.visibilidad, (porVisibilidad.get(i.visibilidad) ?? 0) + 1));
+
+const meses = ultimosNMeses(6);
+const porMes = meses.map((m) => instancias.filter((i) => m.pertenece(i.creadoEn)).length);
+
+const charts: ChartSpec[] = [];
+if (kpiTotal > 0) {
+  charts.push({
+    id: 'inst-chart-visibilidad',
+    tipo: 'doughnut',
+    titulo: 'Por visibilidad',
+    labels: [...porVisibilidad.keys()],
+    values: [...porVisibilidad.values()],
+  });
+  charts.push({
+    id: 'inst-chart-mes',
+    tipo: 'line',
+    titulo: 'Instancias creadas por mes',
+    labels: meses.map((m) => m.etiqueta),
+    values: porMes,
+  });
 }
 ---
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
@@ -50,6 +87,30 @@ try {
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Instancia creada.</p>}
     {Astro.url.searchParams.get('error') === 'slug' && <p class="admin-alert">Ese slug ya está en uso.</p>}
     {Astro.url.searchParams.get('error') === '1' && <p class="admin-alert">Faltan curso, empresa o slug.</p>}
+
+    {kpiTotal > 0 && (
+      <>
+        <section class="obs-kpis" aria-label="Indicadores de instancias">
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Total</p>
+            <p class="obs-kpi__value">{kpiTotal}</p>
+            <p class="obs-kpi__hint">Instancias cargadas en total</p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Visibles en el sitio</p>
+            <p class="obs-kpi__value">{kpiVisibles}</p>
+            <p class="obs-kpi__hint">Públicas o anonimizadas</p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Este mes</p>
+            <p class="obs-kpi__value">{kpiEsteMes}</p>
+            <p class="obs-kpi__hint">Instancias nuevas desde el 1°</p>
+          </article>
+        </section>
+        <ObservatorioCharts charts={charts} />
+      </>
+    )}
+
     {instancias.length > 0 && (
       <div data-table-wrap>
         <div class="admin-table-tools">

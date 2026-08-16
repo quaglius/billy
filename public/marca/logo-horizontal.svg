@@ -1,10 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 120" role="img" aria-label="Guille Nuesch — Salud mental en el trabajo">
-  <title>Guille Nuesch</title>
-  <g transform="translate(0,22) scale(0.6333)">
-    <rect x="20" y="22" width="80" height="56" rx="20" fill="#051229"/>
-    <path d="M32 78 L30 96 L54 78 Z" fill="#051229"/>
-    <path fill="none" stroke="#0075ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M40 54 56 70 84 36"/>
+  <title>Guille Nuesch — conversación que sostiene</title>
+  <g transform="translate(5,15) scale(.72)">
+    <circle cx="32" cy="27" r="9" fill="#051229"/>
+    <path d="M15 79c0-25 11-39 31-39 11 0 21 5 27 13-16-1-26 7-26 21 0 11 6 19 16 23-31 3-48-5-48-18Z" fill="#051229"/>
+    <circle cx="88" cy="27" r="9" fill="#0075ff"/>
+    <path d="M105 79c0-25-11-39-31-39-11 0-21 5-27 13 16-1 26 7 26 21 0 11-6 19-16 23 10 1 18 0 25-2l10 9-2-15c10-3 15-6 15-10Z" fill="#0075ff"/>
+    <circle cx="60" cy="72" r="24" fill="#f7f7f7"/>
+    <path d="m48 72 9 9 17-19" fill="none" stroke="#051229" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  <text x="96" y="66" font-family="'Libre Franklin','Segoe UI',sans-serif" font-weight="600" font-size="42" letter-spacing="-0.5" fill="#051229">Guille Nuesch</text>
-  <text x="97" y="90" font-family="'Lato','Segoe UI',sans-serif" font-weight="700" font-size="13" letter-spacing="2.5" fill="#0075ff">SALUD MENTAL EN EL TRABAJO</text>
+  <text x="102" y="66" font-family="'Libre Franklin','Segoe UI',sans-serif" font-weight="650" font-size="42" letter-spacing="-1" fill="#051229">Guille Nuesch</text>
+  <text x="104" y="91" font-family="'Lato','Segoe UI',sans-serif" font-weight="700" font-size="12.5" letter-spacing="2.35" fill="#0075ff">SALUD MENTAL EN EL TRABAJO</text>
 </svg>

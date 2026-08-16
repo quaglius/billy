@@ -7,6 +7,14 @@ import { db } from '../../../lib/firebase-admin';
 import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../../lib/encuentro';
 import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../lib/admin-instancia';
 
+function toDateInput(v: unknown): string {
+  if (!v) return '';
+  const d = fechaDeDoc(v);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin/instancias');
 const doc = await db().collection('instancias').doc(id).get();
@@ -14,6 +22,13 @@ if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
 const nombre = etiquetaInstancia(inst);
 const rutas = rutasInstancia(id);
+
+const [cursosSnap, empresasSnap] = await Promise.all([
+  db().collection('cursos').orderBy('titulo').get(),
+  db().collection('empresas').orderBy('nombre').get(),
+]);
+const cursos = cursosSnap.docs.map((d) => ({ id: d.id, titulo: String(d.data().titulo ?? d.id) }));
+const empresas = empresasSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
 
 const encSnap = await db()
   .collection('encuentros')
@@ -42,10 +57,16 @@ const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 const mensajesOk: Record<string, string> = {
   '1': 'Guardado.',
+  editada: 'Datos de la instancia guardados.',
   archivado: 'Encuentro archivado. Ya no aparece en el cronograma.',
   restaurado: 'Encuentro restaurado al cronograma.',
   eliminado: 'Encuentro eliminado.',
 };
+const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
+  ? 'Ese slug ya está en uso por otra instancia.'
+  : Astro.url.searchParams.get('errorInst') === '1'
+    ? 'Faltan curso, empresa o slug.'
+    : '';
 ---
 <Layout title={`Cronograma — ${nombre}`} noindex={true} whatsapp={false}>
   <AdminChrome titulo="Cronograma">
@@ -62,7 +83,64 @@ const mensajesOk: Record<string, string> = {
       </span>
       <a href={rutas.duplicar}>Duplicar instancia</a>
     </p>
-    <p>Para cambiar título, fecha u orden, entrá a <strong>Editar</strong>. El nombre del encuentro también abre esa ficha.</p>
+
+    <details class="inst-editar">
+      <summary>Editar datos de la instancia (empresa, curso, visibilidad, fechas)</summary>
+      {errorInstancia && <p class="admin-alert">{errorInstancia}</p>}
+      <form class="admin-form" method="post" action="/api/admin/instancias">
+        <input type="hidden" name="id" value={id} />
+        <AdminCampo titulo="Curso" ayuda="El formato que se está dictando en esta cursada.">
+          <select name="cursoId" required>
+            {cursos.map((c) => (
+              <option value={c.id} selected={inst.cursoId === c.id}>{c.titulo}</option>
+            ))}
+          </select>
+        </AdminCampo>
+        <AdminCampo titulo="Empresa" ayuda="Organización, sindicato o área para la que se dicta.">
+          <select name="empresaId" required>
+            {empresas.map((e) => (
+              <option value={e.id} selected={inst.empresaId === e.id}>{e.nombre}</option>
+            ))}
+          </select>
+        </AdminCampo>
+        <AdminCampo titulo="Slug público" ayuda="La parte de la URL. Minúsculas y guiones, sin espacios ni tildes. Tiene que ser único.">
+          <input type="text" name="slug" value={inst.slug ?? ''} required />
+        </AdminCampo>
+        <AdminCampo titulo="Título particular" ayuda="Opcional: si querés que esta cursada tenga un nombre propio distinto al del curso base.">
+          <input type="text" name="tituloParticular" value={inst.tituloParticular ?? ''} />
+        </AdminCampo>
+        <AdminCampo
+          titulo="Visibilidad"
+          ayuda="Privada: solo con link o QR, no aparece en el sitio. Pública: se lista con el nombre de la organización. Anonimizada: se lista sin nombrar a la empresa."
+        >
+          <select name="visibilidad">
+            <option value="privada" selected={inst.visibilidad === 'privada'}>Privada — solo con link o QR</option>
+            <option value="publica" selected={inst.visibilidad === 'publica'}>Pública — visible con el nombre de la organización</option>
+            <option value="anonimizada" selected={inst.visibilidad === 'anonimizada'}>Anonimizada — visible, sin nombrar a la empresa</option>
+          </select>
+        </AdminCampo>
+        <AdminCampo titulo="Modalidad" ayuda="Presencial, virtual o híbrida. Dejalo sin definir si todavía no se decidió.">
+          <select name="modalidad">
+            <option value="" selected={!inst.modalidad}>Sin definir</option>
+            <option value="presencial" selected={inst.modalidad === 'presencial'}>Presencial</option>
+            <option value="virtual" selected={inst.modalidad === 'virtual'}>Virtual</option>
+            <option value="hibrida" selected={inst.modalidad === 'hibrida'}>Híbrida</option>
+          </select>
+        </AdminCampo>
+        <AdminCampo titulo="Fecha inicio" ayuda="Primer día de esta cursada.">
+          <input type="date" name="fechaInicio" value={toDateInput(inst.fechaInicio)} />
+        </AdminCampo>
+        <AdminCampo titulo="Fecha fin" ayuda="Último día previsto. Puede coincidir con el inicio.">
+          <input type="date" name="fechaFin" value={toDateInput(inst.fechaFin)} />
+        </AdminCampo>
+        <AdminCampo titulo="Particularidades" ayuda="Notas específicas de esta cursada, en markdown. Opcional.">
+          <textarea name="particularidades" rows="3">{inst.particularidades ?? ''}</textarea>
+        </AdminCampo>
+        <button type="submit">Guardar datos de la instancia</button>
+      </form>
+    </details>
+
+    <p>Para cambiar título, fecha u orden de un encuentro, entrá a <strong>Editar</strong>. El nombre del encuentro también abre esa ficha.</p>
 
     {vigentes.length > 0 ? (
       <table class="admin-table">
