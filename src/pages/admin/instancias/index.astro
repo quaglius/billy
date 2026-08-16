@@ -41,40 +41,50 @@ try {
 }
 ---
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Instancias">
+  <AdminChrome
+    titulo="Instancias"
+    subtitulo="Una instancia es un curso dictado a una empresa concreta, con fechas reales. Acá también gestionás el cronograma de encuentros y las actividades de cada una. Por defecto quedan privadas: no se ven en el sitio hasta que cambies la visibilidad."
+  >
     <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'listado' })} />
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Instancia creada.</p>}
     {Astro.url.searchParams.get('error') === 'slug' && <p class="admin-alert">Ese slug ya está en uso.</p>}
     {Astro.url.searchParams.get('error') === '1' && <p class="admin-alert">Faltan curso, empresa o slug.</p>}
     {instancias.length > 0 && (
-      <table class="admin-table">
-        <thead>
-          <tr><th>Instancia</th><th>Curso</th><th>Empresa</th><th>Visibilidad</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-          {instancias.map((i) => (
-            <tr>
-              <td class="admin-table__titulo">
-                <a href={`/admin/instancias/${i.id}`}>{i.nombre}</a>
-              </td>
-              <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
-              <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
-              <td>
-                <span class:list={['pill-estado', i.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                  {i.visibilidad}
-                </span>
-              </td>
-              <td class="admin-table__acciones">
-                <a href={`/admin/instancias/${i.id}`}>Cronograma</a>
-                <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div data-table-wrap>
+        <div class="admin-table-tools">
+          <input type="search" class="admin-search" data-table-search placeholder="Buscar por instancia, curso o empresa…" aria-label="Buscar instancia" />
+          <span class="admin-table-count" data-table-count></span>
+        </div>
+        <table class="admin-table" data-admin-table data-page-size="20">
+          <thead>
+            <tr><th data-sort="text">Instancia</th><th data-sort="text">Curso</th><th data-sort="text">Empresa</th><th data-sort="text">Visibilidad</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            {instancias.map((i) => (
+              <tr>
+                <td class="admin-table__titulo">
+                  <a href={`/admin/instancias/${i.id}`}>{i.nombre}</a>
+                </td>
+                <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
+                <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
+                <td data-value={i.visibilidad}>
+                  <span class:list={['pill-estado', i.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                    {i.visibilidad}
+                  </span>
+                </td>
+                <td class="admin-table__acciones">
+                  <a href={`/admin/instancias/${i.id}`}>Cronograma</a>
+                  <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <nav class="admin-pager" data-pager aria-label="Paginado de instancias"></nav>
+      </div>
     )}
-    {instancias.length === 0 && !errorCarga && <p>No hay instancias todavía.</p>}
+    {instancias.length === 0 && !errorCarga && <p>No hay instancias todavía. Cargá la primera con el formulario de abajo.</p>}
 
     <h2>Nueva instancia</h2>
     <form class="admin-form" method="post" action="/api/admin/instancias">
@@ -126,3 +136,5 @@ try {
     </form>
   </AdminChrome>
 </Layout>
+
+<script src="/admin/table-utils.js" defer></script>

@@ -416,6 +416,11 @@ Todo el acceso real pasa por el Admin SDK en los endpoints del servidor, que ign
 
 *(Esto es lo más importante del proyecto. Ver también [estrategia-sitio-web.md](estrategia-sitio-web.md) §5 y [cursos-demo.md](cursos-demo.md) para el contenido de ejemplo.)*
 
+> 🔄 **Actualizado tras el uso real de la primera versión (agosto 2026), tres cambios de fondo respecto de lo que sigue en este apartado:**
+> 1. **No hay "activar" ni "cerrar".** Toda actividad creada acepta respuestas desde el momento en que existe, siempre. Se sacó el estado `activa` como gate — el campo sigue en el esquema por compatibilidad, pero no lo lee ni lo escribe nada.
+> 2. **Las preguntas viven en el Curso, no se escriben de cero por instancia.** Nueva colección `actividades_curso` (banco reutilizable por curso: `cursoId`, `tipo`, `consigna`, `opciones`, `orden`). Desde `/admin/cursos/[id]` se carga el banco una vez; desde `/admin/instancias/.../actividades` se "importan" (clonan) al encuentro que corresponda — cada clon es un documento nuevo en `actividades` con su propio código y QR. Esto es clave: como cada instancia tiene su propia copia, un taller a la mañana y otro a la tarde con la misma pregunta **nunca mezclan respuestas**, aunque compartan el mismo banco de origen.
+> 3. **Borrar respuestas es una acción exclusiva del Observatorio, nunca de la pantalla en vivo.** La pantalla `/vivo` no tiene ningún botón destructivo — mostrar una actividad de una instancia distinta ya alcanza para tener una pantalla "limpia", porque esa instancia tiene sus propias respuestas desde cero. Si hace falta purgar datos de prueba del histórico, se hace desde `/admin/observatorio`, por bloque (consigna+curso), con confirmación explícita — nunca como efecto colateral de otra pantalla.
+
 ### 6.1 Generación de código corto
 
 Cada actividad, al crearse (vía endpoint de servidor con Admin SDK), recibe un código de 5 caracteres. Alfabeto permitido: `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (sin `0`, `O`, `1`, `I` porque se confunden al leerlos o tipearlos). Generar y consultar Firestore (`where('codigo', '==', candidato)`) hasta encontrar uno que no exista.

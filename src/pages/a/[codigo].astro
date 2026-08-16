@@ -5,7 +5,6 @@ import { db } from '../../lib/firebase-admin';
 const { codigo } = Astro.params;
 let consigna = '';
 let encontrada = false;
-let activa = false;
 let tipo = 'si_no';
 let opciones: string[] = [];
 let actividadId = '';
@@ -18,7 +17,6 @@ if (codigo) {
     actividadId = doc.id;
     const a = doc.data();
     consigna = String(a.consigna ?? '');
-    activa = Boolean(a.activa);
     tipo = String(a.tipo ?? 'si_no');
     opciones = Array.isArray(a.opciones) ? a.opciones.map(String) : [];
   }
@@ -29,17 +27,11 @@ if (codigo) {
     <div class="participate__card">
       {!encontrada && (
         <div class="empty-state">
-          <h1>Esta actividad no está disponible</h1>
-          <p>Prestá atención a la pantalla para la próxima.</p>
+          <h1>No encontramos esta actividad</h1>
+          <p>Revisá el código o volvé a escanear el QR de la pantalla.</p>
         </div>
       )}
-      {encontrada && !activa && (
-        <div class="empty-state">
-          <h1>Esta actividad ya cerró</h1>
-          <p>Prestá atención a la pantalla para la próxima.</p>
-        </div>
-      )}
-      {encontrada && activa && (
+      {encontrada && (
         <>
           <p class="eyebrow">Participar</p>
           <h1>{consigna}</h1>
@@ -66,13 +58,13 @@ if (codigo) {
                 </label>
               ))}
             {tipo === 'numero' && (
-              <label>Número <input type="number" name="numero" required /></label>
+              <label>Número <input type="number" name="numero" inputmode="numeric" required /></label>
             )}
             {tipo === 'fecha' && (
               <label>Fecha <input type="date" name="fecha" required /></label>
             )}
             {tipo === 'texto_libre' && (
-              <label>Tu respuesta <textarea name="texto" maxlength="60" rows="2" required></textarea></label>
+              <label>Tu respuesta <textarea name="texto" maxlength="60" rows="2" required autofocus></textarea></label>
             )}
             {tipo !== 'si_no' && <button class="participate__enviar" type="submit">Enviar</button>}
           </form>
@@ -83,7 +75,7 @@ if (codigo) {
   </div>
 </Layout>
 
-{encontrada && activa && (
+{encontrada && (
   <script define:vars={{ tipo, actividadId }}>
     const KEY = 'gn_token_navegador';
     if (!localStorage.getItem(KEY)) localStorage.setItem(KEY, crypto.randomUUID());
@@ -99,7 +91,12 @@ if (codigo) {
       }
     }
 
+    let enviando = false;
+
     async function enviar(valor) {
+      if (enviando) return;
+      enviando = true;
+      document.querySelectorAll('.si-no button, .participate__enviar').forEach((b) => (b.disabled = true));
       try {
         const res = await fetch('/api/responder', {
           method: 'POST',
@@ -110,12 +107,12 @@ if (codigo) {
         if (data.estado === 'ya_registrada') {
           mostrar('Ya registramos tu respuesta para esta actividad. Gracias por participar.');
         } else if (data.estado === 'cerrada') {
-          mostrar('Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.');
+          mostrar('No pudimos registrar tu respuesta. Probá de nuevo en un momento.');
         } else {
-          mostrar('Gracias por participar.');
+          mostrar('¡Gracias por participar! Ya podés mirar la pantalla.');
         }
       } catch {
-        mostrar('Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.');
+        mostrar('No pudimos registrar tu respuesta. Revisá tu conexión y probá de nuevo.');
       }
     }
 

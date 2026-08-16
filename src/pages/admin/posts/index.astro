@@ -3,43 +3,66 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import { db } from '../../../lib/firebase-admin';
 
-let posts: { id: string; titulo: string; slug: string; estado: string }[] = [];
+let posts: { id: string; titulo: string; slug: string; estado: string; imagen: string | null }[] = [];
 let errorCarga = '';
 try {
   const snap = await db().collection('posts').get();
-  posts = snap.docs.map((d) => ({
-    id: d.id,
-    titulo: String(d.data().titulo ?? ''),
-    slug: String(d.data().slug ?? ''),
-    estado: String(d.data().estado ?? 'borrador'),
-  }));
+  posts = snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      titulo: String(data.titulo ?? ''),
+      slug: String(data.slug ?? ''),
+      estado: String(data.estado ?? 'borrador'),
+      imagen: data.imagenPortadaUrl ? String(data.imagenPortadaUrl) : null,
+    };
+  });
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los posts.';
 }
 ---
 <Layout title="Posts — Admin" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Posts">
+  <AdminChrome
+    titulo="Posts"
+    subtitulo="El blog del sitio. Un post en borrador nunca se ve en /blog, aunque tenga todo el contenido cargado — tenés que abrirlo y marcarlo como publicado a propósito."
+  >
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {posts.length === 0 && !errorCarga && <p>No hay posts todavía. Van a cargarse con el seed.</p>}
     {posts.length > 0 && (
-      <table class="admin-table">
-        <thead>
-          <tr><th>Título</th><th>Estado</th><th></th></tr>
-        </thead>
-        <tbody>
-          {posts.map((p) => (
-            <tr>
-              <td>{p.titulo}</td>
-              <td>
-                <span class:list={['pill-estado', p.estado === 'publicado' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                  {p.estado}
-                </span>
-              </td>
-              <td><a href={`/admin/posts/${p.id}`}>Editar</a></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div data-table-wrap>
+        <div class="admin-table-tools">
+          <input type="search" class="admin-search" data-table-search placeholder="Buscar post…" aria-label="Buscar post" />
+          <span class="admin-table-count" data-table-count></span>
+        </div>
+        <table class="admin-table" data-admin-table data-page-size="20">
+          <thead>
+            <tr><th></th><th data-sort="text">Título</th><th data-sort="text">Estado</th><th></th></tr>
+          </thead>
+          <tbody>
+            {posts.map((p) => (
+              <tr>
+                <td class="admin-table__thumb-cell">
+                  {p.imagen ? (
+                    <img class="admin-table__thumb" src={p.imagen} alt="" loading="lazy" />
+                  ) : (
+                    <span class="admin-table__thumb" aria-hidden="true"></span>
+                  )}
+                </td>
+                <td class="admin-table__titulo"><a href={`/admin/posts/${p.id}`}>{p.titulo}</a></td>
+                <td data-value={p.estado}>
+                  <span class:list={['pill-estado', p.estado === 'publicado' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                    {p.estado}
+                  </span>
+                </td>
+                <td><a href={`/admin/posts/${p.id}`}>Editar</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <nav class="admin-pager" data-pager aria-label="Paginado de posts"></nav>
+      </div>
     )}
   </AdminChrome>
 </Layout>
+
+<script src="/admin/table-utils.js" defer></script>

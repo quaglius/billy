@@ -33,6 +33,14 @@
       ]
     },
     {
+      "collectionGroup": "actividades_curso",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cursoId", "order": "ASCENDING" },
+        { "fieldPath": "orden", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [

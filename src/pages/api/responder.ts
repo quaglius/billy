@@ -23,7 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const act = await db().collection('actividades').doc(actividadId).get();
-  if (!act.exists || !act.data()?.activa) {
+  if (!act.exists) {
     return new Response(JSON.stringify({ estado: 'cerrada' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

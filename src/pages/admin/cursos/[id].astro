@@ -2,7 +2,9 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
+import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
+import { OBS_MIN, armarDashboard, etiquetaTipo, type ActividadObs, type RespuestaObs } from '../../../lib/observatorio';
 
 const { id } = Astro.params;
 if (!id) return Astro.redirect('/admin/cursos');
@@ -13,6 +15,65 @@ const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 const objetivos = Array.isArray(c.objetivos) ? c.objetivos.join('\n') : '';
 const temario = Array.isArray(c.temario) ? c.temario.join('\n') : '';
+
+const TIPO_LABEL: Record<string, string> = {
+  si_no: 'Sí / No',
+  seleccion_unica: 'Opción única',
+  seleccion_multiple: 'Varias opciones',
+  numero: 'Número',
+  fecha: 'Fecha',
+  texto_libre: 'Texto libre — nube de palabras',
+};
+
+const bancoSnap = await db().collection('actividades_curso').where('cursoId', '==', id).orderBy('orden').get();
+const banco = bancoSnap.docs.map((d) => {
+  const b = d.data();
+  return {
+    id: d.id,
+    tipo: String(b.tipo ?? ''),
+    tipoLabel: TIPO_LABEL[String(b.tipo ?? '')] ?? String(b.tipo ?? ''),
+    consigna: String(b.consigna ?? ''),
+    orden: Number(b.orden ?? 0),
+  };
+});
+const okBanco = Astro.url.searchParams.get('okBanco');
+const errorBanco = Astro.url.searchParams.get('errorBanco');
+
+let dashCurso = null;
+let errorObs = '';
+try {
+  const [actsSnap, respSnap] = await Promise.all([
+    db().collection('actividades').where('cursoId', '==', id).get(),
+    db().collection('respuestas').where('cursoId', '==', id).get(),
+  ]);
+  const actividades: ActividadObs[] = actsSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      cursoId: String(data.cursoId ?? ''),
+      tipo: String(data.tipo ?? ''),
+      consigna: String(data.consigna ?? ''),
+      opciones: Array.isArray(data.opciones) ? data.opciones.map(String) : null,
+      activa: Boolean(data.activa),
+    };
+  });
+  const respuestas: RespuestaObs[] = respSnap.docs.map((d) => {
+    const data = d.data();
+    const creado = data.creadoEn;
+    let creadoEn = new Date();
+    if (creado && typeof creado.toDate === 'function') creadoEn = creado.toDate();
+    else if (creado instanceof Date) creadoEn = creado;
+    return { actividadId: String(data.actividadId ?? ''), cursoId: String(data.cursoId ?? ''), valor: data.valor, creadoEn };
+  });
+  dashCurso = armarDashboard({
+    filtros: { cursoId: id, desde: '', hasta: '' },
+    cursos: [{ id, titulo: String(c.titulo ?? '') }],
+    actividades,
+    respuestas,
+  });
+} catch (err) {
+  errorObs = err instanceof Error ? err.message : 'No se pudieron cargar las estadísticas de este curso.';
+}
 ---
 <Layout title={`Editar curso — ${c.titulo}`} noindex={true} whatsapp={false}>
   <AdminChrome titulo={`Editar: ${c.titulo}`}>
@@ -57,5 +118,142 @@ const temario = Array.isArray(c.temario) ? c.temario.join('\n') : '';
       </AdminCampo>
       <button type="submit">Guardar</button>
     </form>
+
+    <section class="curso-banco">
+      <h2>Banco de preguntas de este curso</h2>
+      <p class="admin-section-nota">
+        Cargá acá las preguntas típicas de este curso, una sola vez. Después, cuando armes el
+        cronograma de una instancia (una cursada concreta para una empresa), las importás al
+        encuentro que corresponda con un click — cada instancia se queda con su propia copia,
+        con su propio código y QR, para que las respuestas de una cursada nunca se mezclen con
+        las de otra.
+      </p>
+      {okBanco === 'eliminada' && <p class="admin-ok">Pregunta eliminada del banco.</p>}
+      {okBanco === '1' && <p class="admin-ok">Pregunta agregada al banco.</p>}
+      {errorBanco && <p class="admin-alert">Falta la consigna.</p>}
+
+      {banco.length > 0 ? (
+        <div class="banco-list">
+          {banco.map((b) => (
+            <div class="banco-list__item">
+              <span class="banco-item__tipo">{b.tipoLabel}</span>
+              <span>{b.consigna}</span>
+              <form method="post" action="/api/admin/actividades-curso/eliminar" onsubmit="return confirm('¿Sacar esta pregunta del banco? No borra las copias que ya se usaron en instancias.')">
+                <input type="hidden" name="id" value={b.id} />
+                <input type="hidden" name="cursoId" value={id} />
+                <button type="submit" class="admin-link-danger">Eliminar</button>
+              </form>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>Todavía no hay preguntas en el banco. Cargá la primera abajo.</p>
+      )}
+
+      <form class="admin-form" method="post" action="/api/admin/actividades-curso">
+        <input type="hidden" name="cursoId" value={id} />
+        <AdminCampo
+          titulo="Tipo"
+          ayuda="Sí/No: dos botones grandes. Opción única: una sola respuesta. Varias opciones: puede marcar más de una. Número o fecha: un valor. Texto libre: arma una nube de palabras con lo que escribe la gente."
+        >
+          <select name="tipo">
+            <option value="si_no">Sí / No</option>
+            <option value="seleccion_unica">Opción única — una sola respuesta</option>
+            <option value="seleccion_multiple">Varias opciones — puede marcar más de una</option>
+            <option value="numero">Número</option>
+            <option value="fecha">Fecha</option>
+            <option value="texto_libre">Texto libre — nube de palabras</option>
+          </select>
+        </AdminCampo>
+        <AdminCampo titulo="Consigna" ayuda="La pregunta que va a ver la gente en el celular. En primera persona, clara, sin jerga.">
+          <textarea name="consigna" rows="3" required></textarea>
+        </AdminCampo>
+        <AdminCampo titulo="Opciones" ayuda="Solo para opción única o varias opciones: una por línea. En Sí/No, número, fecha o texto libre, dejalo vacío.">
+          <textarea name="opciones" rows="4"></textarea>
+        </AdminCampo>
+        <button type="submit">Agregar al banco</button>
+      </form>
+    </section>
+
+    <section class="curso-obs">
+      <h2>Estadísticas de este curso</h2>
+      <p class="admin-section-nota">
+        El agregado de todas las respuestas anónimas de todas las instancias que usaron este curso —
+        no de esta plantilla en particular, sino de cada vez que se dictó. Nunca muestra empresa ni
+        persona. Es el mismo umbral que en el Observatorio: hace falta al menos {OBS_MIN} respuestas
+        por consigna para ver el detalle. <a href={`/admin/observatorio?curso=${id}`}>Ver en el Observatorio completo →</a>
+      </p>
+      {errorObs && <p class="admin-alert">{errorObs}</p>}
+      {dashCurso && dashCurso.kpis.respuestasEnRango === 0 && !errorObs && (
+        <p class="obs-empty">Todavía no hay respuestas registradas para este curso.</p>
+      )}
+      {dashCurso && dashCurso.kpis.respuestasEnRango > 0 && (
+        <>
+          <section class="obs-kpis" aria-label="Indicadores de este curso">
+            <article class="obs-kpi">
+              <p class="obs-kpi__label">Respuestas totales</p>
+              <p class="obs-kpi__value">{dashCurso.kpis.respuestasEnRango}</p>
+              <p class="obs-kpi__hint">Acumuladas en todas las cursadas de este curso</p>
+            </article>
+            <article class="obs-kpi">
+              <p class="obs-kpi__label">Consignas con dato</p>
+              <p class="obs-kpi__value">{dashCurso.kpis.consignasListas} / {dashCurso.kpis.consignasTotal}</p>
+              <p class="obs-kpi__hint">Llegaron al umbral de {OBS_MIN} respuestas</p>
+            </article>
+            {dashCurso.kpis.pctSi !== null && (
+              <article class="obs-kpi">
+                <p class="obs-kpi__label">% Sí</p>
+                <p class="obs-kpi__value">{dashCurso.kpis.pctSi}%</p>
+                <p class="obs-kpi__hint">{dashCurso.kpis.siTotal} respuestas sí/no</p>
+              </article>
+            )}
+          </section>
+
+          <ObservatorioCharts charts={dashCurso.charts} />
+
+          <div class="obs-bloques">
+            {dashCurso.bloques.map((b, i) => {
+              const chartId = `obs-chart-act-${i}`;
+              const tieneChart = dashCurso!.charts.some((chart) => chart.id === chartId);
+              return (
+                <article class:list={['obs-card', b.listo && 'is-ready']}>
+                  <header class="obs-card__head">
+                    <span class="obs-card__tipo">{etiquetaTipo(b.tipo)}</span>
+                  </header>
+                  <h3 class="obs-card__consigna">{b.consigna}</h3>
+                  {b.listo && b.agregado ? (
+                    <>
+                      <p class="obs-card__meta">
+                        {b.total} respuestas
+                        {b.agregado.numero && ` · promedio ${b.agregado.numero.promedio.toFixed(1)}`}
+                      </p>
+                      {tieneChart && (
+                        <div class="obs-chart-card__canvas obs-chart-card__canvas--tall">
+                          <canvas id={chartId} aria-label={b.consigna}></canvas>
+                        </div>
+                      )}
+                      {b.agregado.palabras && b.agregado.palabras.length > 0 && (
+                        <ul class="obs-words">
+                          {b.agregado.palabras.slice(0, 12).map((p) => (
+                            <li>{p.palabra} <span>{p.cantidad}</span></li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div class="obs-track" aria-hidden="true">
+                        <div class="obs-fill" style={`width: ${Math.min(100, Math.round((b.total / OBS_MIN) * 100))}%`} />
+                      </div>
+                      <p class="obs-card__meta">{b.total}/{OBS_MIN} — todavía no hay suficientes respuestas.</p>
+                    </>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </section>
   </AdminChrome>
 </Layout>

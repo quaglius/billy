@@ -35,6 +35,7 @@ export type BloqueObs = {
   total: number;
   listo: boolean;
   agregado: ResultadoAgregado | null;
+  actividadIds: string[];
 };
 
 export type ChartSpec = {
@@ -54,7 +55,7 @@ export type DashboardObs = {
     consignasTotal: number;
     pctSi: number | null;
     siTotal: number;
-    actividadesActivas: number;
+    actividadesCargadas: number;
     respuestasEnRango: number;
   };
   porCurso: { etiqueta: string; cantidad: number }[];
@@ -178,6 +179,7 @@ export function armarDashboard(opts: {
       total,
       listo,
       agregado: listo ? agregarRespuestas(g.tipo, g.docs) : null,
+      actividadIds: g.ids,
     };
   });
   bloques.sort((a, b) => {
@@ -200,7 +202,7 @@ export function armarDashboard(opts: {
   const siNo = siNoTotal >= OBS_MIN ? siNoCount : null;
   const pctSi = siNo && siNoTotal ? Math.round((siNo.si / siNoTotal) * 100) : null;
 
-  const actividadesActivas = actividades.filter((a) => a.activa).length;
+  const actividadesCargadas = actividades.length;
 
   const porCursoMap = new Map<string, number>();
   for (const r of respuestas) {
@@ -279,7 +281,7 @@ export function armarDashboard(opts: {
       consignasTotal,
       pctSi,
       siTotal: siNoTotal,
-      actividadesActivas,
+      actividadesCargadas,
       respuestasEnRango: respuestas.length,
     },
     porCurso,

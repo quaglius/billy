@@ -23,32 +23,42 @@ try {
 }
 ---
 <Layout title="Cursos — Admin" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Cursos">
+  <AdminChrome
+    titulo="Cursos"
+    subtitulo="Acá cargás las plantillas reutilizables: Encuentro, Taller o Programa. Un curso no se dicta solo — para dictarlo a una organización concreta, con fechas reales, creá una Instancia a partir de este curso."
+  >
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Curso creado.</p>}
     {Astro.url.searchParams.get('error') && <p class="admin-alert">Falta el título.</p>}
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {cursos.length > 0 && (
-      <table class="admin-table">
-        <thead>
-          <tr><th>Título</th><th>Formato</th><th>Estado</th><th></th></tr>
-        </thead>
-        <tbody>
-          {cursos.map((c) => (
-            <tr>
-              <td>{c.titulo}</td>
-              <td>{c.formato}</td>
-              <td>
-                <span class:list={['pill-estado', c.publicado ? 'pill-estado--ok' : 'pill-estado--off']}>
-                  {c.publicado ? 'publicado' : 'borrador'}
-                </span>
-              </td>
-              <td><a href={`/admin/cursos/${c.id}`}>Editar</a></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div data-table-wrap>
+        <div class="admin-table-tools">
+          <input type="search" class="admin-search" data-table-search placeholder="Buscar curso…" aria-label="Buscar curso" />
+          <span class="admin-table-count" data-table-count></span>
+        </div>
+        <table class="admin-table" data-admin-table data-page-size="20">
+          <thead>
+            <tr><th data-sort="text">Título</th><th data-sort="text">Formato</th><th data-sort="text">Estado</th><th></th></tr>
+          </thead>
+          <tbody>
+            {cursos.map((c) => (
+              <tr>
+                <td class="admin-table__titulo"><a href={`/admin/cursos/${c.id}`}>{c.titulo}</a></td>
+                <td>{c.formato}</td>
+                <td data-value={c.publicado ? 'publicado' : 'borrador'}>
+                  <span class:list={['pill-estado', c.publicado ? 'pill-estado--ok' : 'pill-estado--off']}>
+                    {c.publicado ? 'publicado' : 'borrador'}
+                  </span>
+                </td>
+                <td><a href={`/admin/cursos/${c.id}`}>Editar</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <nav class="admin-pager" data-pager aria-label="Paginado de cursos"></nav>
+      </div>
     )}
-    {cursos.length === 0 && !errorCarga && <p>No hay cursos todavía.</p>}
+    {cursos.length === 0 && !errorCarga && <p>No hay cursos todavía. Cargá el primero con el formulario de abajo.</p>}
 
     <h2>Nuevo curso</h2>
     <form class="admin-form" method="post" action="/api/admin/cursos">
@@ -90,3 +100,5 @@ try {
     </form>
   </AdminChrome>
 </Layout>
+
+<script src="/admin/table-utils.js" defer></script>

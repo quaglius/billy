@@ -2,8 +2,8 @@
 import Layout from '../../../../../../layouts/Layout.astro';
 import AdminBreadcrumb from '../../../../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../../../../lib/firebase-admin';
-import QRCode from 'qrcode';
 import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../../../lib/admin-instancia';
+import { qrDataUrl, urlParticipante, urlSitio } from '../../../../../../lib/qr';
 
 const { id, encuentroId } = Astro.params;
 if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
@@ -19,6 +19,7 @@ if (String(e.instanciaId) !== id) return Astro.redirect(`/admin/instancias/${id}
 const nombre = etiquetaInstancia(instDoc.data()!);
 const titulo = String(e.titulo ?? 'Encuentro');
 const rutas = rutasInstancia(id, encuentroId);
+const site = urlSitio(Astro.site);
 
 const actSnap = await db()
   .collection('actividades')
@@ -31,28 +32,24 @@ const actividades = actSnap.docs.map((d) => {
     id: d.id,
     consigna: String(data.consigna ?? ''),
     codigo: String(data.codigo ?? ''),
-    activa: Boolean(data.activa),
     tipo: String(data.tipo ?? ''),
     orden: Number(data.orden ?? 0),
   };
 });
-const activa = actividades.find((a) => a.activa);
-const siguiente = activa
-  ? actividades.find((a) => a.orden > activa.orden)
-  : actividades[0];
-const site = (Astro.site?.toString() ?? 'https://guillenuesch.netlify.app').replace(/\/$/, '');
-const urlParticipante = activa ? `${site}/a/${activa.codigo}` : '';
-let qrSvg = '';
-if (urlParticipante) {
-  qrSvg = await QRCode.toString(urlParticipante, {
-    type: 'svg',
-    margin: 2,
-    width: 360,
-    color: { dark: '#051229', light: '#ffffff' },
-  });
+
+const actividadIdParam = Astro.url.searchParams.get('actividad') ?? '';
+const actual = actividades.find((a) => a.id === actividadIdParam) ?? null;
+
+let qr = '';
+let link = '';
+if (actual) {
+  link = urlParticipante(site, actual.codigo);
+  qr = await qrDataUrl(link, 480);
 }
+
+const otras = actual ? actividades.filter((a) => a.id !== actual.id) : [];
 ---
-<Layout title="En vivo" noindex={true} whatsapp={false} chrome={false}>
+<Layout title={actual ? `En vivo — ${actual.consigna}` : 'En vivo'} noindex={true} whatsapp={false} chrome={false}>
   <div class="vivo">
     <header class="vivo__bar">
       <AdminBreadcrumb
@@ -66,73 +63,80 @@ if (urlParticipante) {
         })}
       />
       <div class="vivo__bar-acciones">
-        <a href={rutas.actividades}>Actividades</a>
+        <a href={rutas.actividades}>Todas las actividades</a>
         <a href={rutas.encuentro}>Editar</a>
-        {activa && (
-          <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
-            Imprimir
-          </a>
-        )}
+        {actual && <a href={rutas.imprimirDe(actual.id)} target="_blank">Imprimir</a>}
       </div>
     </header>
 
-    {activa ? (
+    {actual ? (
       <div class="vivo__stage">
         <aside class="vivo__join">
-          <div class="vivo__qr" set:html={qrSvg} />
+          <img class="vivo__qr-img" src={qr} width="360" height="360" alt={`QR para participar: ${actual.consigna}`} />
           <p class="vivo__hint">Escaneá o entrá con el código</p>
-          <p class="vivo__code">{activa.codigo}</p>
-          <p class="vivo__url">{urlParticipante.replace(/^https?:\/\//, '')}</p>
+          <p class="vivo__code">{actual.codigo}</p>
+          <p class="vivo__url">{link.replace(/^https?:\/\//, '')}</p>
         </aside>
         <section class="vivo__board">
           <p class="vivo__eyebrow">En vivo</p>
-          <h1 class="vivo__pregunta">{activa.consigna}</h1>
-          <div id="grafico" class="vivo__grafico" data-actividad={activa.id} data-tipo={activa.tipo}>
+          <h1 class="vivo__pregunta">{actual.consigna}</h1>
+          <div id="grafico" class="vivo__grafico" data-actividad={actual.id} data-tipo={actual.tipo}>
             <p class="vivo__esperando">Esperando respuestas…</p>
           </div>
-          <div class="vivo__acciones">
-            <form method="post" action="/api/admin/actividades/cerrar">
-              <input type="hidden" name="actividadId" value={activa.id} />
-              <input type="hidden" name="encuentroId" value={encuentroId} />
-              <input type="hidden" name="instanciaId" value={id} />
-              <button type="submit">Cerrar</button>
-            </form>
-            {siguiente && (
-              <form method="post" action="/api/admin/actividades/activar">
-                <input type="hidden" name="actividadId" value={siguiente.id} />
-                <input type="hidden" name="encuentroId" value={encuentroId} />
-                <input type="hidden" name="instanciaId" value={id} />
-                <button type="submit">Siguiente</button>
-              </form>
-            )}
-          </div>
+          {otras.length > 0 && (
+            <div class="vivo__acciones">
+              <label class="vivo__selector">
+                Cambiar de actividad
+                <select id="selector-actividad">
+                  <option value="">Elegir…</option>
+                  {otras.map((o) => (
+                    <option value={rutas.vivoDe(o.id)}>#{o.orden} · {o.consigna.slice(0, 60)}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
         </section>
       </div>
     ) : (
-      <div class="vivo__vacio">
-        <div class="empty-state">
-          <h1>No hay actividad activa</h1>
-          <p>Cuando esté lista, activála para proyectar el QR y el código.</p>
-          {actividades[0] && (
-            <form method="post" action="/api/admin/actividades/activar">
-              <input type="hidden" name="actividadId" value={actividades[0].id} />
-              <input type="hidden" name="encuentroId" value={encuentroId} />
-              <input type="hidden" name="instanciaId" value={id} />
-              <button type="submit">Activar la primera</button>
-            </form>
-          )}
-        </div>
+      <div class="vivo__picker">
+        <h1>¿Qué actividad querés proyectar?</h1>
+        <p class="vivo__picker-ayuda">
+          Todas están siempre listas para responder. Elegí cuál mostrar en pantalla — podés cambiar
+          de una a otra en cualquier momento, sin perder las respuestas de las demás.
+        </p>
+        {actividades.length === 0 ? (
+          <p>Todavía no cargaste actividades para este encuentro. <a href={rutas.actividades}>Cargá la primera acá</a>.</p>
+        ) : (
+          <div class="vivo__picker-grid">
+            {actividades.map((a) => (
+              <a class="vivo__picker-card" href={rutas.vivoDe(a.id)}>
+                <span class="vivo__picker-orden">#{a.orden}</span>
+                <span>{a.consigna}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     )}
   </div>
 </Layout>
 
-{activa && (
+<script>
+  const selector = document.getElementById('selector-actividad') as HTMLSelectElement | null;
+  selector?.addEventListener('change', () => {
+    if (selector.value) window.location.href = selector.value;
+  });
+</script>
+
+{actual && (
   <script>
     const el = document.getElementById('grafico');
     if (el) {
       const idAct = el.dataset.actividad;
       let ultimo = '';
+
+      const PALETA = ['#0075ff', '#051229', '#364052', '#7e8590'];
 
       function barra(etiqueta, porcentaje) {
         const row = document.createElement('div');
@@ -154,6 +158,27 @@ if (urlParticipante) {
         return row;
       }
 
+      function nube(palabras) {
+        const max = Math.max(...palabras.map((p) => p.cantidad), 1);
+        const min = Math.min(...palabras.map((p) => p.cantidad), 1);
+        const wrap = document.createElement('div');
+        wrap.className = 'vivo-nube';
+        palabras.forEach((p, i) => {
+          const span = document.createElement('span');
+          span.className = 'vivo-nube__palabra';
+          const escala = max === min ? 0.6 : (p.cantidad - min) / (max - min);
+          const tamano = 20 + escala * 64;
+          span.style.fontSize = `${tamano}px`;
+          span.style.color = PALETA[i % PALETA.length === 1 ? 1 : 0];
+          span.style.opacity = String(0.55 + escala * 0.45);
+          const giro = ((i * 37) % 11) - 5;
+          span.style.transform = `rotate(${giro}deg)`;
+          span.textContent = p.palabra;
+          wrap.append(span);
+        });
+        return wrap;
+      }
+
       async function tick() {
         try {
           const res = await fetch(`/api/actividad/${idAct}/resultados`);
@@ -171,17 +196,8 @@ if (urlParticipante) {
             wrap.innerHTML =
               `<p class="vivo-num__big">${data.numero.promedio.toFixed(1)}</p><p>promedio · mín ${data.numero.min} · máx ${data.numero.max}</p>`;
             el.append(wrap);
-          } else if (data.palabras) {
-            const nube = document.createElement('div');
-            nube.className = 'vivo-nube';
-            data.palabras.forEach((p) => {
-              const span = document.createElement('span');
-              span.className = 'vivo-nube__palabra';
-              span.style.fontSize = `${16 + p.cantidad * 8}px`;
-              span.textContent = p.palabra;
-              nube.append(span);
-            });
-            el.append(nube);
+          } else if (data.palabras && data.palabras.length) {
+            el.append(nube(data.palabras));
           } else if (data.semanas) {
             data.semanas.forEach((s) => el.append(barra(String(s.semana), Number(s.cantidad))));
           } else {

@@ -67,6 +67,12 @@ try {
 
 const kpiSi = dash?.kpis.pctSi;
 const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
+const qsLimpio = new URLSearchParams();
+if (filtros.cursoId) qsLimpio.set('curso', filtros.cursoId);
+if (filtros.desde) qsLimpio.set('desde', filtros.desde);
+if (filtros.hasta) qsLimpio.set('hasta', filtros.hasta);
+const volverA = qsLimpio.toString() ? `/admin/observatorio?${qsLimpio.toString()}` : '/admin/observatorio';
+const borrado = Astro.url.searchParams.get('borrado');
 ---
 <Layout title="Observatorio — Admin" noindex={true} whatsapp={false}>
   <AdminChrome
@@ -74,6 +80,7 @@ const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
     subtitulo="Mirá la participación agregada por curso, en el rango de fechas que elijas. Las respuestas son anónimas: no se muestra la empresa ni quién contestó."
   >
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+    {borrado && <p class="admin-ok">Se borraron {borrado} respuestas de esa consigna. No se puede deshacer.</p>}
 
     <form class="obs-filters" method="get" action="/admin/observatorio">
       <label>
@@ -126,9 +133,9 @@ const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
             </p>
           </article>
           <article class="obs-kpi">
-            <p class="obs-kpi__label">Actividades activas</p>
-            <p class="obs-kpi__value">{dash.kpis.actividadesActivas}</p>
-            <p class="obs-kpi__hint">En vivo ahora, en el recorte de curso</p>
+            <p class="obs-kpi__label">Actividades cargadas</p>
+            <p class="obs-kpi__value">{dash.kpis.actividadesCargadas}</p>
+            <p class="obs-kpi__hint">En el recorte de curso, sumando todas las cursadas</p>
           </article>
           <article class="obs-kpi">
             <p class="obs-kpi__label">Respuestas en el rango</p>
@@ -193,6 +200,18 @@ const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
                       {b.total}/{OBS_MIN} — todavía no hay suficientes respuestas acumuladas para este dato (mínimo {OBS_MIN}).
                     </p>
                   </>
+                )}
+                {b.total > 0 && (
+                  <form
+                    class="obs-card__borrar"
+                    method="post"
+                    action="/api/admin/observatorio/borrar-bloque"
+                    onsubmit={`return confirm('Esto borra ${b.total} respuestas de esta consigna, de forma permanente, en todas las instancias que la usaron. No se puede deshacer. ¿Borrar igual?')`}
+                  >
+                    <input type="hidden" name="actividadIds" value={b.actividadIds.join(',')} />
+                    <input type="hidden" name="volverA" value={volverA} />
+                    <button type="submit" class="admin-link-danger">Borrar estas respuestas</button>
+                  </form>
                 )}
               </article>
             );

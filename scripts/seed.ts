@@ -266,15 +266,42 @@ async function main() {
     { orden: 5, tipo: 'numero', consigna: 'Del 1 al 10, ¿cuánto sentís que te afecta personalmente acompañar estas situaciones?', opciones: null, cursoId: 'curso-taller' },
   ];
 
-  async function seedActs(encuentroId: string, instanciaId: string, items: typeof acts1) {
+  // El banco vive a nivel de curso: se carga una sola vez y se clona a cada encuentro/instancia
+  // que lo necesite (ver /api/admin/actividades/importar). Acá sembramos el banco de los dos
+  // cursos de ejemplo, y además clonamos esas preguntas al encuentro demo para que la pantalla
+  // en vivo tenga algo para mostrar sin pasos manuales.
+  async function seedBanco(cursoId: string, items: typeof acts1) {
+    const existentes = await db.collection('actividades_curso').where('cursoId', '==', cursoId).get();
+    if (!existentes.empty) return existentes.docs.map((d) => ({ id: d.id, ...(d.data() as (typeof items)[number]) }));
+    const creadas: { id: string; orden: number; tipo: string; consigna: string; opciones: string[] | null }[] = [];
+    for (const item of items) {
+      const ref = await db.collection('actividades_curso').add({
+        cursoId,
+        tipo: item.tipo,
+        consigna: item.consigna,
+        opciones: item.opciones,
+        orden: item.orden,
+        creadoEn: now,
+      });
+      creadas.push({ id: ref.id, orden: item.orden, tipo: item.tipo, consigna: item.consigna, opciones: item.opciones });
+    }
+    return creadas;
+  }
+
+  async function clonarABancoAEncuentro(
+    banco: { orden: number; tipo: string; consigna: string; opciones: string[] | null }[],
+    encuentroId: string,
+    instanciaId: string,
+    cursoId: string,
+  ) {
     const existentes = await db.collection('actividades').where('encuentroId', '==', encuentroId).get();
     if (!existentes.empty) return;
-    for (const item of items) {
+    for (const item of banco) {
       const codigo = await generarCodigoActividad();
       await db.collection('actividades').add({
         encuentroId,
         instanciaId,
-        cursoId: item.cursoId,
+        cursoId,
         codigo,
         tipo: item.tipo,
         consigna: item.consigna,
@@ -287,10 +314,12 @@ async function main() {
     }
   }
 
-  await seedActs('demo-enc-1', 'demo-encuentro', acts1);
-  await seedActs('demo-enc-2', 'demo-encuentro', acts2);
+  const banco1 = await seedBanco('curso-encuentro', acts1);
+  const banco2 = await seedBanco('curso-taller', acts2);
+  await clonarABancoAEncuentro(banco1, 'demo-enc-1', 'demo-encuentro', 'curso-encuentro');
+  await clonarABancoAEncuentro(banco2, 'demo-enc-2', 'demo-encuentro', 'curso-taller');
 
-  console.log('Seed OK: cursos, posts, testimonios, instancia demo y actividades.');
+  console.log('Seed OK: cursos, posts, testimonios, banco de preguntas, instancia demo y actividades.');
 }
 
 main().catch((err) => {

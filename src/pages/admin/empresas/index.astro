@@ -18,27 +18,37 @@ try {
 }
 ---
 <Layout title="Empresas — Admin" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Empresas">
+  <AdminChrome
+    titulo="Empresas"
+    subtitulo="Las organizaciones, sindicatos o áreas para las que dictás cada curso. Cargalas acá antes de crear una Instancia — los datos de contacto y las notas internas solo se ven en este panel, nunca en el sitio público."
+  >
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Empresa creada.</p>}
     {Astro.url.searchParams.get('error') && <p class="admin-alert">Falta el nombre.</p>}
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {empresas.length > 0 && (
-      <table class="admin-table">
-        <thead>
-          <tr><th>Nombre</th><th>Slug</th><th></th></tr>
-        </thead>
-        <tbody>
-          {empresas.map((e) => (
-            <tr>
-              <td>{e.nombre}</td>
-              <td>{e.slug}</td>
-              <td><a href={`/admin/empresas/${e.id}`}>Editar</a></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div data-table-wrap>
+        <div class="admin-table-tools">
+          <input type="search" class="admin-search" data-table-search placeholder="Buscar empresa…" aria-label="Buscar empresa" />
+          <span class="admin-table-count" data-table-count></span>
+        </div>
+        <table class="admin-table" data-admin-table data-page-size="20">
+          <thead>
+            <tr><th data-sort="text">Nombre</th><th data-sort="text">Slug</th><th></th></tr>
+          </thead>
+          <tbody>
+            {empresas.map((e) => (
+              <tr>
+                <td class="admin-table__titulo"><a href={`/admin/empresas/${e.id}`}>{e.nombre}</a></td>
+                <td>{e.slug}</td>
+                <td><a href={`/admin/empresas/${e.id}`}>Editar</a></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <nav class="admin-pager" data-pager aria-label="Paginado de empresas"></nav>
+      </div>
     )}
-    {empresas.length === 0 && !errorCarga && <p>No hay empresas todavía.</p>}
+    {empresas.length === 0 && !errorCarga && <p>No hay empresas todavía. Cargá la primera con el formulario de abajo.</p>}
 
     <h2>Nueva empresa</h2>
     <form class="admin-form" method="post" action="/api/admin/empresas">
@@ -64,3 +74,5 @@ try {
     </form>
   </AdminChrome>
 </Layout>
+
+<script src="/admin/table-utils.js" defer></script>

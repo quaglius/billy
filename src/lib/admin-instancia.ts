@@ -12,6 +12,8 @@ export function rutasInstancia(instanciaId: string, encuentroId?: string) {
     encuentro,
     actividades: encuentro ? `${encuentro}/actividades` : '',
     vivo: encuentro ? `${encuentro}/vivo` : '',
+    vivoDe: (actividadId: string) => (encuentro ? `${encuentro}/vivo?actividad=${actividadId}` : ''),
+    imprimirDe: (actividadId: string) => (encuentro ? `${encuentro}/imprimir?actividad=${actividadId}` : ''),
   };
 }
 

@@ -69,6 +69,18 @@ export type Encuentro = {
   archivado: boolean;
 };
 
+// Banco de preguntas reutilizable a nivel de Curso (plantilla). No tiene código ni QR propio:
+// se clona a un encuentro concreto (ver Actividad) cuando se arma o edita una instancia.
+export type ActividadCurso = {
+  id: string;
+  cursoId: string;
+  tipo: TipoActividad;
+  consigna: string;
+  opciones: string[] | null;
+  orden: number;
+  creadoEn: Date;
+};
+
 export type Actividad = {
   id: string;
   encuentroId: string;

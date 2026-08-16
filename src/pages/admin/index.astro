@@ -1,9 +1,118 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AdminChrome from '../../components/AdminChrome.astro';
+import { db } from '../../lib/firebase-admin';
+import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../lib/encuentro';
+import { etiquetaInstancia, rutasInstancia } from '../../lib/admin-instancia';
+
+let proximos: {
+  id: string;
+  titulo: string;
+  fechaTexto: string;
+  estado: string;
+  instanciaId: string;
+  instanciaNombre: string;
+  rutaActividades: string;
+  rutaVivo: string;
+}[] = [];
+let conteos = { cursos: 0, empresas: 0, instancias: 0, posts: 0 };
+let errorCarga = '';
+
+try {
+  const [encSnap, instSnap, cursosSnap, empSnap, postsSnap] = await Promise.all([
+    db().collection('encuentros').get(),
+    db().collection('instancias').get(),
+    db().collection('cursos').get(),
+    db().collection('empresas').get(),
+    db().collection('posts').get(),
+  ]);
+
+  conteos = {
+    cursos: cursosSnap.size,
+    empresas: empSnap.size,
+    instancias: instSnap.size,
+    posts: postsSnap.size,
+  };
+
+  const instMap = new Map(instSnap.docs.map((d) => [d.id, d.data()]));
+  const ahora = new Date();
+
+  proximos = encSnap.docs
+    .map((d) => {
+      const data = d.data();
+      const fechaHora = fechaDeDoc(data.fechaHora);
+      const instanciaId = String(data.instanciaId ?? '');
+      const inst = instMap.get(instanciaId);
+      const rutas = rutasInstancia(instanciaId, d.id);
+      return {
+        id: d.id,
+        titulo: String(data.titulo ?? 'Encuentro'),
+        fechaHora,
+        fechaTexto: formatFechaEncuentro(fechaHora),
+        estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null, ahora),
+        instanciaId,
+        instanciaNombre: inst ? etiquetaInstancia(inst) : 'Instancia',
+        rutaActividades: rutas.actividades,
+        rutaVivo: rutas.vivo,
+      };
+    })
+    .filter((e) => e.estado !== 'completado')
+    .sort((a, b) => a.fechaHora.getTime() - b.fechaHora.getTime())
+    .slice(0, 6);
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : 'No se pudo cargar el panel.';
+}
+
+const secciones = [
+  { href: '/admin/cursos', label: 'Cursos', desc: 'Las plantillas: Encuentro, Taller o Programa.', n: conteos.cursos },
+  { href: '/admin/empresas', label: 'Empresas', desc: 'Organizaciones y sindicatos para los que trabajás.', n: conteos.empresas },
+  { href: '/admin/instancias', label: 'Instancias', desc: 'Un curso dictado a una empresa, con fechas y actividades.', n: conteos.instancias },
+  { href: '/admin/posts', label: 'Posts', desc: 'El blog. Los borradores no se ven en el sitio.', n: conteos.posts },
+  { href: '/admin/observatorio', label: 'Observatorio', desc: 'Datos agregados y anónimos de todas las cursadas.', n: null },
+];
 ---
 <Layout title="Admin — Guille Nuesch" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Lo de hoy">
-    <p>Panel de administración. El próximo encuentro con QR aparece acá cuando haya instancias cargadas.</p>
+  <AdminChrome
+    titulo="Lo de hoy"
+    subtitulo="Tu próximo encuentro y accesos directos a cada sección del panel."
+  >
+    {errorCarga && <p class="admin-alert">{errorCarga}</p>}
+
+    <h2 class="dash-section-title">Próximos encuentros</h2>
+    {proximos.length === 0 && !errorCarga && (
+      <p>No hay encuentros próximos cargados. Andá a <a href="/admin/instancias">Instancias</a> para armar el cronograma de una cursada.</p>
+    )}
+    {proximos.length > 0 && (
+      <div class="dash-proximos">
+        {proximos.map((e) => (
+          <article class="dash-encuentro">
+            <div class="dash-encuentro__info">
+              <span class:list={['pill-estado', e.estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                {e.estado}
+              </span>
+              <h3>{e.titulo}</h3>
+              <p class="dash-encuentro__meta">{e.instanciaNombre} · {e.fechaTexto}</p>
+            </div>
+            <div class="dash-encuentro__acciones">
+              <a href={e.rutaActividades} class="admin-btn-secondary">Actividades</a>
+              <a href={e.rutaVivo} class="admin-btn-primario">En vivo</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+
+    <h2 class="dash-section-title">Secciones</h2>
+    <div class="dash-secciones">
+      {secciones.map((s) => (
+        <a class="dash-seccion" href={s.href}>
+          <div class="dash-seccion__head">
+            <span>{s.label}</span>
+            {s.n !== null && <span class="dash-seccion__n">{s.n}</span>}
+          </div>
+          <p>{s.desc}</p>
+        </a>
+      ))}
+    </div>
   </AdminChrome>
 </Layout>
