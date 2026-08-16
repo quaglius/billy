@@ -13,8 +13,12 @@ import {
 
 export const prerender = true;
 
-const heroSrc = existsSync(path.join(process.cwd(), 'public/fotos/guille/hero-brazos-cruzados.png'))
+const heroDir = path.join(process.cwd(), 'public/fotos/guille');
+const heroSrc = existsSync(path.join(heroDir, 'hero-brazos-cruzados.png'))
   ? '/fotos/guille/hero-brazos-cruzados.png'
+  : null;
+const heroSrc2x = existsSync(path.join(heroDir, 'hero-hires-sonrisa.png'))
+  ? '/fotos/guille/hero-hires-sonrisa.png'
   : null;
 
 const pilares = [
@@ -95,7 +99,15 @@ const testimonios = [
       <div class="hero__photo wow fadeInUp" data-wow-delay="0.5s">
         <img class="hero-shapes-img" src="/shapes/h5-hero-shape-1.svg" alt="" aria-hidden="true" />
         {heroSrc ? (
-          <img class="hero-cutout" src={heroSrc} alt="Guillermo Nuesch" width="531" height="531" />
+          <img
+            class="hero-cutout"
+            src={heroSrc}
+            srcset={heroSrc2x ? `${heroSrc} 531w, ${heroSrc2x} 1086w` : undefined}
+            sizes="(min-width: 768px) 531px, 90vw"
+            alt="Guillermo Nuesch"
+            width="531"
+            height="531"
+          />
         ) : (
           <div class="hero-placeholder">
             Foto de portada pendiente

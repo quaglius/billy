@@ -1,9 +1,15 @@
 ---
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import Layout from '../layouts/Layout.astro';
 import BotonPrimario from '../components/BotonPrimario.astro';
 import { WHATSAPP_URL, INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL } from '../lib/site';
 
 export const prerender = true;
+
+const aboutSrc = existsSync(path.join(process.cwd(), 'public/fotos/guille/about-gesticulando.png'))
+  ? '/fotos/guille/about-gesticulando.png'
+  : null;
 
 const pasos = [
   {
@@ -88,6 +94,11 @@ const organizaciones = [
   <article class="page-shell gn-prose wow fadeInUp" data-wow-delay="0.2s">
     <p class="eyebrow">Sobre mí</p>
     <h1 class="text-anim">Guillermo “Billy” Nuesch</h1>
+    {aboutSrc && (
+      <p>
+        <img src={aboutSrc} alt="Guillermo Nuesch en una charla" width="640" height="640" />
+      </p>
+    )}
     <p>Capacitador externo en Salud Mental y Prevención de Consumos Problemáticos en los ámbitos laborales. Bienestar ocupacional.</p>
 
     <p>
