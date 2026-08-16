@@ -1,14 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "encuentros",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "instanciaId", "order": "ASCENDING" },
-        { "fieldPath": "orden", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "actividades",
       "queryScope": "COLLECTION",
       "fields": [

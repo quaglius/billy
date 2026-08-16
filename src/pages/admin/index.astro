@@ -2,24 +2,22 @@
 import Layout from '../../layouts/Layout.astro';
 import AdminChrome from '../../components/AdminChrome.astro';
 import { db } from '../../lib/firebase-admin';
-import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../lib/encuentro';
-import { etiquetaInstancia } from '../../lib/admin-instancia';
+import { fechaDeDoc, formatFecha } from '../../lib/fecha';
+import { estadoInstancia, etiquetaInstancia } from '../../lib/admin-instancia';
 
-let proximos: {
+let proximas: {
   id: string;
-  titulo: string;
+  nombre: string;
+  fechaInicio: Date | null;
   fechaTexto: string;
   estado: string;
-  instanciaId: string;
-  instanciaNombre: string;
   rutaCurso: string;
 }[] = [];
 let conteos = { cursos: 0, empresas: 0, instancias: 0, posts: 0 };
 let errorCarga = '';
 
 try {
-  const [encSnap, instSnap, cursosSnap, empSnap, postsSnap] = await Promise.all([
-    db().collection('encuentros').get(),
+  const [instSnap, cursosSnap, empSnap, postsSnap] = await Promise.all([
     db().collection('instancias').get(),
     db().collection('cursos').get(),
     db().collection('empresas').get(),
@@ -33,28 +31,27 @@ try {
     posts: postsSnap.size,
   };
 
-  const instMap = new Map(instSnap.docs.map((d) => [d.id, d.data()]));
+  const cursoTitulo = new Map(cursosSnap.docs.map((d) => [d.id, String(d.data().titulo ?? '')]));
+  const empresaNombre = new Map(empSnap.docs.map((d) => [d.id, String(d.data().nombre ?? '')]));
   const ahora = new Date();
 
-  proximos = encSnap.docs
+  proximas = instSnap.docs
     .map((d) => {
       const data = d.data();
-      const fechaHora = fechaDeDoc(data.fechaHora);
-      const instanciaId = String(data.instanciaId ?? '');
-      const inst = instMap.get(instanciaId);
+      const fechaInicio = data.fechaInicio ? fechaDeDoc(data.fechaInicio) : null;
+      const fechaFin = data.fechaFin ? fechaDeDoc(data.fechaFin) : null;
+      const cursoId = String(data.cursoId ?? '');
       return {
         id: d.id,
-        titulo: String(data.titulo ?? 'Encuentro'),
-        fechaHora,
-        fechaTexto: formatFechaEncuentro(fechaHora),
-        estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null, ahora),
-        instanciaId,
-        instanciaNombre: inst ? etiquetaInstancia(inst) : 'Instancia',
-        rutaCurso: inst ? `/admin/cursos/${String(inst.cursoId ?? '')}` : '/admin/cursos',
+        nombre: etiquetaInstancia(data, cursoTitulo.get(cursoId), empresaNombre.get(String(data.empresaId ?? ''))),
+        fechaInicio,
+        fechaTexto: fechaInicio ? `${formatFecha(fechaInicio)}${fechaFin ? ` – ${formatFecha(fechaFin)}` : ''}` : 'Sin fecha',
+        estado: estadoInstancia(fechaInicio, fechaFin, ahora),
+        rutaCurso: `/admin/cursos/${cursoId}`,
       };
     })
-    .filter((e) => e.estado !== 'completado')
-    .sort((a, b) => a.fechaHora.getTime() - b.fechaHora.getTime())
+    .filter((i) => i.estado === 'en curso' || i.estado === 'próxima')
+    .sort((a, b) => (a.fechaInicio?.getTime() ?? Infinity) - (b.fechaInicio?.getTime() ?? Infinity))
     .slice(0, 6);
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudo cargar el panel.';
@@ -71,27 +68,28 @@ const secciones = [
 <Layout title="Admin — Guille Nuesch" noindex={true} whatsapp={false}>
   <AdminChrome
     titulo="Lo de hoy"
-    subtitulo="Tu próximo encuentro y accesos directos a cada sección del panel."
+    subtitulo="Tus próximas instancias y accesos directos a cada sección del panel."
   >
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
 
-    <h2 class="dash-section-title">Próximos encuentros</h2>
-    {proximos.length === 0 && !errorCarga && (
-      <p>No hay encuentros próximos cargados. Andá a <a href="/admin/instancias">Instancias</a> para armar el cronograma de una cursada.</p>
+    <h2 class="dash-section-title">Próximas instancias</h2>
+    {proximas.length === 0 && !errorCarga && (
+      <p>No hay instancias próximas cargadas. Andá a <a href="/admin/instancias">Instancias</a> para cargar una cursada.</p>
     )}
-    {proximos.length > 0 && (
+    {proximas.length > 0 && (
       <div class="dash-proximos">
-        {proximos.map((e) => (
+        {proximas.map((i) => (
           <article class="dash-encuentro">
             <div class="dash-encuentro__info">
-              <span class:list={['pill-estado', e.estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                {e.estado}
+              <span class:list={['pill-estado', i.estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
+                {i.estado}
               </span>
-              <h3>{e.titulo}</h3>
-              <p class="dash-encuentro__meta">{e.instanciaNombre} · {e.fechaTexto}</p>
+              <h3>{i.nombre}</h3>
+              <p class="dash-encuentro__meta">{i.fechaTexto}</p>
             </div>
             <div class="dash-encuentro__acciones">
-              <a href={e.rutaCurso} class="admin-btn-primario">Ver preguntas y QRs</a>
+              <a href={`/admin/instancias/${i.id}`} class="admin-btn-primario">Ver instancia</a>
+              <a href={i.rutaCurso} class="admin-btn-secondary">Preguntas y QRs</a>
             </div>
           </article>
         ))}

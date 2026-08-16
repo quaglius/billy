@@ -9,7 +9,7 @@ export type TipoActividad =
   | 'fecha'
   | 'texto_libre';
 export type EstadoPost = 'borrador' | 'publicado';
-export type EstadoEncuentro = 'completado' | 'en curso' | 'próximo';
+export type EstadoInstancia = 'completado' | 'en curso' | 'próxima' | 'sin fecha';
 
 export type Adjunto = { nombre: string; url: string };
 
@@ -48,7 +48,6 @@ export type Instancia = {
   id: string;
   cursoId: string;
   empresaId: string;
-  slug: string;
   tituloParticular: string | null;
   particularidades: string | null;
   visibilidad: VisibilidadInstancia;
@@ -56,17 +55,6 @@ export type Instancia = {
   fechaFin: Date | null;
   modalidad: Modalidad | null;
   creadoEn: Date;
-};
-
-export type Encuentro = {
-  id: string;
-  instanciaId: string;
-  orden: number;
-  titulo: string;
-  fechaHora: Date;
-  duracionMinutos: number | null;
-  descripcion: string | null;
-  archivado: boolean;
 };
 
 // Pregunta de un curso, con QR y código PERMANENTES: se imprime una vez y se reutiliza en

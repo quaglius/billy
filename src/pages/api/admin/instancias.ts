@@ -7,11 +7,10 @@ export const POST: APIRoute = async ({ request }) => {
   const id = String(form.get('id') ?? '');
   const cursoId = String(form.get('cursoId') ?? '');
   const empresaId = String(form.get('empresaId') ?? '');
-  const slug = String(form.get('slug') ?? '').trim();
   const errorParam = id ? 'errorInst' : 'error';
   const volver = id ? `/admin/instancias/${id}` : '/admin/instancias';
 
-  if (!cursoId || !empresaId || !slug) {
+  if (!cursoId || !empresaId) {
     return new Response(null, { status: 303, headers: { Location: `${volver}?${errorParam}=1` } });
   }
 
@@ -19,12 +18,6 @@ export const POST: APIRoute = async ({ request }) => {
   const empresa = await db().collection('empresas').doc(empresaId).get();
   if (!curso.exists || !empresa.exists) {
     return new Response(null, { status: 303, headers: { Location: `${volver}?${errorParam}=1` } });
-  }
-
-  const slugTaken = await db().collection('instancias').where('slug', '==', slug).limit(1).get();
-  const slugEnUso = slugTaken.docs.some((d) => d.id !== id);
-  if (slugEnUso) {
-    return new Response(null, { status: 303, headers: { Location: `${volver}?${errorParam}=slug` } });
   }
 
   const fechaInicioRaw = String(form.get('fechaInicio') ?? '');
@@ -36,7 +29,6 @@ export const POST: APIRoute = async ({ request }) => {
   const payload = {
     cursoId,
     empresaId,
-    slug,
     tituloParticular,
     particularidades,
     visibilidad: 'privada',

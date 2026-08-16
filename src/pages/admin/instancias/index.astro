@@ -6,13 +6,12 @@ import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
 import AdminCampo from '../../../components/AdminCampo.astro';
 import { etiquetaInstancia, migasInstancia } from '../../../lib/admin-instancia';
-import { fechaDeDoc } from '../../../lib/encuentro';
+import { fechaDeDoc } from '../../../lib/fecha';
 import { ultimosNMeses } from '../../../lib/kpis';
 import type { ChartSpec } from '../../../lib/observatorio';
 
 let instancias: {
   id: string;
-  slug: string;
   nombre: string;
   cursoId: string;
   empresaId: string;
@@ -31,12 +30,13 @@ try {
   empSnap.docs.forEach((d) => empresas.set(d.id, String(d.data().nombre ?? d.id)));
   instancias = instSnap.docs.map((d) => {
     const data = d.data();
+    const cursoId = String(data.cursoId ?? '');
+    const empresaId = String(data.empresaId ?? '');
     return {
       id: d.id,
-      slug: String(data.slug ?? ''),
-      nombre: etiquetaInstancia(data),
-      cursoId: String(data.cursoId ?? ''),
-      empresaId: String(data.empresaId ?? ''),
+      nombre: etiquetaInstancia(data, cursos.get(cursoId), empresas.get(empresaId)),
+      cursoId,
+      empresaId,
       creadoEn: fechaDeDoc(data.creadoEn),
     };
   });
@@ -67,13 +67,12 @@ if (kpiTotal > 0) {
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
   <AdminChrome
     titulo="Instancias"
-    subtitulo="Una instancia es un curso dictado a una empresa concreta, con fechas reales. Acá también gestionás el cronograma de encuentros y las actividades de cada una. Son siempre privadas: solo entra quien tiene el link o el QR, nunca aparecen listadas en el sitio."
+    subtitulo="Una instancia es un curso dictado a una empresa concreta, con fechas reales. Son siempre privadas: nunca aparecen listadas en el sitio."
   >
     <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'listado' })} />
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
     {Astro.url.searchParams.get('ok') && <p class="admin-ok">Instancia creada.</p>}
-    {Astro.url.searchParams.get('error') === 'slug' && <p class="admin-alert">Ese slug ya está en uso.</p>}
-    {Astro.url.searchParams.get('error') === '1' && <p class="admin-alert">Faltan curso, empresa o slug.</p>}
+    {Astro.url.searchParams.get('error') === '1' && <p class="admin-alert">Faltan curso o empresa.</p>}
 
     {kpiTotal > 0 && (
       <>
@@ -112,7 +111,7 @@ if (kpiTotal > 0) {
                 <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
                 <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
                 <td class="admin-table__acciones">
-                  <a href={`/admin/instancias/${i.id}`}>Cronograma</a>
+                  <a href={`/admin/instancias/${i.id}`}>Ver</a>
                   <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
                 </td>
               </tr>
@@ -139,9 +138,6 @@ if (kpiTotal > 0) {
             <option value={id}>{nombre}</option>
           ))}
         </select>
-      </AdminCampo>
-      <AdminCampo titulo="Slug público" ayuda="La parte de la URL, en minúsculas y con guiones. Ejemplo: taller-sitos-2026. Tiene que ser único. No uses espacios ni tildes.">
-        <input type="text" name="slug" required placeholder="taller-sitos-2026" />
       </AdminCampo>
       <AdminCampo
         titulo="Modalidad"

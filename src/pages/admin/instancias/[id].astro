@@ -3,9 +3,11 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
+import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
-import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../../lib/encuentro';
-import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../lib/admin-instancia';
+import { fechaDeDoc, formatFecha } from '../../../lib/fecha';
+import { etiquetaInstancia, estadoInstancia, migasInstancia, rutasInstancia } from '../../../lib/admin-instancia';
+import { OBS_MIN, armarDashboard, etiquetaTipo, type ActividadObs, type RespuestaObs } from '../../../lib/observatorio';
 
 function toDateInput(v: unknown): string {
   if (!v) return '';
@@ -20,8 +22,6 @@ if (!id) return Astro.redirect('/admin/instancias');
 const doc = await db().collection('instancias').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
-const nombre = etiquetaInstancia(inst);
-const rutas = rutasInstancia(id);
 
 const [cursosSnap, empresasSnap] = await Promise.all([
   db().collection('cursos').orderBy('titulo').get(),
@@ -29,53 +29,72 @@ const [cursosSnap, empresasSnap] = await Promise.all([
 ]);
 const cursos = cursosSnap.docs.map((d) => ({ id: d.id, titulo: String(d.data().titulo ?? d.id) }));
 const empresas = empresasSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
+const cursoTitulo = cursos.find((c) => c.id === inst.cursoId)?.titulo;
+const empresaNombre = empresas.find((e) => e.id === inst.empresaId)?.nombre;
+const nombre = etiquetaInstancia(inst, cursoTitulo, empresaNombre);
+const rutas = rutasInstancia(id);
 
-const encSnap = await db()
-  .collection('encuentros')
-  .where('instanciaId', '==', id)
-  .orderBy('orden')
-  .get();
+const fechaInicio = inst.fechaInicio ? fechaDeDoc(inst.fechaInicio) : null;
+const fechaFin = inst.fechaFin ? fechaDeDoc(inst.fechaFin) : null;
+const estado = estadoInstancia(fechaInicio, fechaFin);
 
-const encuentros = encSnap.docs.map((d) => {
-  const data = d.data();
-  const fechaHora = fechaDeDoc(data.fechaHora);
-  return {
-    id: d.id,
-    titulo: String(data.titulo ?? ''),
-    orden: Number(data.orden ?? 0),
-    fechaHora,
-    fechaTexto: formatFechaEncuentro(fechaHora),
-    duracionMinutos: data.duracionMinutos ?? null,
-    estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null),
-    archivado: Boolean(data.archivado),
-  };
-});
-const vigentes = encuentros.filter((e) => !e.archivado);
-const archivados = encuentros.filter((e) => e.archivado);
-const proximoOrden = encuentros.reduce((max, e) => Math.max(max, e.orden), 0) + 1;
 const ok = Astro.url.searchParams.get('ok');
-const error = Astro.url.searchParams.get('error');
 const mensajesOk: Record<string, string> = {
-  '1': 'Guardado.',
   editada: 'Datos de la instancia guardados.',
-  archivado: 'Encuentro archivado. Ya no aparece en el cronograma.',
-  restaurado: 'Encuentro restaurado al cronograma.',
-  eliminado: 'Encuentro eliminado.',
+  '1': 'Instancia creada.',
 };
-const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
-  ? 'Ese slug ya está en uso por otra instancia.'
-  : Astro.url.searchParams.get('errorInst') === '1'
-    ? 'Faltan curso, empresa o slug.'
-    : '';
+const errorInstancia = Astro.url.searchParams.get('errorInst') === '1'
+  ? 'Faltan curso o empresa.'
+  : '';
+
+let dashCurso = null;
+let errorObs = '';
+const cursoId = String(inst.cursoId ?? '');
+try {
+  const [actSnap, respSnap] = await Promise.all([
+    db().collection('actividades').where('cursoId', '==', cursoId).orderBy('orden').get(),
+    db().collection('respuestas').where('cursoId', '==', cursoId).get(),
+  ]);
+  const actividadesObs: ActividadObs[] = actSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      cursoId: String(data.cursoId ?? ''),
+      tipo: String(data.tipo ?? ''),
+      consigna: String(data.consigna ?? ''),
+      opciones: Array.isArray(data.opciones) ? data.opciones.map(String) : null,
+    };
+  });
+  const respuestas: RespuestaObs[] = respSnap.docs.map((d) => {
+    const data = d.data();
+    const creado = data.creadoEn;
+    let creadoEn = new Date();
+    if (creado && typeof creado.toDate === 'function') creadoEn = creado.toDate();
+    else if (creado instanceof Date) creadoEn = creado;
+    return { actividadId: String(data.actividadId ?? ''), cursoId: String(data.cursoId ?? ''), valor: data.valor, creadoEn };
+  });
+  dashCurso = armarDashboard({
+    filtros: { cursoId, desde: '', hasta: '' },
+    cursos: [{ id: cursoId, titulo: cursoTitulo ?? '' }],
+    actividades: actividadesObs,
+    respuestas,
+  });
+} catch (err) {
+  errorObs = err instanceof Error ? err.message : 'No se pudieron cargar las estadísticas.';
+}
 ---
-<Layout title={`Cronograma — ${nombre}`} noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Cronograma">
-    <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'cronograma', instanciaId: id, instanciaLabel: nombre })} />
+<Layout title={`Instancia — ${nombre}`} noindex={true} whatsapp={false}>
+  <AdminChrome titulo={nombre}>
+    <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'ficha', instanciaId: id, instanciaLabel: nombre })} />
     {ok && mensajesOk[ok] && <p class="admin-ok">{mensajesOk[ok]}</p>}
-    {error && <p class="admin-alert">Faltan el título o la fecha.</p>}
     <p class="admin-meta">
       <span>{nombre}</span>
+      <span class:list={['pill-estado', estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
+        {estado}
+      </span>
+      {fechaInicio && <span>{formatFecha(fechaInicio)}{fechaFin && ` – ${formatFecha(fechaFin)}`}</span>}
       <a href={rutas.duplicar}>Duplicar instancia</a>
+      <a href={`/admin/cursos/${cursoId}`}>Ver preguntas y QRs del curso →</a>
     </p>
 
     <details class="inst-editar">
@@ -96,9 +115,6 @@ const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
               <option value={e.id} selected={inst.empresaId === e.id}>{e.nombre}</option>
             ))}
           </select>
-        </AdminCampo>
-        <AdminCampo titulo="Slug público" ayuda="La parte de la URL. Minúsculas y guiones, sin espacios ni tildes. Tiene que ser único.">
-          <input type="text" name="slug" value={inst.slug ?? ''} required />
         </AdminCampo>
         <AdminCampo titulo="Título particular" ayuda="Opcional: si querés que esta cursada tenga un nombre propio distinto al del curso base.">
           <input type="text" name="tituloParticular" value={inst.tituloParticular ?? ''} />
@@ -124,98 +140,85 @@ const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
       </form>
     </details>
 
-    <p>Para cambiar título, fecha u orden de un encuentro, entrá a <strong>Editar</strong>. El nombre del encuentro también abre esa ficha.</p>
+    <section class="curso-obs">
+      <h2>Estadísticas</h2>
+      <p class="admin-section-nota">
+        Es el agregado histórico de <strong>todas</strong> las cursadas de este curso, no solo
+        esta instancia: las respuestas anónimas no distinguen empresa. Hace falta al menos
+        {OBS_MIN} respuestas por consigna para ver el detalle.
+        <a href={`/admin/observatorio?curso=${cursoId}`}>Ver en el Observatorio completo →</a>
+      </p>
+      {errorObs && <p class="admin-alert">{errorObs}</p>}
+      {dashCurso && dashCurso.kpis.respuestasEnRango === 0 && !errorObs && (
+        <p class="obs-empty">Todavía no hay respuestas registradas para este curso.</p>
+      )}
+      {dashCurso && dashCurso.kpis.respuestasEnRango > 0 && (
+        <>
+          <section class="obs-kpis" aria-label="Indicadores de este curso">
+            <article class="obs-kpi">
+              <p class="obs-kpi__label">Respuestas totales</p>
+              <p class="obs-kpi__value">{dashCurso.kpis.respuestasEnRango}</p>
+              <p class="obs-kpi__hint">Acumuladas en todas las cursadas de este curso</p>
+            </article>
+            <article class="obs-kpi">
+              <p class="obs-kpi__label">Consignas con dato</p>
+              <p class="obs-kpi__value">{dashCurso.kpis.consignasListas} / {dashCurso.kpis.consignasTotal}</p>
+              <p class="obs-kpi__hint">Llegaron al umbral de {OBS_MIN} respuestas</p>
+            </article>
+            {dashCurso.kpis.pctSi !== null && (
+              <article class="obs-kpi">
+                <p class="obs-kpi__label">% Sí</p>
+                <p class="obs-kpi__value">{dashCurso.kpis.pctSi}%</p>
+                <p class="obs-kpi__hint">{dashCurso.kpis.siTotal} respuestas sí/no</p>
+              </article>
+            )}
+          </section>
 
-    {vigentes.length > 0 ? (
-      <table class="admin-table">
-        <thead>
-          <tr><th>#</th><th>Encuentro</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody>
-          {vigentes.map((e) => {
-            const r = rutasInstancia(id, e.id);
-            return (
-              <tr>
-                <td>{e.orden}</td>
-                <td class="admin-table__titulo">
-                  <a href={r.encuentro}>{e.titulo}</a>
-                </td>
-                <td>{e.fechaTexto}</td>
-                <td>
-                  <span class:list={['pill-estado', e.estado === 'en curso' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                    {e.estado}
-                  </span>
-                </td>
-                <td class="admin-table__acciones">
-                  <a href={r.encuentro}>Editar</a>
-                  <a href={r.actividades}>Actividades</a>
-                  <a href={r.vivo}>En vivo</a>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    ) : (
-      <p>No hay encuentros en el cronograma. Creá el primero con el formulario de abajo.</p>
-    )}
+          <ObservatorioCharts charts={dashCurso.charts} />
 
-    {archivados.length > 0 && (
-      <>
-        <h2>Archivados</h2>
-        <p>No se muestran en el cronograma activo. Se pueden restaurar o eliminar.</p>
-        <table class="admin-table admin-table--muted">
-          <thead>
-            <tr><th>#</th><th>Encuentro</th><th>Fecha</th><th>Acciones</th></tr>
-          </thead>
-          <tbody>
-            {archivados.map((e) => {
-              const r = rutasInstancia(id, e.id);
+          <div class="obs-bloques">
+            {dashCurso.bloques.map((b, i) => {
+              const chartId = `obs-chart-act-${i}`;
+              const tieneChart = dashCurso!.charts.some((chart) => chart.id === chartId);
               return (
-                <tr>
-                  <td>{e.orden}</td>
-                  <td class="admin-table__titulo">
-                    <a href={r.encuentro}>{e.titulo}</a>
-                  </td>
-                  <td>{e.fechaTexto}</td>
-                  <td class="admin-table__acciones">
-                    <a href={r.encuentro}>Editar</a>
-                    <form method="post" action="/api/admin/encuentros">
-                      <input type="hidden" name="instanciaId" value={id} />
-                      <input type="hidden" name="id" value={e.id} />
-                      <input type="hidden" name="_action" value="restaurar" />
-                      <button type="submit">Restaurar</button>
-                    </form>
-                  </td>
-                </tr>
+                <article class:list={['obs-card', b.listo && 'is-ready']}>
+                  <header class="obs-card__head">
+                    <span class="obs-card__tipo">{etiquetaTipo(b.tipo)}</span>
+                  </header>
+                  <h3 class="obs-card__consigna">{b.consigna}</h3>
+                  {b.listo && b.agregado ? (
+                    <>
+                      <p class="obs-card__meta">
+                        {b.total} respuestas
+                        {b.agregado.numero && ` · promedio ${b.agregado.numero.promedio.toFixed(1)}`}
+                      </p>
+                      {tieneChart && (
+                        <div class="obs-chart-card__canvas obs-chart-card__canvas--tall">
+                          <canvas id={chartId} aria-label={b.consigna}></canvas>
+                        </div>
+                      )}
+                      {b.agregado.palabras && b.agregado.palabras.length > 0 && (
+                        <ul class="obs-words">
+                          {b.agregado.palabras.slice(0, 12).map((p) => (
+                            <li>{p.palabra} <span>{p.cantidad}</span></li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div class="obs-track" aria-hidden="true">
+                        <div class="obs-fill" style={`width: ${Math.min(100, Math.round((b.total / OBS_MIN) * 100))}%`} />
+                      </div>
+                      <p class="obs-card__meta">{b.total}/{OBS_MIN} — todavía no hay suficientes respuestas.</p>
+                    </>
+                  )}
+                </article>
               );
             })}
-          </tbody>
-        </table>
-      </>
-    )}
-
-    <h2>Nuevo encuentro</h2>
-    <p>Al crear se abre la ficha del encuentro, donde se edita, se archiva y se entra a las actividades.</p>
-    <form class="admin-form" method="post" action="/api/admin/encuentros">
-      <input type="hidden" name="instanciaId" value={id} />
-      <input type="hidden" name="_action" value="crear" />
-      <AdminCampo titulo="Orden" ayuda="Número de aparición en el cronograma. 1 es el primero. Si hay dos el mismo día, el más chico va arriba.">
-        <input type="number" name="orden" value={proximoOrden} required />
-      </AdminCampo>
-      <AdminCampo titulo="Título" ayuda="Cómo se llama este encuentro. Ejemplo: Diagnóstico y apertura.">
-        <input type="text" name="titulo" required />
-      </AdminCampo>
-      <AdminCampo titulo="Fecha y hora" ayuda="Cuándo empieza. El estado (próximo / en curso / completado) se calcula solo a partir de esta fecha y la duración.">
-        <input type="datetime-local" name="fechaHora" required />
-      </AdminCampo>
-      <AdminCampo titulo="Duración (minutos)" ayuda="Cuánto dura la sesión. Si no lo cargás, se asumen 120 minutos para saber cuándo termina.">
-        <input type="number" name="duracionMinutos" value="120" />
-      </AdminCampo>
-      <AdminCampo titulo="Descripción" ayuda="Notas para vos o para la ficha: qué se trabaja ese día. No es obligatorio.">
-        <textarea name="descripcion" rows="3"></textarea>
-      </AdminCampo>
-      <button type="submit">Crear encuentro</button>
-    </form>
+          </div>
+        </>
+      )}
+    </section>
   </AdminChrome>
 </Layout>

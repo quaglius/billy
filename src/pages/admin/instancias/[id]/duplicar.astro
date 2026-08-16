@@ -11,18 +11,16 @@ if (!id) return Astro.redirect('/admin/instancias');
 const doc = await db().collection('instancias').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/instancias');
 const inst = doc.data()!;
-const nombre = etiquetaInstancia(inst);
+
+const [cursosSnap, empresasSnap] = await Promise.all([
+  db().collection('cursos').get(),
+  db().collection('empresas').orderBy('nombre').get(),
+]);
+const cursoTitulo = cursosSnap.docs.find((d) => d.id === inst.cursoId)?.data().titulo;
+const empresaNombre = empresasSnap.docs.find((d) => d.id === inst.empresaId)?.data().nombre;
+const nombre = etiquetaInstancia(inst, cursoTitulo, empresaNombre);
 const rutas = rutasInstancia(id);
-const empSnap = await db().collection('empresas').orderBy('nombre').get();
-const empresas = empSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
-const encSnap = await db().collection('encuentros').where('instanciaId', '==', id).get();
-const encVigentes = encSnap.docs.filter((enc) => !enc.data().archivado);
-let actividadesN = 0;
-for (const enc of encVigentes) {
-  const acts = await db().collection('actividades').where('encuentroId', '==', enc.id).get();
-  actividadesN += acts.size;
-}
-const encuentrosN = encVigentes.length;
+const empresas = empresasSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
 const error = Astro.url.searchParams.get('error');
 ---
 <Layout title={`Duplicar — ${nombre}`} noindex={true} whatsapp={false}>
@@ -32,15 +30,14 @@ const error = Astro.url.searchParams.get('error');
       crumbs={migasInstancia({ pagina: 'duplicar', instanciaId: id, instanciaLabel: nombre })}
     />
     <p class="admin-links">
-      <a href={rutas.cronograma}>← Cronograma</a>
+      <a href={rutas.ficha}>← Instancia</a>
       <a href="/admin/instancias">Instancias</a>
     </p>
-    <p>Se copia el contenido del curso. Elegí la organización nueva y las fechas.</p>
-    <p>Se van a copiar <strong>{encuentrosN} encuentros</strong> y <strong>{actividadesN} actividades</strong> (con códigos nuevos). Los encuentros archivados no se copian.</p>
+    <p>Se copia el mismo curso, con nueva empresa y fechas. Las actividades y QR son del curso, así que no hace falta duplicarlas: son las mismas de siempre.</p>
     {error && <p class="admin-alert">Faltan la empresa o la fecha de inicio.</p>}
     <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
       <input type="hidden" name="id" value={id} />
-      <AdminCampo titulo="Empresa o sindicato" ayuda="La organización nueva. Se copian encuentros y actividades, con códigos QR nuevos. La copia arranca privada.">
+      <AdminCampo titulo="Empresa o sindicato" ayuda="La organización nueva. La copia arranca privada.">
         <select name="empresaId" required>
           <option value="">Elegí una empresa</option>
           {empresas.map((e) => (
@@ -51,7 +48,7 @@ const error = Astro.url.searchParams.get('error');
       <AdminCampo titulo="Fecha de inicio" ayuda="Primer día de la cursada nueva. Obligatorio.">
         <input type="date" name="fechaInicio" required />
       </AdminCampo>
-      <AdminCampo titulo="Fecha de fin" ayuda="Último día previsto. Si es un solo encuentro, puede ser el mismo día. Podés dejarlo vacío.">
+      <AdminCampo titulo="Fecha de fin" ayuda="Último día previsto. Podés dejarlo vacío.">
         <input type="date" name="fechaFin" />
       </AdminCampo>
       <button type="submit">Duplicar</button>

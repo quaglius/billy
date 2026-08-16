@@ -11,49 +11,23 @@ const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/cursos');
 
 const cursoSnap = await db().collection('cursos').where('slug', '==', slug).limit(1).get();
-const instSnap = await db().collection('instancias').where('slug', '==', slug).limit(1).get();
+if (cursoSnap.empty) return Astro.redirect('/cursos');
 
-let titulo = '';
-let descripcion = '';
-let noindex = false;
-let extra = '';
-let formato = '';
-let objetivos: string[] = [];
-let temario: string[] = [];
-let imagen: string | null = null;
+const c = cursoSnap.docs[0]!.data();
+if (!c.publicado) return Astro.redirect('/cursos');
 
-if (!cursoSnap.empty) {
-  const c = cursoSnap.docs[0]!.data();
-  if (!c.publicado) return Astro.redirect('/cursos');
-  titulo = String(c.titulo ?? '');
-  descripcion = String(c.descripcion ?? '');
-  formato = String(c.formato ?? '');
-  objetivos = Array.isArray(c.objetivos) ? c.objetivos.map(String) : [];
-  temario = Array.isArray(c.temario) ? c.temario.map(String) : [];
-  imagen = c.imagenPortadaUrl ? String(c.imagenPortadaUrl) : null;
-} else if (!instSnap.empty) {
-  const inst = instSnap.docs[0]!;
-  const data = inst.data();
-  noindex = true;
-  const curso = await db().collection('cursos').doc(String(data.cursoId)).get();
-  const cursoData = curso.data() ?? {};
-  titulo = String(data.tituloParticular ?? cursoData.titulo ?? '');
-  descripcion = String(cursoData.descripcion ?? '');
-  extra = String(data.particularidades ?? '');
-  formato = String(cursoData.formato ?? '');
-  objetivos = Array.isArray(cursoData.objetivos) ? cursoData.objetivos.map(String) : [];
-  temario = Array.isArray(cursoData.temario) ? cursoData.temario.map(String) : [];
-  imagen = cursoData.imagenPortadaUrl ? String(cursoData.imagenPortadaUrl) : null;
-} else {
-  return Astro.redirect('/cursos');
-}
+const titulo = String(c.titulo ?? '');
+const descripcion = String(c.descripcion ?? '');
+const formato = String(c.formato ?? '');
+const objetivos: string[] = Array.isArray(c.objetivos) ? c.objetivos.map(String) : [];
+const temario: string[] = Array.isArray(c.temario) ? c.temario.map(String) : [];
+const imagen: string | null = c.imagenPortadaUrl ? String(c.imagenPortadaUrl) : null;
 
 const html = renderMarkdown(descripcion);
-const extraHtml = extra ? renderMarkdown(extra) : '';
 const cover = coverForCurso(formato, imagen);
 const coverPos = coverPositionForCurso(formato, imagen);
 ---
-<Layout title={titulo} description={descripcion.slice(0, 160)} ogImage={cover} noindex={noindex}>
+<Layout title={titulo} description={descripcion.slice(0, 160)} ogImage={cover}>
   <PageHeader titulo={titulo} actual={titulo} crumbs={[{ href: '/', label: 'Inicio' }, { href: '/cursos', label: 'Cursos' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
@@ -61,7 +35,6 @@ const coverPos = coverPositionForCurso(formato, imagen);
     </div>
     {formato && <p class="curso-card__chip">{formato}</p>}
     <div set:html={html} />
-    {extraHtml && <div set:html={extraHtml} />}
     {objetivos.length > 0 && (
       <>
         <h2>Objetivos</h2>

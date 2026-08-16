@@ -1,28 +1,30 @@
-export function etiquetaInstancia(data: { tituloParticular?: unknown; slug?: unknown }): string {
+export function etiquetaInstancia(
+  data: { tituloParticular?: unknown },
+  cursoTitulo?: string,
+  empresaNombre?: string,
+): string {
   const titulo = String(data.tituloParticular ?? '').trim();
-  return titulo || String(data.slug ?? 'Instancia');
+  if (titulo) return titulo;
+  if (cursoTitulo && empresaNombre) return `${cursoTitulo} — ${empresaNombre}`;
+  return cursoTitulo || 'Instancia';
 }
 
-export function rutasInstancia(instanciaId: string, encuentroId?: string) {
+export function rutasInstancia(instanciaId: string) {
   const base = `/admin/instancias/${instanciaId}`;
-  const encuentro = encuentroId ? `${base}/encuentros/${encuentroId}` : '';
   return {
-    cronograma: base,
+    ficha: base,
     duplicar: `${base}/duplicar`,
-    encuentro,
   };
 }
 
 export type Miga = { href?: string; label: string };
 
-type PaginaInstancia = 'listado' | 'cronograma' | 'duplicar' | 'encuentro';
+type PaginaInstancia = 'listado' | 'ficha' | 'duplicar';
 
 export function migasInstancia(args: {
   pagina: PaginaInstancia;
   instanciaId?: string;
   instanciaLabel?: string;
-  encuentroId?: string;
-  encuentroLabel?: string;
 }): Miga[] {
   const admin = { href: '/admin', label: 'Admin' };
   const listado = { href: '/admin/instancias', label: 'Instancias' };
@@ -33,17 +35,23 @@ export function migasInstancia(args: {
 
   const instanciaId = args.instanciaId ?? '';
   const nombre = args.instanciaLabel || 'Instancia';
-  const cronogramaHref = `/admin/instancias/${instanciaId}`;
-  const inst = { href: cronogramaHref, label: nombre };
-  const cronograma = { href: cronogramaHref, label: 'Cronograma' };
+  const fichaHref = `/admin/instancias/${instanciaId}`;
 
-  if (args.pagina === 'cronograma') {
-    return [admin, listado, inst, { label: 'Cronograma' }];
-  }
-  if (args.pagina === 'duplicar') {
-    return [admin, listado, inst, { label: 'Duplicar' }];
+  if (args.pagina === 'ficha') {
+    return [admin, listado, { label: nombre }];
   }
 
-  const encuentroLabel = args.encuentroLabel || 'Encuentro';
-  return [admin, listado, inst, cronograma, { label: encuentroLabel }];
+  return [admin, listado, { href: fichaHref, label: nombre }, { label: 'Duplicar' }];
+}
+
+export function estadoInstancia(
+  fechaInicio: Date | null,
+  fechaFin: Date | null,
+  ahora: Date = new Date(),
+): 'completado' | 'en curso' | 'próxima' | 'sin fecha' {
+  if (!fechaInicio) return 'sin fecha';
+  const fin = fechaFin ?? fechaInicio;
+  if (fin.getTime() < ahora.getTime()) return 'completado';
+  if (fechaInicio.getTime() > ahora.getTime()) return 'próxima';
+  return 'en curso';
 }
