@@ -49,10 +49,8 @@ try {
           {empresas.get(i.empresaId) ?? i.empresaId}
           {' · '}
           {i.visibilidad}
-          <form method="post" action="/api/admin/instancias/duplicar" style="display:inline">
-            <input type="hidden" name="id" value={i.id} />
-            <button type="submit">Duplicar</button>
-          </form>
+          {' · '}
+          <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
         </li>
       ))}
     </ul>

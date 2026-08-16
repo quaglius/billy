@@ -1,0 +1,36 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import { db } from '../../../../lib/firebase-admin';
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect('/admin/instancias');
+const doc = await db().collection('instancias').doc(id).get();
+if (!doc.exists) return Astro.redirect('/admin/instancias');
+const inst = doc.data()!;
+const empSnap = await db().collection('empresas').orderBy('nombre').get();
+const empresas = empSnap.docs.map((d) => ({ id: d.id, nombre: String(d.data().nombre ?? d.id) }));
+const error = Astro.url.searchParams.get('error');
+---
+<Layout title="Duplicar instancia" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin/instancias">← Instancias</a></p>
+    <h1>Duplicar {inst.slug}</h1>
+    <p>Se copia el contenido del curso. Elegí la organización nueva y las fechas.</p>
+    {error && <p>Faltan la empresa o la fecha de inicio.</p>}
+    <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
+      <input type="hidden" name="id" value={id} />
+      <label>
+        Empresa o sindicato
+        <select name="empresaId" required>
+          <option value="">Elegí una empresa</option>
+          {empresas.map((e) => (
+            <option value={e.id}>{e.nombre}</option>
+          ))}
+        </select>
+      </label>
+      <label>Fecha de inicio <input type="date" name="fechaInicio" required /></label>
+      <label>Fecha de fin <input type="date" name="fechaFin" /></label>
+      <button type="submit">Duplicar</button>
+    </form>
+  </div>
+</Layout>
