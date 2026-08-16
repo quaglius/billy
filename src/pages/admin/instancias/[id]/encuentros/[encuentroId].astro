@@ -1,0 +1,64 @@
+---
+import Layout from '../../../../../layouts/Layout.astro';
+import { db } from '../../../../../lib/firebase-admin';
+
+const { id, encuentroId } = Astro.params;
+if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
+const enc = await db().collection('encuentros').doc(encuentroId).get();
+if (!enc.exists) return Astro.redirect(`/admin/instancias/${id}`);
+const e = enc.data()!;
+
+const actSnap = await db()
+  .collection('actividades')
+  .where('encuentroId', '==', encuentroId)
+  .orderBy('orden')
+  .get();
+const actividades = actSnap.docs.map((d) => {
+  const data = d.data();
+  return {
+    id: d.id,
+    consigna: String(data.consigna ?? ''),
+    tipo: String(data.tipo ?? ''),
+    codigo: String(data.codigo ?? ''),
+    activa: Boolean(data.activa),
+    orden: Number(data.orden ?? 0),
+  };
+});
+---
+<Layout title={`Actividades — ${e.titulo}`} noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href={`/admin/instancias/${id}`}>← Instancia</a></p>
+    <h1>{e.titulo}</h1>
+    <p><a href={`/admin/instancias/${id}/encuentros/${encuentroId}/vivo`}>Pantalla en vivo</a></p>
+    <ul>
+      {actividades.map((a) => (
+        <li>
+          {a.orden}. {a.consigna} ({a.tipo}) — código {a.codigo}
+          {a.activa ? ' · activa' : ''}
+        </li>
+      ))}
+    </ul>
+    {actividades.length === 0 && <p>No hay actividades todavía.</p>}
+
+    <h2>Nueva actividad</h2>
+    <form class="admin-form" method="post" action="/api/admin/actividades">
+      <input type="hidden" name="encuentroId" value={encuentroId} />
+      <input type="hidden" name="instanciaId" value={id} />
+      <label>Orden <input type="number" name="orden" value={actividades.length + 1} required /></label>
+      <label>
+        Tipo
+        <select name="tipo">
+          <option value="si_no">si_no</option>
+          <option value="seleccion_unica">seleccion_unica</option>
+          <option value="seleccion_multiple">seleccion_multiple</option>
+          <option value="numero">numero</option>
+          <option value="fecha">fecha</option>
+          <option value="texto_libre">texto_libre</option>
+        </select>
+      </label>
+      <label>Consigna <textarea name="consigna" rows="3" required></textarea></label>
+      <label>Opciones (una por línea, si aplica) <textarea name="opciones" rows="4"></textarea></label>
+      <button type="submit">Crear</button>
+    </form>
+  </div>
+</Layout>

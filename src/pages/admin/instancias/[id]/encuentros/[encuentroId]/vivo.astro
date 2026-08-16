@@ -1,0 +1,46 @@
+---
+import Layout from '../../../../../../layouts/Layout.astro';
+import { db } from '../../../../../../lib/firebase-admin';
+
+const { id, encuentroId } = Astro.params;
+if (!id || !encuentroId) return Astro.redirect('/admin/instancias');
+
+const actSnap = await db()
+  .collection('actividades')
+  .where('encuentroId', '==', encuentroId)
+  .orderBy('orden')
+  .get();
+const actividades = actSnap.docs.map((d) => {
+  const data = d.data();
+  return {
+    id: d.id,
+    consigna: String(data.consigna ?? ''),
+    codigo: String(data.codigo ?? ''),
+    activa: Boolean(data.activa),
+    tipo: String(data.tipo ?? ''),
+  };
+});
+const activa = actividades.find((a) => a.activa);
+const site = Astro.site ? Astro.site.toString().replace(/\/$/, '') : '';
+const urlParticipante = activa ? `${site}/a/${activa.codigo}` : '';
+---
+<Layout title="En vivo" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href={`/admin/instancias/${id}/encuentros/${encuentroId}`}>← Actividades</a></p>
+    <h1>Pantalla en vivo</h1>
+    {activa ? (
+      <>
+        <p class="hero-title">{activa.codigo}</p>
+        <p>{activa.consigna}</p>
+        {urlParticipante && (
+          <p>
+            <a href={`/a/${activa.codigo}`}>{urlParticipante}</a>
+          </p>
+        )}
+        <p>Los gráficos en vivo se actualizan por sondeo. Próximo paso: QR y resultados.</p>
+      </>
+    ) : (
+      <p>No hay actividad activa. Activá una desde la lista de actividades.</p>
+    )}
+  </div>
+</Layout>

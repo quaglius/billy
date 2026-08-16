@@ -1,0 +1,43 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+let empresas: { id: string; nombre: string; slug: string }[] = [];
+let errorCarga = '';
+try {
+  const snap = await db().collection('empresas').orderBy('nombre').get();
+  empresas = snap.docs.map((d) => ({
+    id: d.id,
+    nombre: String(d.data().nombre ?? ''),
+    slug: String(d.data().slug ?? ''),
+  }));
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las empresas.';
+}
+---
+<Layout title="Empresas — Admin" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin">← Panel</a></p>
+    <h1>Empresas</h1>
+    {errorCarga && <p>{errorCarga}</p>}
+    <ul>
+      {empresas.map((e) => (
+        <li>
+          <a href={`/admin/empresas/${e.id}`}>{e.nombre}</a>
+        </li>
+      ))}
+    </ul>
+    {empresas.length === 0 && !errorCarga && <p>No hay empresas todavía.</p>}
+
+    <h2>Nueva empresa</h2>
+    <form class="admin-form" method="post" action="/api/admin/empresas">
+      <label>Nombre <input type="text" name="nombre" required /></label>
+      <label>Rubro <input type="text" name="rubro" /></label>
+      <label>Contacto <input type="text" name="contactoNombre" /></label>
+      <label>Email (interno, nunca público) <input type="email" name="contactoEmail" /></label>
+      <label>Teléfono (interno, nunca público) <input type="text" name="contactoTelefono" /></label>
+      <label>Notas internas <textarea name="notasInternas" rows="3"></textarea></label>
+      <button type="submit">Crear</button>
+    </form>
+  </div>
+</Layout>

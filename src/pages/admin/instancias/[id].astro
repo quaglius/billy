@@ -1,0 +1,58 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+import { estadoEncuentro } from '../../../lib/encuentro';
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect('/admin/instancias');
+const doc = await db().collection('instancias').doc(id).get();
+if (!doc.exists) return Astro.redirect('/admin/instancias');
+const inst = doc.data()!;
+
+const encSnap = await db()
+  .collection('encuentros')
+  .where('instanciaId', '==', id)
+  .orderBy('orden')
+  .get();
+
+const encuentros = encSnap.docs.map((d) => {
+  const data = d.data();
+  const fechaHora = data.fechaHora?.toDate?.() ?? new Date(data.fechaHora);
+  return {
+    id: d.id,
+    titulo: String(data.titulo ?? ''),
+    orden: Number(data.orden ?? 0),
+    fechaHora,
+    duracionMinutos: data.duracionMinutos ?? null,
+    estado: estadoEncuentro(fechaHora, data.duracionMinutos ?? null),
+  };
+});
+---
+<Layout title={`Instancia — ${inst.slug}`} noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin/instancias">← Instancias</a></p>
+    <h1>{inst.slug}</h1>
+    <p>Visibilidad: {inst.visibilidad}</p>
+    <h2>Cronograma</h2>
+    <ul>
+      {encuentros.map((e) => (
+        <li>
+          {e.orden}. {e.titulo} — {e.estado}
+          {' · '}
+          <a href={`/admin/instancias/${id}/encuentros/${e.id}`}>Actividades</a>
+        </li>
+      ))}
+    </ul>
+    {encuentros.length === 0 && <p>No hay encuentros todavía.</p>}
+
+    <h2>Nuevo encuentro</h2>
+    <form class="admin-form" method="post" action="/api/admin/encuentros">
+      <input type="hidden" name="instanciaId" value={id} />
+      <label>Orden <input type="number" name="orden" value={encuentros.length + 1} required /></label>
+      <label>Título <input type="text" name="titulo" required /></label>
+      <label>Fecha y hora <input type="datetime-local" name="fechaHora" required /></label>
+      <label>Duración (minutos) <input type="number" name="duracionMinutos" value="120" /></label>
+      <button type="submit">Crear</button>
+    </form>
+  </div>
+</Layout>

@@ -1,0 +1,61 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+let cursos: { id: string; titulo: string; slug: string; formato: string; publicado: boolean }[] = [];
+let errorCarga = '';
+try {
+  const snap = await db().collection('cursos').orderBy('titulo').get();
+  cursos = snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      titulo: String(data.titulo ?? ''),
+      slug: String(data.slug ?? ''),
+      formato: String(data.formato ?? ''),
+      publicado: Boolean(data.publicado),
+    };
+  });
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los cursos.';
+}
+---
+<Layout title="Cursos — Admin" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin">← Panel</a></p>
+    <h1>Cursos</h1>
+    {errorCarga && <p>{errorCarga}</p>}
+    <ul>
+      {cursos.map((c) => (
+        <li>
+          <a href={`/admin/cursos/${c.id}`}>{c.titulo}</a>
+          {' — '}
+          {c.formato}
+          {c.publicado ? ' · publicado' : ' · borrador'}
+        </li>
+      ))}
+    </ul>
+    {cursos.length === 0 && !errorCarga && <p>No hay cursos todavía.</p>}
+
+    <h2>Nuevo curso</h2>
+    <form class="admin-form" method="post" action="/api/admin/cursos">
+      <label>Título <input type="text" name="titulo" required /></label>
+      <label>Descripción corta <input type="text" name="descripcionCorta" /></label>
+      <label>Descripción <textarea name="descripcion" rows="4"></textarea></label>
+      <label>
+        Formato
+        <select name="formato">
+          <option value="encuentro">encuentro</option>
+          <option value="taller">taller</option>
+          <option value="programa">programa</option>
+        </select>
+      </label>
+      <label>Duración <input type="text" name="duracionTexto" /></label>
+      <label>Dirigido a <input type="text" name="dirigidoA" /></label>
+      <label>Objetivos (uno por línea) <textarea name="objetivos" rows="4"></textarea></label>
+      <label>Temario (uno por línea) <textarea name="temario" rows="4"></textarea></label>
+      <label><input type="checkbox" name="publicado" /> Publicado</label>
+      <button type="submit">Crear</button>
+    </form>
+  </div>
+</Layout>

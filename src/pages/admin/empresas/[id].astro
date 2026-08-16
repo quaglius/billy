@@ -1,0 +1,19 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect('/admin/empresas');
+const doc = await db().collection('empresas').doc(id).get();
+if (!doc.exists) return Astro.redirect('/admin/empresas');
+const e = doc.data()!;
+---
+<Layout title={`Empresa — ${e.nombre}`} noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin/empresas">← Empresas</a></p>
+    <h1>{e.nombre}</h1>
+    <p>Slug: {e.slug}</p>
+    {e.rubro && <p>Rubro: {e.rubro}</p>}
+    {e.notasInternas && <p>Notas internas: {e.notasInternas}</p>}
+  </div>
+</Layout>

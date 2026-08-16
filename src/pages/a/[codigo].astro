@@ -1,0 +1,38 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/firebase-admin';
+
+const { codigo } = Astro.params;
+let consigna = '';
+let encontrada = false;
+let activa = false;
+
+if (codigo) {
+  const snap = await db().collection('actividades').where('codigo', '==', codigo).limit(1).get();
+  if (!snap.empty) {
+    encontrada = true;
+    const a = snap.docs[0]!.data();
+    consigna = String(a.consigna ?? '');
+    activa = Boolean(a.activa);
+  }
+}
+---
+<Layout title="Participar" noindex={true}>
+  <div class="page-shell gn-prose">
+    {!encontrada && (
+      <>
+        <h1>Esta actividad no está disponible</h1>
+        <p>Prestá atención a la pantalla para la próxima.</p>
+      </>
+    )}
+    {encontrada && !activa && (
+      <p>Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.</p>
+    )}
+    {encontrada && activa && (
+      <>
+        <h1>{consigna}</h1>
+        <p>El formulario de respuesta se completa en el próximo paso del motor en vivo.</p>
+      </>
+    )}
+  </div>
+</Layout>

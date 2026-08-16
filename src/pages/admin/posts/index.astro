@@ -1,0 +1,35 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+let posts: { id: string; titulo: string; slug: string; estado: string }[] = [];
+let errorCarga = '';
+try {
+  const snap = await db().collection('posts').get();
+  posts = snap.docs.map((d) => ({
+    id: d.id,
+    titulo: String(d.data().titulo ?? ''),
+    slug: String(d.data().slug ?? ''),
+    estado: String(d.data().estado ?? 'borrador'),
+  }));
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los posts.';
+}
+---
+<Layout title="Posts — Admin" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin">← Panel</a></p>
+    <h1>Posts</h1>
+    {errorCarga && <p>{errorCarga}</p>}
+    <ul>
+      {posts.map((p) => (
+        <li>
+          <a href={`/admin/posts/${p.id}`}>{p.titulo}</a>
+          {' — '}
+          {p.estado}
+        </li>
+      ))}
+    </ul>
+    {posts.length === 0 && !errorCarga && <p>No hay posts todavía. Van a cargarse con el seed.</p>}
+  </div>
+</Layout>

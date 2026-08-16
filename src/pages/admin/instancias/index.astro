@@ -1,0 +1,102 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+let instancias: {
+  id: string;
+  slug: string;
+  visibilidad: string;
+  cursoId: string;
+  empresaId: string;
+}[] = [];
+let cursos = new Map<string, string>();
+let empresas = new Map<string, string>();
+let errorCarga = '';
+try {
+  const [instSnap, cursoSnap, empSnap] = await Promise.all([
+    db().collection('instancias').get(),
+    db().collection('cursos').get(),
+    db().collection('empresas').get(),
+  ]);
+  cursoSnap.docs.forEach((d) => cursos.set(d.id, String(d.data().titulo ?? d.id)));
+  empSnap.docs.forEach((d) => empresas.set(d.id, String(d.data().nombre ?? d.id)));
+  instancias = instSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      slug: String(data.slug ?? ''),
+      visibilidad: String(data.visibilidad ?? 'privada'),
+      cursoId: String(data.cursoId ?? ''),
+      empresaId: String(data.empresaId ?? ''),
+    };
+  });
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : 'No se pudieron leer las instancias.';
+}
+---
+<Layout title="Instancias — Admin" noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin">← Panel</a></p>
+    <h1>Instancias</h1>
+    {errorCarga && <p>{errorCarga}</p>}
+    <ul>
+      {instancias.map((i) => (
+        <li>
+          <a href={`/admin/instancias/${i.id}`}>{i.slug}</a>
+          {' — '}
+          {cursos.get(i.cursoId) ?? i.cursoId}
+          {' · '}
+          {empresas.get(i.empresaId) ?? i.empresaId}
+          {' · '}
+          {i.visibilidad}
+          <form method="post" action="/api/admin/instancias/duplicar" style="display:inline">
+            <input type="hidden" name="id" value={i.id} />
+            <button type="submit">Duplicar</button>
+          </form>
+        </li>
+      ))}
+    </ul>
+    {instancias.length === 0 && !errorCarga && <p>No hay instancias todavía.</p>}
+
+    <h2>Nueva instancia</h2>
+    <form class="admin-form" method="post" action="/api/admin/instancias">
+      <label>
+        Curso
+        <select name="cursoId" required>
+          {Array.from(cursos.entries()).map(([id, titulo]) => (
+            <option value={id}>{titulo}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Empresa
+        <select name="empresaId" required>
+          {Array.from(empresas.entries()).map(([id, nombre]) => (
+            <option value={id}>{nombre}</option>
+          ))}
+        </select>
+      </label>
+      <label>Slug público <input type="text" name="slug" required /></label>
+      <label>
+        Visibilidad
+        <select name="visibilidad">
+          <option value="privada">privada</option>
+          <option value="publica">publica</option>
+          <option value="anonimizada">anonimizada</option>
+        </select>
+      </label>
+      <label>
+        Modalidad
+        <select name="modalidad">
+          <option value="">—</option>
+          <option value="presencial">presencial</option>
+          <option value="virtual">virtual</option>
+          <option value="hibrida">hibrida</option>
+        </select>
+      </label>
+      <label>Fecha inicio <input type="date" name="fechaInicio" /></label>
+      <label>Fecha fin <input type="date" name="fechaFin" /></label>
+      <button type="submit">Crear</button>
+    </form>
+  </div>
+</Layout>
