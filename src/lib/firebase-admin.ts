@@ -14,6 +14,9 @@ export function getFirebaseAdmin(): App {
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const bucket = process.env.FIREBASE_STORAGE_BUCKET;
   const keyB64 = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64;
+  // DECISIÓN PENDIENTE: Firebase Storage para proyectos nuevos exige plan Blaze
+  // (cambio de Google desde sept 2024). El Admin SDK queda listo; no hay bucket
+  // en Spark. Portadas e imágenes se sirven desde /public hasta que se active Blaze.
 
   if (!projectId || !keyB64) {
     throw new Error(
@@ -46,5 +49,11 @@ export function db() {
 }
 
 export function storage() {
+  const bucket = process.env.FIREBASE_STORAGE_BUCKET;
+  if (!bucket) {
+    throw new Error(
+      'Firebase Storage no está disponible: Google exige plan Blaze para crear un bucket nuevo. Mientras tanto las imágenes se sirven desde /public.',
+    );
+  }
   return getStorage(getFirebaseAdmin());
 }

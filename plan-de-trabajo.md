@@ -126,6 +126,8 @@ SESSION_SECRET=            # generar una cadena aleatoria larga, distinta para c
 
 El plan gratuito de Firestore incluye, por día: 50.000 lecturas, 20.000 escrituras, 20.000 borrados, 1 GiB de almacenamiento total. Firebase Storage: 5 GB de almacenamiento, 1 GB/día de descarga. **Importante:** estas cuotas se consumen igual cuando se accede vía Admin SDK, no es "gratis por ser servidor" — el Admin SDK evita las reglas de seguridad, no el cobro/cuota. Para el volumen esperado de este proyecto (un capacitador, charlas puntuales, no miles de visitas diarias) esto alcanza de sobra. Si en algún momento el sondeo de la pantalla en vivo (§6.5) empieza a acercarse al límite de lecturas por un evento con mucha gente, la solución es espaciar el intervalo de sondeo, no cambiar de plan — no hay que anticiparse a ese problema ahora.
 
+> **Estado Storage (ago 2026):** Google exige plan **Blaze** para crear un bucket nuevo (cambio de sept 2024). El proyecto `guille-nuesch` está en Spark y **no tiene bucket**. No se fuerza el upgrade. El Admin SDK queda preparado (`storage()` falla con un error explícito si no hay `FIREBASE_STORAGE_BUCKET`). Portadas e imágenes se sirven desde `/public` hasta que alguien active Blaze a conciencia.
+
 ### 2.6 Qué NO hacer en esta etapa
 
 - No elegir Next.js, Remix, SvelteKit ni ningún otro framework "porque es más conocido". La decisión ya está tomada y justificada arriba.
