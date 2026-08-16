@@ -1,65 +1,228 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FlujoPasos from '../components/FlujoPasos.astro';
+
 export const prerender = true;
+
+const pasosUso = [
+  {
+    titulo: 'Cargar una charla nueva para una organización',
+    texto:
+      'Vas a /admin/instancias, tocás "Nueva", elegís cuál de tus tres formatos es (Encuentro, Taller o Programa), para qué empresa o sindicato es, y las fechas. Si ya diste ese mismo curso antes para otra organización, mejor: buscá esa instancia vieja y tocá "Duplicar" — te arma una copia con el mismo contenido, vos solo cambiás la organización y las fechas.',
+  },
+  {
+    titulo: 'Las preguntas de cada curso — con QR fijo, para siempre',
+    texto:
+      'Esto es clave: las preguntas no se cargan por charla, se cargan una sola vez por curso, en /admin/cursos, el curso que corresponda. Cada pregunta te queda con un código y un QR que no cambian nunca. Imprimís ese QR una vez y lo usás en todas las charlas de ese curso, sea la organización que sea. Elegís el tipo: Sí/No, opción única, opción múltiple, número, fecha, o texto libre (esta arma una nube de palabras con lo que escribe la gente, queda muy bien proyectada). Ya te dejamos tres cursos con preguntas de ejemplo cargadas — podés usarlas tal cual o cambiarlas.',
+  },
+  {
+    titulo: 'El día de la charla',
+    texto:
+      'Desde la ficha del curso, tocás "Ir en vivo" en la pregunta que vas a usar y la proyectás en tu notebook o tablet. Ahí aparece el QR grande y también un código cortito para el que no puede escanear. La gente entra desde su celular, sin bajar nada, sin registrarse, contesta, y vos ves el gráfico armarse en vivo (tarda un par de segundos, no es instantáneo pero se siente en vivo). Antes de arrancar con un grupo nuevo, tocá "Renovar" en esa pregunta: como el QR es siempre el mismo, si ya la usaste en otra charla la pantalla podría mostrarte resultados viejos mezclados con los nuevos. Renovar hace que el conteo de esa pantalla arranque de cero, pero no borra nada — todo el historial sigue sumando en las estadísticas del curso y en el Observatorio, para siempre.',
+  },
+  {
+    titulo: 'Después de la charla',
+    texto:
+      'Nada más que hacer con el sistema: las respuestas ya quedaron guardadas, sumadas a las de todas las veces anteriores que diste ese mismo curso. Con el tiempo vas a poder ver, en el Observatorio y en la ficha de cada curso o instancia, cosas como "el 78% de la gente que pasó por mis encuentros dijo que se preocupó por un compañero y no supo qué hacer" — un dato real, tuyo, que no tiene nadie más. Si alguna vez cargaste una respuesta de prueba y no querés que ensucie ese dato, desde el Observatorio podés borrar el historial de una pregunta puntual — eso sí es definitivo, así que se pide confirmación aparte.',
+  },
+  {
+    titulo: 'El blog',
+    texto:
+      'Ya están publicadas 9 notas completas. El post del protocolo SRT 2026 quedó en borrador hasta cotejar el texto con el Boletín Oficial. Para editar o publicar, entrá a /admin/posts.',
+  },
+];
 ---
-<Layout title="Che, Guillermo — esto es lo que armamos" noindex={true}>
-  <article class="page-shell gn-prose">
-    <h1>Che, Guillermo — esto es lo que armamos</h1>
-    <p>Esta página es solo para vos. No está en el menú del sitio y no aparece en Google. Es la explicación de qué es esto, cómo se usa, y qué hacer primero.</p>
+<Layout title="Che, Guillermo — esto es lo que armamos" noindex={true} whatsapp={false}>
+  <article class="page-shell gn-prose ayuda-guille">
+    <header class="ayuda-guille__hero">
+      <img
+        src="/fotos/guille/about-gesticulando.png"
+        alt="Guillermo Nuesch"
+        width="220"
+        height="220"
+        class="ayuda-guille__foto"
+      />
+      <div>
+        <p class="eyebrow">Solo para vos</p>
+        <h1>Che, Guillermo — esto es lo que armamos</h1>
+        <p>Esta página no está en el menú del sitio y no aparece en Google. Es la explicación de qué es esto, cómo se usa, y qué hacer primero.</p>
+      </div>
+    </header>
 
-    <h2>Qué es esto, en una frase</h2>
-    <p>Un sitio con tu nombre, un blog, y algo que hoy no tiene nadie en tu rubro en Argentina: un sistema para hacer las dinámicas de tus charlas con el celular de la gente, en vivo, de forma anónima, y que te queden los resultados guardados.</p>
+    <section class="ayuda-guille__banda">
+      <p class="eyebrow">Qué es esto, en una frase</p>
+      <p class="ayuda-guille__frase">
+        Un sitio con tu nombre, un blog, y algo que hoy no tiene nadie en tu rubro en Argentina: un
+        sistema para hacer las dinámicas de tus charlas con el celular de la gente, en vivo, de
+        forma anónima, y que te queden los resultados guardados.
+      </p>
+    </section>
 
-    <h2>Por qué lo armamos así</h2>
-    <p>Relevamos las páginas de otras consultoras y capacitadores del rubro (Convivir, Lumenti, Ahora Wellness, y varios speakers corporativos). Todas se parecen: una fundación sin cara visible, o un catálogo de charlas sin nada más. Ninguna tiene lo que vos tenés — 25 años de laburo real, con sindicatos, con ART, con el Estado, en comedores de planta y talleres ferroviarios, no en oficinas. El sitio está pensado para que eso se note, no para que te parezcas a ellos.</p>
-    <p>Y hay una sola cosa que nadie más ofrece: la posibilidad de que, en medio de una charla, la gente conteste algo desde el celular — anónimo, nadie sabe quién contestó qué — y vos veas el resultado proyectado en el momento. Es la versión digital de lo que ya hacés con tus "disparadores y dinámicas interactivas", pero con memoria: cada encuentro deja un dato que se suma a los anteriores.</p>
+    <section class="ayuda-guille__split">
+      <img src="/fotos/campo/piso-operativos.jpg" alt="" width="360" height="270" loading="lazy" />
+      <div>
+        <h2>Por qué lo armamos así</h2>
+        <p>Relevamos las páginas de otras consultoras y capacitadores del rubro (Convivir, Lumenti, Ahora Wellness, y varios speakers corporativos). Todas se parecen: una fundación sin cara visible, o un catálogo de charlas sin nada más. Ninguna tiene lo que vos tenés — 25 años de laburo real, con sindicatos, con ART, con el Estado, en comedores de planta y talleres ferroviarios, no en oficinas. El sitio está pensado para que eso se note, no para que te parezcas a ellos.</p>
+        <p>Y hay una sola cosa que nadie más ofrece: la posibilidad de que, en medio de una charla, la gente conteste algo desde el celular — anónimo, nadie sabe quién contestó qué — y vos veas el resultado proyectado en el momento. Es la versión digital de lo que ya hacés con tus "disparadores y dinámicas interactivas", pero con memoria: cada encuentro deja un dato que se suma a los anteriores.</p>
+      </div>
+    </section>
 
-    <h2>Cómo entrás</h2>
-    <p>El sitio tiene una parte pública (la que ve cualquiera) y un panel privado para vos, en <a href="/admin">/admin</a>. Te vamos a pasar el usuario y la contraseña por WhatsApp, aparte de esta página — no los escribimos acá por seguridad.</p>
+    <blockquote class="ayuda-guille__nota">
+      <p class="ayuda-guille__nota-icono" aria-hidden="true">🔑</p>
+      <p><strong>Cómo entrás:</strong> el sitio tiene una parte pública (la que ve cualquiera) y un panel privado para vos, en <a href="/admin">/admin</a>. Te vamos a pasar el usuario y la contraseña por WhatsApp, aparte de esta página — no los escribimos acá por seguridad.</p>
+    </blockquote>
 
-    <h2>Cómo se usa — lo que vas a hacer más seguido</h2>
-    <h3>1. Cargar una charla nueva para una organización</h3>
-    <p>Vas a <a href="/admin/instancias">/admin/instancias</a>, tocás "Nueva", elegís cuál de tus tres formatos es (Encuentro, Taller o Programa), para qué empresa o sindicato es, y las fechas. Si ya diste ese mismo curso antes para otra organización, mejor: buscá esa instancia vieja y tocá "Duplicar" — te arma una copia con el mismo contenido, vos solo cambiás la organización y las fechas.</p>
+    <section>
+      <p class="eyebrow">Paso a paso</p>
+      <h2>Cómo se usa — lo que vas a hacer más seguido</h2>
+      <p>Tocá cada paso para ver el detalle.</p>
+      <FlujoPasos pasos={pasosUso} prefijo="ayuda" />
+    </section>
 
-    <h3>2. Las preguntas de cada curso — con QR fijo, para siempre</h3>
-    <p>Esto es clave y es distinto a como lo pensamos al principio: las preguntas <strong>no se cargan por charla</strong>, se cargan <strong>una sola vez por curso</strong>, en <a href="/admin/cursos">/admin/cursos</a> → el curso que corresponda. Cada pregunta te queda con un código y un QR que <strong>no cambian nunca</strong>. Imprimís ese QR una vez y lo usás en todas las charlas de ese curso, sea la organización que sea. Elegís el tipo: Sí/No, opción única, opción múltiple, número, fecha, o texto libre (esta arma una nube de palabras con lo que escribe la gente, queda muy bien proyectada). Ya te dejamos tres cursos con preguntas de ejemplo cargadas — podés usarlas tal cual o cambiarlas.</p>
+    <section class="ayuda-guille__prioridades">
+      <p class="eyebrow">Tus prioridades</p>
+      <h2>Qué atacar primero</h2>
 
-    <h3>3. El día de la charla</h3>
-    <p>Desde la ficha del curso, tocás "Ir en vivo" en la pregunta que vas a usar y la proyectás en tu notebook o tablet. Ahí aparece el QR grande y también un código cortito para el que no puede escanear. La gente entra desde su celular, sin bajar nada, sin registrarse, contesta, y vos ves el gráfico armarse en vivo (tarda un par de segundos, no es instantáneo pero se siente en vivo).</p>
-    <p><strong>Antes de arrancar con un grupo nuevo, tocá "Renovar"</strong> en esa pregunta. Como el QR es siempre el mismo, si ya la usaste en otra charla (a la mañana con un grupo, a la tarde con otro) la pantalla podría mostrarte resultados viejos mezclados con los nuevos — Renovar hace que el conteo de esa pantalla arranque de cero. <strong>No borra nada:</strong> todo el historial sigue sumando en las estadísticas del curso y en el Observatorio, para siempre. Renovar es solo "quiero ver de nuevo desde cero en la pantalla", no "borrar lo que pasó".</p>
+      <div class="ayuda-guille__bloque">
+        <h3><span class="ayuda-guille__icono" aria-hidden="true">📆</span> Esta semana, sin necesidad de tocar el sitio</h3>
+        <ul class="ayuda-guille__lista">
+          <li>Probá la dinámica de preguntas en tu próxima charla, aunque sea con lápiz y papel o a mano alzada, para ver si engancha con tu público real</li>
+          <li>Empezá a conectar en LinkedIn con la gente con la que ya trabajaste — delegados, RRHH, gente de ART y sindicatos de estos 25 años. Hoy tenés muy pocos contactos ahí, y es lo que más rápido te va a servir</li>
+          <li>Después de cada charla que des, grabate un audio de 2 minutos contando qué preguntó la gente, qué te sorprendió, qué frase se te quedó dando vueltas. Con eso solo, sin escribir nada más, se arma contenido para el blog, LinkedIn e Instagram</li>
+        </ul>
+      </div>
 
-    <h3>4. Después de la charla</h3>
-    <p>Nada más que hacer con el sistema — las respuestas ya quedaron guardadas, sumadas a las de todas las veces anteriores que diste ese mismo curso. Con el tiempo vas a poder ver, en el panel de "Observatorio" y en las estadísticas de cada curso, cosas como "el 78% de la gente que pasó por mis encuentros dijo que se preocupó por un compañero y no supo qué hacer" — un dato real, tuyo, que no tiene nadie más. Si alguna vez cargaste una respuesta de prueba y no querés que ensucie ese dato, desde el Observatorio podés borrar el historial de una pregunta puntual — eso sí es definitivo, así que se pide confirmación aparte.</p>
+      <div class="ayuda-guille__bloque">
+        <h3><span class="ayuda-guille__icono" aria-hidden="true">🌐</span> Cuando el sitio esté publicado</h3>
+        <ul class="ayuda-guille__lista">
+          <li>Revisá la página <a href="/sobre-mi">/sobre-mi</a> y avisanos si algo de tu historia está mal contado</li>
+          <li>Revisá las notas publicadas en <a href="/blog">/blog</a> y avisanos si alguna no suena a tu voz. El protocolo SRT sigue en borrador hasta verificarlo contra el Boletín Oficial</li>
+          <li>Mandanos el contacto de alguien de SITOS, la Fundación Provincia ART, o Trenes Argentinos que te pueda dar un testimonio real — hoy tenemos tres inventados solo para mostrar cómo se ve la sección, hay que reemplazarlos</li>
+        </ul>
+      </div>
 
-    <h3>5. El blog</h3>
-    <p>Ya están publicadas 9 notas completas (las de la sección 7 del plan de contenido). El post del protocolo SRT 2026 quedó en borrador hasta cotejar el texto con el Boletín Oficial. Para editar o publicar, entrá a <a href="/admin/posts">/admin/posts</a>.</p>
+      <div class="ayuda-guille__bloque">
+        <h3><span class="ayuda-guille__icono" aria-hidden="true">📷</span> En redes (Instagram @equilibrarprosalud)</h3>
+        <ul class="ayuda-guille__lista">
+          <li>Cambiá la foto de perfil y la biografía (te vamos a pasar el archivo listo)</li>
+          <li>Empezá a publicar 2-3 veces por semana con lo que ya tenés: fotos de tus charlas + el audio de 2 minutos de después de cada encuentro</li>
+          <li>Nunca publiques la cara de un trabajador sin que te digan que sí — mejor una foto de espaldas o de todo el grupo que arriesgarte</li>
+        </ul>
+      </div>
+    </section>
 
-    <h2>Tus prioridades — qué atacar primero</h2>
-    <h3>Esta semana, sin necesidad de tocar el sitio:</h3>
-    <ul>
-      <li>Probá la dinámica de preguntas en tu próxima charla, aunque sea con lápiz y papel o a mano alzada, para ver si engancha con tu público real</li>
-      <li>Empezá a conectar en LinkedIn con la gente con la que ya trabajaste — delegados, RRHH, gente de ART y sindicatos de estos 25 años. Hoy tenés muy pocos contactos ahí, y es lo que más rápido te va a servir</li>
-      <li>Después de cada charla que des, grabate un audio de 2 minutos contando qué preguntó la gente, qué te sorprendió, qué frase se te quedó dando vueltas. Con eso solo, sin escribir nada más, se arma contenido para el blog, LinkedIn e Instagram</li>
-    </ul>
+    <section>
+      <h2>Más adelante (no ahora)</h2>
+      <p>Certificados descargables, el quiz final con explicación, y saber quién completó cada curso: eso lo dejamos pensado pero no lo construimos todavía. Primero queremos ver si la parte de las preguntas en vivo funciona bien en tus charlas reales.</p>
+    </section>
 
-    <h3>Cuando el sitio esté publicado:</h3>
-    <ul>
-      <li>Revisá la página <a href="/sobre-mi">/sobre-mi</a> y avisanos si algo de tu historia está mal contado</li>
-      <li>Revisá las notas publicadas en <a href="/blog">/blog</a> y avisanos si alguna no suena a tu voz. El protocolo SRT sigue en borrador hasta verificarlo contra el Boletín Oficial</li>
-      <li>Mandanos el contacto de alguien de SITOS, la Fundación Provincia ART, o Trenes Argentinos que te pueda dar un testimonio real — hoy tenemos tres inventados solo para mostrar cómo se ve la sección, hay que reemplazarlos</li>
-    </ul>
-
-    <h3>En redes (Instagram @equilibrarprosalud):</h3>
-    <ul>
-      <li>Cambiá la foto de perfil y la biografía (te vamos a pasar el archivo listo)</li>
-      <li>Empezá a publicar 2-3 veces por semana con lo que ya tenés: fotos de tus charlas + el audio de 2 minutos de después de cada encuentro</li>
-      <li>Nunca publiques la cara de un trabajador sin que te digan que sí — mejor una foto de espaldas o de todo el grupo que arriesgarte</li>
-    </ul>
-
-    <h3>Más adelante (no ahora):</h3>
-    <p>Certificados descargables, el quiz final con explicación, y saber quién completó cada curso: eso lo dejamos pensado pero no lo construimos todavía. Primero queremos ver si la parte de las preguntas en vivo funciona bien en tus charlas reales.</p>
-
-    <h2>Si algo no funciona o querés cambiar algo</h2>
-    <p>Anotá bien qué pantalla, qué botón, y qué esperabas que pasara. Cuanto más concreto, más rápido se arregla.</p>
+    <blockquote class="ayuda-guille__nota">
+      <p class="ayuda-guille__nota-icono" aria-hidden="true">💬</p>
+      <p><strong>Si algo no funciona o querés cambiar algo:</strong> anotá bien qué pantalla, qué botón, y qué esperabas que pasara. Cuanto más concreto, más rápido se arregla.</p>
+    </blockquote>
   </article>
 </Layout>
+
+<style>
+  .ayuda-guille__hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 8px;
+  }
+
+  .ayuda-guille__foto {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .ayuda-guille__hero h1 {
+    margin-top: 4px;
+  }
+
+  .ayuda-guille__banda {
+    background: var(--tj-color-theme-bg-2);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin: 32px 0;
+  }
+
+  .ayuda-guille__frase {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--tj-color-heading-primary);
+    margin: 0;
+  }
+
+  .ayuda-guille__split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: flex-start;
+    margin: 32px 0;
+  }
+
+  .ayuda-guille__split img {
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .ayuda-guille__split > div {
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .ayuda-guille__nota {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: #fff;
+  }
+
+  .ayuda-guille__nota-icono {
+    font-size: 22px;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .ayuda-guille__prioridades {
+    margin-top: 40px;
+  }
+
+  .ayuda-guille__bloque {
+    margin: 24px 0;
+  }
+
+  .ayuda-guille__bloque h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 19px;
+  }
+
+  .ayuda-guille__icono {
+    font-size: 22px;
+  }
+
+  .ayuda-guille__lista {
+    padding-left: 20px;
+  }
+
+  .ayuda-guille__lista li {
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .ayuda-guille__hero {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>
