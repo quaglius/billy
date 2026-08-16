@@ -72,6 +72,15 @@ export function coverPositionForFormato(formato: string): string {
   return CENTRO;
 }
 
+/** La imagen propia del curso gana siempre; si no tiene, cae al genérico por formato. */
+export function coverForCurso(formato: string, imagenPortadaUrl?: string | null): string {
+  return imagenPortadaUrl || coverForFormato(formato);
+}
+
+export function coverPositionForCurso(formato: string, imagenPortadaUrl?: string | null): string {
+  return imagenPortadaUrl ? CENTRO : coverPositionForFormato(formato);
+}
+
 export function coverMeta(slug: string, imagenPortadaUrl?: string | null): CoverMeta {
   const mapped = POST_COVERS[slug];
   if (mapped) return mapped;

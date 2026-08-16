@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
 import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
+import ImagePicker from '../../../components/ImagePicker.astro';
 import { db } from '../../../lib/firebase-admin';
 import { OBS_MIN, armarDashboard, etiquetaTipo, type ActividadObs, type RespuestaObs } from '../../../lib/observatorio';
 import { qrDataUrl, urlParticipante, urlSitio } from '../../../lib/qr';
@@ -131,6 +132,9 @@ try {
       </AdminCampo>
       <AdminCampo titulo="Temario" ayuda="Uno por línea. Los bloques o temas que se recorren.">
         <textarea name="temario" rows="4">{temario}</textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Imagen de portada" ayuda="Se usa en /cursos y en la ficha del curso. Si no elegís ninguna, se usa una imagen genérica según el formato (Encuentro, Taller o Programa).">
+        <ImagePicker id={`curso-${id}`} name="imagenPortadaUrl" valorActual={c.imagenPortadaUrl ?? ''} />
       </AdminCampo>
       <AdminCampo titulo="Publicado" ayuda="Si está marcado, el curso se ve en /cursos. Si no, queda solo en el panel.">
         <span class="admin-campo__check"><input type="checkbox" name="publicado" checked={Boolean(c.publicado)} /> Visible en el catálogo público</span>

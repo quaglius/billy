@@ -4,7 +4,7 @@ import PageHeader from '../../components/PageHeader.astro';
 import BotonPrimario from '../../components/BotonPrimario.astro';
 import { db } from '../../lib/firebase-admin';
 import { renderMarkdown } from '../../lib/markdown';
-import { coverForFormato, coverPositionForFormato } from '../../lib/covers';
+import { coverForCurso, coverPositionForCurso } from '../../lib/covers';
 import { WHATSAPP_URL } from '../../lib/site';
 
 const { slug } = Astro.params;
@@ -20,6 +20,7 @@ let extra = '';
 let formato = '';
 let objetivos: string[] = [];
 let temario: string[] = [];
+let imagen: string | null = null;
 
 if (!cursoSnap.empty) {
   const c = cursoSnap.docs[0]!.data();
@@ -29,6 +30,7 @@ if (!cursoSnap.empty) {
   formato = String(c.formato ?? '');
   objetivos = Array.isArray(c.objetivos) ? c.objetivos.map(String) : [];
   temario = Array.isArray(c.temario) ? c.temario.map(String) : [];
+  imagen = c.imagenPortadaUrl ? String(c.imagenPortadaUrl) : null;
 } else if (!instSnap.empty) {
   const inst = instSnap.docs[0]!;
   const data = inst.data();
@@ -42,20 +44,21 @@ if (!cursoSnap.empty) {
   formato = String(cursoData.formato ?? '');
   objetivos = Array.isArray(cursoData.objetivos) ? cursoData.objetivos.map(String) : [];
   temario = Array.isArray(cursoData.temario) ? cursoData.temario.map(String) : [];
+  imagen = cursoData.imagenPortadaUrl ? String(cursoData.imagenPortadaUrl) : null;
 } else {
   return Astro.redirect('/cursos');
 }
 
 const html = renderMarkdown(descripcion);
 const extraHtml = extra ? renderMarkdown(extra) : '';
-const cover = coverForFormato(formato);
-const coverPos = coverPositionForFormato(formato);
+const cover = coverForCurso(formato, imagen);
+const coverPos = coverPositionForCurso(formato, imagen);
 ---
 <Layout title={titulo} description={descripcion.slice(0, 160)} ogImage={cover} noindex={noindex}>
   <PageHeader titulo={titulo} actual={titulo} crumbs={[{ href: '/', label: 'Inicio' }, { href: '/cursos', label: 'Cursos' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
-      <img src={cover} alt="" width="1200" height="630" style={`object-position: ${coverPos}`} />
+      <img src={cover} alt={titulo} width="1200" height="630" style={`object-position: ${coverPos}`} />
     </div>
     {formato && <p class="curso-card__chip">{formato}</p>}
     <div set:html={html} />

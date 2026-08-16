@@ -2,9 +2,9 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { db } from '../../lib/firebase-admin';
-import { coverForFormato, coverPositionForFormato } from '../../lib/covers';
+import { coverForCurso, coverPositionForCurso } from '../../lib/covers';
 
-let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string }[] = [];
+let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string; imagen: string | null }[] = [];
 let instancias: { slug: string; titulo: string; visibilidad: string }[] = [];
 try {
   const [cursoSnap, instSnap] = await Promise.all([
@@ -16,6 +16,7 @@ try {
     titulo: String(d.data().titulo ?? ''),
     descripcionCorta: String(d.data().descripcionCorta ?? ''),
     formato: String(d.data().formato ?? ''),
+    imagen: d.data().imagenPortadaUrl ? String(d.data().imagenPortadaUrl) : null,
   }));
   const cursoTitulo = new Map(cursoSnap.docs.map((d) => [d.id, String(d.data().titulo ?? '')]));
   instancias = instSnap.docs.map((d) => {
@@ -45,11 +46,11 @@ try {
         <a class="curso-card" href={`/cursos/${c.slug}`}>
           <span class="curso-card__thumb">
             <img
-              src={coverForFormato(c.formato)}
-              alt=""
+              src={coverForCurso(c.formato, c.imagen)}
+              alt={c.titulo}
               width="640"
               height="400"
-              style={`object-position: ${coverPositionForFormato(c.formato)}`}
+              style={`object-position: ${coverPositionForCurso(c.formato, c.imagen)}`}
             />
           </span>
           <div class="curso-card__body">

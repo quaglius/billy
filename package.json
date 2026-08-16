@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "seed": "tsx --env-file=.env scripts/seed.ts",
-    "seed:observatorio": "tsx --env-file=.env scripts/seed-observatorio.ts"
+    "seed:observatorio": "tsx --env-file=.env scripts/seed-observatorio.ts",
+    "seed:imagenes": "tsx --env-file=.env scripts/seed-imagenes.ts"
   },
   "dependencies": {
     "@astrojs/netlify": "^6.5.13",

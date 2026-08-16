@@ -19,16 +19,24 @@ export const POST: APIRoute = async ({ request }) => {
 
   const estado = String(form.get('estado') ?? 'borrador');
   const publicado = estado === 'publicado';
-  await db()
-    .collection('posts')
-    .doc(id)
-    .update({
-      titulo,
-      bajada: String(form.get('bajada') ?? ''),
-      cuerpoMd: String(form.get('cuerpoMd') ?? ''),
-      estado,
-      publicadoEn: publicado ? FieldValue.serverTimestamp() : null,
-    });
+  const imagenPortadaUrl = String(form.get('imagenPortadaUrl') ?? '').trim() || null;
+
+  const ref = db().collection('posts').doc(id);
+  const actual = await ref.get();
+  // No pisar la fecha de publicación original si se pasa a borrador y se vuelve a publicar:
+  // solo se pone la fecha la primera vez que el post pasa a publicado.
+  const yaTeniaFecha = Boolean(actual.data()?.publicadoEn);
+  const payload: Record<string, unknown> = {
+    titulo,
+    bajada: String(form.get('bajada') ?? ''),
+    cuerpoMd: String(form.get('cuerpoMd') ?? ''),
+    imagenPortadaUrl,
+    estado,
+  };
+  if (publicado && !yaTeniaFecha) {
+    payload.publicadoEn = FieldValue.serverTimestamp();
+  }
+  await ref.update(payload);
 
   return new Response(null, {
     status: 303,

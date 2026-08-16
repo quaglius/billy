@@ -1,0 +1,129 @@
+---
+import { db } from '../lib/firebase-admin';
+
+interface Props {
+  id: string;
+  name: string;
+  valorActual?: string | null;
+  ayuda?: string;
+}
+
+const { id, name, valorActual = '', ayuda } = Astro.props;
+
+let banco: { id: string; url: string; nombre: string }[] = [];
+try {
+  const snap = await db().collection('imagenes').orderBy('nombre').get();
+  banco = snap.docs.map((d) => {
+    const data = d.data();
+    return { id: d.id, url: String(data.url ?? ''), nombre: String(data.nombre ?? '') };
+  });
+} catch {
+  // Si falla, el picker igual funciona: queda el valor actual y la carga manual de URL.
+}
+---
+<div class="img-picker" data-img-picker={id}>
+  <input type="hidden" name={name} value={valorActual ?? ''} data-img-valor />
+  <div class="img-picker__preview">
+    {valorActual ? (
+      <img src={valorActual} alt="" data-img-preview />
+    ) : (
+      <span class="img-picker__vacio" data-img-preview-vacio>Sin imagen</span>
+    )}
+  </div>
+  <button type="button" class="admin-btn-secondary" data-img-abrir>Elegir imagen</button>
+
+  <dialog class="img-dialog" data-img-dialog>
+    <button type="button" class="qr-dialog__cerrar" data-img-cerrar aria-label="Cerrar">✕</button>
+    <h3>Elegí del banco</h3>
+    {ayuda && <p class="admin-section-nota">{ayuda}</p>}
+    <div class="img-grid">
+      {banco.map((img) => (
+        <button type="button" class="img-grid__item" data-img-elegir data-url={img.url} data-nombre={img.nombre}>
+          <img src={img.url} alt={img.nombre} loading="lazy" />
+          <span>{img.nombre}</span>
+        </button>
+      ))}
+      {banco.length === 0 && <p>Todavía no hay imágenes en el banco.</p>}
+    </div>
+
+    <h3>O subí una nueva</h3>
+    <p class="admin-section-nota" data-img-upload-nota>
+      Necesita el plan Blaze de Firebase (pago por uso, con capa gratuita) para guardar archivos. Si todavía no está activado, vas a ver un aviso acá al intentar subir.
+    </p>
+    <div class="img-upload">
+      <input type="file" accept="image/png,image/jpeg,image/webp" data-img-archivo />
+      <button type="button" class="admin-btn-secondary" data-img-subir>Subir</button>
+    </div>
+    <p class="admin-alert" data-img-upload-error hidden></p>
+  </dialog>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-img-picker]').forEach((root) => {
+    const dialog = root.querySelector<HTMLDialogElement>('[data-img-dialog]');
+    const valor = root.querySelector<HTMLInputElement>('[data-img-valor]');
+    const preview = root.querySelector<HTMLElement>('.img-picker__preview');
+    const abrir = root.querySelector<HTMLButtonElement>('[data-img-abrir]');
+    const cerrar = root.querySelector<HTMLButtonElement>('[data-img-cerrar]');
+    const archivo = root.querySelector<HTMLInputElement>('[data-img-archivo]');
+    const subirBtn = root.querySelector<HTMLButtonElement>('[data-img-subir]');
+    const uploadError = root.querySelector<HTMLElement>('[data-img-upload-error]');
+    if (!dialog || !valor || !preview || !abrir) return;
+
+    function setPreview(url: string) {
+      preview.innerHTML = url
+        ? `<img src="${url}" alt="">`
+        : `<span class="img-picker__vacio">Sin imagen</span>`;
+    }
+
+    abrir.addEventListener('click', () => dialog.showModal());
+    cerrar?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (ev) => {
+      if (ev.target === dialog) dialog.close();
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-img-elegir]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.url ?? '';
+        valor.value = url;
+        setPreview(url);
+        dialog.close();
+      });
+    });
+
+    subirBtn?.addEventListener('click', async () => {
+      if (uploadError) uploadError.hidden = true;
+      const file = archivo?.files?.[0];
+      if (!file) {
+        if (uploadError) {
+          uploadError.hidden = false;
+          uploadError.textContent = 'Elegí un archivo primero.';
+        }
+        return;
+      }
+      subirBtn.disabled = true;
+      subirBtn.textContent = 'Subiendo…';
+      try {
+        const fd = new FormData();
+        fd.set('archivo', file);
+        fd.set('nombre', file.name);
+        const res = await fetch('/api/admin/imagenes/subir', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'No se pudo subir la imagen.');
+        }
+        valor.value = data.url;
+        setPreview(data.url);
+        dialog.close();
+      } catch (err) {
+        if (uploadError) {
+          uploadError.hidden = false;
+          uploadError.textContent = err instanceof Error ? err.message : 'No se pudo subir la imagen.';
+        }
+      } finally {
+        subirBtn.disabled = false;
+        subirBtn.textContent = 'Subir';
+      }
+    });
+  });
+</script>

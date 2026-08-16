@@ -2,6 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
+import ImagePicker from '../../../components/ImagePicker.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -30,6 +31,9 @@ const error = Astro.url.searchParams.get('error');
       </AdminCampo>
       <AdminCampo titulo="Cuerpo" ayuda="El artículo en markdown: títulos con ##, listas con -, negritas con **texto**. No hace falta pegar la firma: el sitio la agrega solo.">
         <textarea name="cuerpoMd" rows="16">{p.cuerpoMd}</textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Imagen de portada" ayuda="Se usa en /blog, en la nota y al compartir el link. Si no elegís ninguna, se asigna una genérica según el tema.">
+        <ImagePicker id={`post-${id}`} name="imagenPortadaUrl" valorActual={p.imagenPortadaUrl ?? ''} />
       </AdminCampo>
       <AdminCampo
         titulo="Estado"

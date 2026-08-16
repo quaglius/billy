@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
 import RubroSelect from '../../../components/RubroSelect.astro';
+import ImagePicker from '../../../components/ImagePicker.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -25,6 +26,9 @@ const error = Astro.url.searchParams.get('error');
       </AdminCampo>
       <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno. Si no está en la lista, elegí «Otro…» y escribilo.">
         <RubroSelect valor={e.rubro ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Logo" ayuda="Solo se muestra si algún día decidís hacer pública esta empresa (por defecto todo queda privado). Opcional.">
+        <ImagePicker id={`empresa-${id}`} name="logoUrl" valorActual={e.logoUrl ?? ''} />
       </AdminCampo>
       <AdminCampo titulo="Contacto" ayuda="Nombre de la persona de referencia. Solo lo ves vos.">
         <input type="text" name="contactoNombre" value={e.contactoNombre ?? ''} />

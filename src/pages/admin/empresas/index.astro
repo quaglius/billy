@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminCampo from '../../../components/AdminCampo.astro';
 import RubroSelect from '../../../components/RubroSelect.astro';
+import ImagePicker from '../../../components/ImagePicker.astro';
 import ObservatorioCharts from '../../../components/ObservatorioCharts.astro';
 import { db } from '../../../lib/firebase-admin';
 import { fechaDeDoc } from '../../../lib/encuentro';
@@ -134,6 +135,9 @@ if (kpiTotal > 0) {
       </AdminCampo>
       <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno. Si no está en la lista, elegí «Otro…» y escribilo.">
         <RubroSelect />
+      </AdminCampo>
+      <AdminCampo titulo="Logo" ayuda="Solo se muestra si algún día decidís hacer pública esta empresa (por defecto todo queda privado). Opcional.">
+        <ImagePicker id="empresa-nueva" name="logoUrl" />
       </AdminCampo>
       <AdminCampo titulo="Contacto" ayuda="Nombre de la persona de referencia (RRHH, delegado, etc.). Solo lo ves vos.">
         <input type="text" name="contactoNombre" />

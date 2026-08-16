@@ -23,9 +23,12 @@ export const POST: APIRoute = async ({ request }) => {
   const rubroSel = String(form.get('rubro') ?? '');
   const rubro = rubroSel === '__otro__' ? String(form.get('rubroOtro') ?? '').trim() : rubroSel;
 
+  const logoUrl = String(form.get('logoUrl') ?? '').trim() || null;
+
   const payload = {
     nombre,
     rubro: rubro || null,
+    logoUrl,
     contactoNombre: String(form.get('contactoNombre') ?? '') || null,
     contactoEmail: String(form.get('contactoEmail') ?? '') || null,
     contactoTelefono: String(form.get('contactoTelefono') ?? '') || null,
@@ -51,7 +54,6 @@ export const POST: APIRoute = async ({ request }) => {
   await db().collection('empresas').add({
     ...payload,
     slug,
-    logoUrl: null,
     creadoEn: FieldValue.serverTimestamp(),
   });
 

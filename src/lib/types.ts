@@ -99,6 +99,17 @@ export type Post = {
   creadoEn: Date;
 };
 
+// Banco de imágenes reutilizable en todo el admin (cursos, posts, empresas). `origen` marca
+// si es una foto ya estática en /public (gratis, sirve siempre) o subida a Firebase Storage
+// (necesita plan Blaze — ver storage() en firebase-admin.ts).
+export type ImagenBanco = {
+  id: string;
+  url: string;
+  nombre: string;
+  origen: 'estatica' | 'subida';
+  creadoEn: Date;
+};
+
 export type Testimonio = {
   id: string;
   cita: string;

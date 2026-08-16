@@ -29,6 +29,8 @@ export const POST: APIRoute = async ({ request }) => {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  const imagenPortadaUrl = String(form.get('imagenPortadaUrl') ?? '').trim() || null;
+
   const payload = {
     titulo,
     descripcionCorta: String(form.get('descripcionCorta') ?? ''),
@@ -38,6 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
     dirigidoA: String(form.get('dirigidoA') ?? ''),
     objetivos,
     temario,
+    imagenPortadaUrl,
     publicado: form.get('publicado') === 'on',
     actualizadoEn: FieldValue.serverTimestamp(),
   };
@@ -61,7 +64,6 @@ export const POST: APIRoute = async ({ request }) => {
   await db().collection('cursos').add({
     ...payload,
     slug,
-    imagenPortadaUrl: null,
     adjuntos: [],
     creadoEn: FieldValue.serverTimestamp(),
   });
