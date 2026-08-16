@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!encuentroId || !instanciaId || !consigna) {
     return new Response(null, {
       status: 303,
-      headers: { Location: `/admin/instancias/${instanciaId}/encuentros/${encuentroId}?error=1` },
+      headers: { Location: `/admin/instancias/${instanciaId}/encuentros/${encuentroId}/actividades?error=1` },
     });
   }
 
@@ -44,6 +44,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(null, {
     status: 303,
-    headers: { Location: `/admin/instancias/${instanciaId}/encuentros/${encuentroId}?ok=1` },
+    headers: { Location: `/admin/instancias/${instanciaId}/encuentros/${encuentroId}/actividades?ok=1` },
   });
 };

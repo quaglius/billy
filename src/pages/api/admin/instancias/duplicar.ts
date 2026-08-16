@@ -51,6 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
   const encuentros = await db().collection('encuentros').where('instanciaId', '==', id).get();
   const ordered = encuentros.docs
     .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .filter((e) => !e.archivado)
     .sort((a, b) => Number(a.orden ?? 0) - Number(b.orden ?? 0));
 
   const primeraFecha = ordered[0]?.fechaHora?.toDate?.() ?? ordered[0]?.fechaHora;
@@ -70,6 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
       fechaHora: nuevaFecha,
       duracionMinutos: e.duracionMinutos ?? null,
       descripcion: e.descripcion ?? null,
+      archivado: false,
     });
 
     const acts = await db().collection('actividades').where('encuentroId', '==', e.id).get();
