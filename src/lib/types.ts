@@ -66,6 +66,7 @@ export type Encuentro = {
   fechaHora: Date;
   duracionMinutos: number | null;
   descripcion: string | null;
+  archivado: boolean;
 };
 
 export type Actividad = {

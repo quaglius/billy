@@ -1,0 +1,25 @@
+---
+import type { Miga } from '../lib/admin-instancia';
+
+interface Props {
+  crumbs: Miga[];
+  tone?: 'admin' | 'vivo';
+}
+
+const { crumbs, tone = 'admin' } = Astro.props;
+---
+<nav class:list={['admin-breadcrumb', tone === 'vivo' && 'admin-breadcrumb--vivo']} aria-label="Migas">
+  {crumbs.map((c, i) => {
+    const esUltimo = i === crumbs.length - 1;
+    return (
+      <>
+        {i > 0 && <span class="admin-breadcrumb__sep" aria-hidden="true">/</span>}
+        {esUltimo || !c.href ? (
+          <span aria-current={esUltimo ? 'page' : undefined}>{c.label}</span>
+        ) : (
+          <a href={c.href}>{c.label}</a>
+        )}
+      </>
+    );
+  })}
+</nav>
