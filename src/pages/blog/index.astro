@@ -1,11 +1,38 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-export const prerender = true;
+import { db } from '../../lib/firebase-admin';
+
+let posts: { slug: string; titulo: string; bajada: string }[] = [];
+let errorCarga = '';
+try {
+  const snap = await db()
+    .collection('posts')
+    .where('estado', '==', 'publicado')
+    .orderBy('publicadoEn', 'desc')
+    .get();
+  posts = snap.docs.map((d) => ({
+    slug: String(d.data().slug ?? ''),
+    titulo: String(d.data().titulo ?? ''),
+    bajada: String(d.data().bajada ?? ''),
+  }));
+} catch (err) {
+  errorCarga = err instanceof Error ? err.message : '';
+  posts = [];
+}
 ---
 <Layout title="Blog — Guille Nuesch">
   <div class="page-shell gn-prose">
     <p class="eyebrow">Blog</p>
     <h1>Notas</h1>
-    <p>Todavía no hay notas publicadas.</p>
+    {errorCarga && <p>Todavía no hay notas publicadas.</p>}
+    {!errorCarga && posts.length === 0 && <p>Todavía no hay notas publicadas.</p>}
+    <ul>
+      {posts.map((p) => (
+        <li>
+          <a href={`/blog/${p.slug}`}>{p.titulo}</a>
+          <p>{p.bajada}</p>
+        </li>
+      ))}
+    </ul>
   </div>
 </Layout>

@@ -1,11 +1,31 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/firebase-admin';
+import { renderMarkdown } from '../../lib/markdown';
 
 const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/blog');
+
+const snap = await db().collection('posts').where('slug', '==', slug).limit(1).get();
+if (snap.empty) return Astro.redirect('/blog');
+const post = snap.docs[0]!.data();
+if (post.estado !== 'publicado') return Astro.redirect('/blog');
+
+const html = renderMarkdown(String(post.cuerpoMd ?? ''));
+const titulo = String(post.titulo ?? '');
+const bajada = String(post.bajada ?? '');
+const imagen = post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null;
 ---
-<Layout title={`Nota — ${slug}`}>
-  <div class="page-shell gn-prose">
-    <h1>Nota</h1>
-    <p>El cuerpo se renderiza cuando el post exista en Firestore y esté publicado.</p>
-  </div>
+<Layout title={titulo} description={bajada} ogImage={imagen}>
+  <article class="page-shell gn-prose">
+    <p class="eyebrow">Blog</p>
+    <h1>{titulo}</h1>
+    <p>{bajada}</p>
+    <div set:html={html} />
+    <aside>
+      <img src="/fotos/guille/blog-laptop.png" alt="Guillermo Nuesch" width="120" height="120" />
+      <p>Por Guillermo Nuesch, capacitador en Salud Mental y Prevención de Consumos Problemáticos en el ámbito laboral · 25 años de trayectoria</p>
+    </aside>
+    <p><a href="/ayuda">Si necesitás ayuda</a></p>
+  </article>
 </Layout>

@@ -10,12 +10,14 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  ogImage?: string | null;
 }
 
 const {
   title = 'Guille Nuesch',
   description = 'Salud mental y prevención de consumos problemáticos en el trabajo.',
   noindex = false,
+  ogImage = null,
 } = Astro.props;
 ---
 <!doctype html>
@@ -34,6 +36,7 @@ const {
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
     {noindex && <meta name="robots" content="noindex" />}
   </head>
   <body>

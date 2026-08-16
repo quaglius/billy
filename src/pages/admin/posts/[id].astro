@@ -1,0 +1,33 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { db } from '../../../lib/firebase-admin';
+
+const { id } = Astro.params;
+if (!id) return Astro.redirect('/admin/posts');
+const doc = await db().collection('posts').doc(id).get();
+if (!doc.exists) return Astro.redirect('/admin/posts');
+const p = doc.data()!;
+---
+<Layout title={`Editar post — ${p.titulo}`} noindex={true}>
+  <div class="page-shell gn-prose">
+    <p><a href="/admin/posts">← Posts</a></p>
+    <h1>{p.titulo}</h1>
+    {p.slug === 'protocolo-salud-mental-laboral-srt-2026' && (
+      <p>⚠️ No publicar sin verificar el texto completo de la Resolución 8/2026 de la SRT contra el Boletín Oficial.</p>
+    )}
+    <form class="admin-form" method="post" action="/api/admin/posts">
+      <input type="hidden" name="id" value={id} />
+      <label>Título <input type="text" name="titulo" value={p.titulo} required /></label>
+      <label>Bajada <textarea name="bajada" rows="3">{p.bajada}</textarea></label>
+      <label>Cuerpo (markdown) <textarea name="cuerpoMd" rows="16">{p.cuerpoMd}</textarea></label>
+      <label>
+        Estado
+        <select name="estado">
+          <option value="borrador" selected={p.estado !== 'publicado'}>borrador</option>
+          <option value="publicado" selected={p.estado === 'publicado'}>publicado</option>
+        </select>
+      </label>
+      <button type="submit">Guardar</button>
+    </form>
+  </div>
+</Layout>
