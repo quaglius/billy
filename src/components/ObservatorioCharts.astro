@@ -23,8 +23,8 @@ const chartsJson = JSON.stringify(charts).replace(/</g, '\\u003c');
 )}
 
 {charts.length > 0 && (
-  <script id="obs-charts-data" type="application/json" set:html={chartsJson} />
-}
+  <script id="obs-charts-data" type="application/json" set:html={chartsJson}></script>
+)}
 
 <script>
   import Chart from 'chart.js/auto';
