@@ -33,9 +33,7 @@ const ok = Astro.url.searchParams.get('ok');
     <div class="img-bank-upload">
       <h2>Subir una nueva</h2>
       <p class="admin-section-nota" data-img-upload-nota>
-        Necesita el plan Blaze de Firebase (pago por uso, con capa gratuita) para guardar archivos.
-        Si todavía no está activado, vas a ver un aviso al intentar subir — mientras tanto elegís
-        de las que ya están abajo.
+        Se comprime sola al subir, hasta 15MB de entrada. Funciona bien para fotos y logos.
       </p>
       <div class="img-upload">
         <input type="file" accept="image/png,image/jpeg,image/webp" id="banco-archivo" />
@@ -54,7 +52,7 @@ const ok = Astro.url.searchParams.get('ok');
           <div class="img-grid__item img-grid__item--banco">
             <img src={img.url} alt={img.nombre} loading="lazy" />
             <span>{img.nombre}</span>
-            {img.origen === 'subida' ? (
+            {img.origen === 'firestore' ? (
               <form method="post" action="/api/admin/imagenes/eliminar" onsubmit="return confirm('¿Eliminar esta imagen del banco? Si algún curso, post o empresa la está usando, va a quedar con el link roto.')">
                 <input type="hidden" name="id" value={img.id} />
                 <button type="submit" class="admin-link-danger">Eliminar</button>

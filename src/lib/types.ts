@@ -100,13 +100,14 @@ export type Post = {
 };
 
 // Banco de imágenes reutilizable en todo el admin (cursos, posts, empresas). `origen` marca
-// si es una foto ya estática en /public (gratis, sirve siempre) o subida a Firebase Storage
-// (necesita plan Blaze — ver storage() en firebase-admin.ts).
+// si es una foto ya estática en /public (gratis, sirve siempre) o una subida por el admin,
+// guardada comprimida como base64 adentro del propio documento de Firestore y servida por
+// /img/[id].ts — sin Firebase Storage, que desde feb/2026 exige el plan Blaze con tarjeta.
 export type ImagenBanco = {
   id: string;
   url: string;
   nombre: string;
-  origen: 'estatica' | 'subida';
+  origen: 'estatica' | 'firestore';
   creadoEn: Date;
 };
 
