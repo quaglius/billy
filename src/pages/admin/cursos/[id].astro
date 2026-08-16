@@ -27,31 +27,44 @@ const TIPO_LABEL: Record<string, string> = {
   texto_libre: 'Texto libre — nube de palabras',
 };
 
-const actSnap = await db().collection('actividades').where('cursoId', '==', id).orderBy('orden').get();
-const actividades = await Promise.all(
-  actSnap.docs.map(async (d) => {
-    const data = d.data();
-    const codigo = String(data.codigo ?? '');
-    const link = urlParticipante(site, codigo);
-    return {
-      id: d.id,
-      tipo: String(data.tipo ?? ''),
-      tipoLabel: TIPO_LABEL[String(data.tipo ?? '')] ?? String(data.tipo ?? ''),
-      consigna: String(data.consigna ?? ''),
-      opciones: Array.isArray(data.opciones) ? data.opciones.join('\n') : '',
-      orden: Number(data.orden ?? 0),
-      codigo,
-      link,
-      qr: await qrDataUrl(link, 420),
-    };
-  }),
-);
+let actSnap: FirebaseFirestore.QuerySnapshot | null = null;
+let errorActividades = '';
+try {
+  actSnap = await db().collection('actividades').where('cursoId', '==', id).orderBy('orden').get();
+} catch (err) {
+  errorActividades =
+    err instanceof Error && err.message.includes('index')
+      ? 'Falta un índice en la base para ordenar las actividades. Si lo acabás de crear, puede tardar unos minutos en estar listo — refrescá en un rato.'
+      : err instanceof Error
+        ? err.message
+        : 'No se pudieron cargar las actividades.';
+}
+const actividades = actSnap
+  ? await Promise.all(
+      actSnap.docs.map(async (d) => {
+        const data = d.data();
+        const codigo = String(data.codigo ?? '');
+        const link = urlParticipante(site, codigo);
+        return {
+          id: d.id,
+          tipo: String(data.tipo ?? ''),
+          tipoLabel: TIPO_LABEL[String(data.tipo ?? '')] ?? String(data.tipo ?? ''),
+          consigna: String(data.consigna ?? ''),
+          opciones: Array.isArray(data.opciones) ? data.opciones.join('\n') : '',
+          orden: Number(data.orden ?? 0),
+          codigo,
+          link,
+          qr: await qrDataUrl(link, 420),
+        };
+      }),
+    )
+  : [];
 
 let dashCurso = null;
 let errorObs = '';
 try {
   const respSnap = await db().collection('respuestas').where('cursoId', '==', id).get();
-  const actividadesObs: ActividadObs[] = actSnap.docs.map((d) => {
+  const actividadesObs: ActividadObs[] = (actSnap?.docs ?? []).map((d) => {
     const data = d.data();
     return {
       id: d.id,
@@ -135,6 +148,7 @@ try {
         sigue sumando acá abajo y en el Observatorio.
       </p>
 
+      {errorActividades && <p class="admin-alert">{errorActividades}</p>}
       {actividades.length > 0 ? (
         <div class="act-grid">
           {actividades.map((a) => (

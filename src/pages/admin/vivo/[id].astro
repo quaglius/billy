@@ -11,17 +11,23 @@ if (!actDoc.exists) return Astro.redirect('/admin/cursos');
 const a = actDoc.data()!;
 const cursoId = String(a.cursoId ?? '');
 
-const [cursoDoc, hermanasSnap] = await Promise.all([
-  db().collection('cursos').doc(cursoId).get(),
-  db().collection('actividades').where('cursoId', '==', cursoId).orderBy('orden').get(),
-]);
+const cursoDoc = await db().collection('cursos').doc(cursoId).get();
 const cursoTitulo = cursoDoc.exists ? String(cursoDoc.data()!.titulo ?? 'Curso') : 'Curso';
-const otras = hermanasSnap.docs
-  .filter((d) => d.id !== id)
-  .map((d) => {
-    const data = d.data();
-    return { id: d.id, orden: Number(data.orden ?? 0), consigna: String(data.consigna ?? '') };
-  });
+
+let otras: { id: string; orden: number; consigna: string }[] = [];
+try {
+  const hermanasSnap = await db().collection('actividades').where('cursoId', '==', cursoId).orderBy('orden').get();
+  otras = hermanasSnap.docs
+    .filter((d) => d.id !== id)
+    .map((d) => {
+      const data = d.data();
+      return { id: d.id, orden: Number(data.orden ?? 0), consigna: String(data.consigna ?? '') };
+    });
+} catch {
+  // El selector de "otra actividad" es un atajo, no algo esencial — si la consulta falla
+  // (por ejemplo, un índice que se está construyendo) la pantalla en vivo sigue funcionando
+  // igual para la actividad actual, solo sin ese selector.
+}
 
 const site = urlSitio(Astro.site);
 const codigo = String(a.codigo ?? '');
