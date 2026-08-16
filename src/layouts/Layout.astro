@@ -37,7 +37,7 @@ const ogImageAbs = ogImage
 
 // Analytics nunca en /admin ni en el login: es panel privado de Guillermo, no tráfico a medir.
 const esAdmin = Astro.url.pathname === '/admin' || Astro.url.pathname.startsWith('/admin/');
-const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined;
+const gaId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID as string | undefined) || 'G-QPTDPYF4FC';
 const analyticsActivo = Boolean(gaId) && !esAdmin;
 ---
 <!doctype html>
