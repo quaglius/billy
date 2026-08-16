@@ -30,53 +30,72 @@ const site = (Astro.site?.toString() ?? 'https://guillenuesch.netlify.app').repl
 const urlParticipante = activa ? `${site}/a/${activa.codigo}` : '';
 let qrSvg = '';
 if (urlParticipante) {
-  qrSvg = await QRCode.toString(urlParticipante, { type: 'svg', margin: 1, width: 280 });
+  qrSvg = await QRCode.toString(urlParticipante, {
+    type: 'svg',
+    margin: 2,
+    width: 360,
+    color: { dark: '#051229', light: '#ffffff' },
+  });
 }
 ---
-<Layout title="En vivo" noindex={true}>
-  <div class="page-shell gn-prose">
-    <p><a href={`/admin/instancias/${id}/encuentros/${encuentroId}`}>← Actividades</a></p>
-    <h1>Pantalla en vivo</h1>
+<Layout title="En vivo" noindex={true} whatsapp={false} chrome={false}>
+  <div class="vivo">
+    <header class="vivo__bar">
+      <a href={`/admin/instancias/${id}/encuentros/${encuentroId}`}>Actividades</a>
+      {activa && (
+        <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
+          Imprimir
+        </a>
+      )}
+    </header>
+
     {activa ? (
-      <>
-        <div class="vivo-qr">
-          <div set:html={qrSvg} />
-          <p class="hero-title">{activa.codigo}</p>
-        </div>
-        <p>{activa.consigna}</p>
-        <div id="grafico" data-actividad={activa.id} data-tipo={activa.tipo}></div>
-        <form method="post" action="/api/admin/actividades/cerrar">
-          <input type="hidden" name="actividadId" value={activa.id} />
-          <input type="hidden" name="encuentroId" value={encuentroId} />
-          <input type="hidden" name="instanciaId" value={id} />
-          <button type="submit">Cerrar actividad</button>
-        </form>
-        {siguiente && (
-          <form method="post" action="/api/admin/actividades/activar">
-            <input type="hidden" name="actividadId" value={siguiente.id} />
-            <input type="hidden" name="encuentroId" value={encuentroId} />
-            <input type="hidden" name="instanciaId" value={id} />
-            <button type="submit">Siguiente actividad</button>
-          </form>
-        )}
-        <p>
-          <a href={`/admin/instancias/${id}/encuentros/${encuentroId}/imprimir?actividad=${activa.id}`} target="_blank">
-            Imprimir consigna
-          </a>
-        </p>
-      </>
+      <div class="vivo__stage">
+        <aside class="vivo__join">
+          <div class="vivo__qr" set:html={qrSvg} />
+          <p class="vivo__hint">Escaneá o entrá con el código</p>
+          <p class="vivo__code">{activa.codigo}</p>
+          <p class="vivo__url">{urlParticipante.replace(/^https?:\/\//, '')}</p>
+        </aside>
+        <section class="vivo__board">
+          <p class="vivo__eyebrow">En vivo</p>
+          <h1 class="vivo__pregunta">{activa.consigna}</h1>
+          <div id="grafico" class="vivo__grafico" data-actividad={activa.id} data-tipo={activa.tipo}>
+            <p class="vivo__esperando">Esperando respuestas…</p>
+          </div>
+          <div class="vivo__acciones">
+            <form method="post" action="/api/admin/actividades/cerrar">
+              <input type="hidden" name="actividadId" value={activa.id} />
+              <input type="hidden" name="encuentroId" value={encuentroId} />
+              <input type="hidden" name="instanciaId" value={id} />
+              <button type="submit">Cerrar</button>
+            </form>
+            {siguiente && (
+              <form method="post" action="/api/admin/actividades/activar">
+                <input type="hidden" name="actividadId" value={siguiente.id} />
+                <input type="hidden" name="encuentroId" value={encuentroId} />
+                <input type="hidden" name="instanciaId" value={id} />
+                <button type="submit">Siguiente</button>
+              </form>
+            )}
+          </div>
+        </section>
+      </div>
     ) : (
-      <>
-        <p>No hay actividad activa.</p>
-        {actividades[0] && (
-          <form method="post" action="/api/admin/actividades/activar">
-            <input type="hidden" name="actividadId" value={actividades[0].id} />
-            <input type="hidden" name="encuentroId" value={encuentroId} />
-            <input type="hidden" name="instanciaId" value={id} />
-            <button type="submit">Activar</button>
-          </form>
-        )}
-      </>
+      <div class="vivo__vacio">
+        <div class="empty-state">
+          <h1>No hay actividad activa</h1>
+          <p>Cuando esté lista, activála para proyectar el QR y el código.</p>
+          {actividades[0] && (
+            <form method="post" action="/api/admin/actividades/activar">
+              <input type="hidden" name="actividadId" value={actividades[0].id} />
+              <input type="hidden" name="encuentroId" value={encuentroId} />
+              <input type="hidden" name="instanciaId" value={id} />
+              <button type="submit">Activar la primera</button>
+            </form>
+          )}
+        </div>
+      </div>
     )}
   </div>
 </Layout>
@@ -84,11 +103,30 @@ if (urlParticipante) {
 {activa && (
   <script>
     const el = document.getElementById('grafico');
-    if (!el) {
-      /* noop */
-    } else {
+    if (el) {
       const idAct = el.dataset.actividad;
       let ultimo = '';
+
+      function barra(etiqueta, porcentaje) {
+        const row = document.createElement('div');
+        row.className = 'vivo-bar';
+        const head = document.createElement('div');
+        head.className = 'vivo-bar__head';
+        const name = document.createElement('strong');
+        name.textContent = etiqueta;
+        const pct = document.createElement('span');
+        pct.textContent = `${porcentaje}%`;
+        head.append(name, pct);
+        const track = document.createElement('div');
+        track.className = 'vivo-bar__track';
+        const fill = document.createElement('div');
+        fill.className = 'vivo-bar__fill';
+        fill.style.width = `${porcentaje}%`;
+        track.append(fill);
+        row.append(head, track);
+        return row;
+      }
+
       async function tick() {
         try {
           const res = await fetch(`/api/actividad/${idAct}/resultados`);
@@ -97,24 +135,36 @@ if (urlParticipante) {
           const serial = JSON.stringify(data);
           if (serial === ultimo) return;
           ultimo = serial;
+          el.replaceChildren();
           if (data.barras) {
-            el.innerHTML = data.barras
-              .map(
-                (b) =>
-                  `<div><strong>${b.etiqueta}</strong> ${b.porcentaje}%<div style="background:#0075ff;height:12px;width:${b.porcentaje}%;border-radius:50px"></div></div>`,
-              )
-              .join('');
+            data.barras.forEach((b) => el.append(barra(String(b.etiqueta), Number(b.porcentaje))));
           } else if (data.numero) {
-            el.innerHTML = `<p>Promedio ${data.numero.promedio.toFixed(1)} · mín ${data.numero.min} · máx ${data.numero.max}</p>`;
+            const wrap = document.createElement('div');
+            wrap.className = 'vivo-num';
+            wrap.innerHTML =
+              `<p class="vivo-num__big">${data.numero.promedio.toFixed(1)}</p><p>promedio · mín ${data.numero.min} · máx ${data.numero.max}</p>`;
+            el.append(wrap);
           } else if (data.palabras) {
-            el.innerHTML = data.palabras
-              .map((p) => `<span style="font-size:${12 + p.cantidad * 6}px;margin:4px">${p.palabra}</span>`)
-              .join(' ');
+            const nube = document.createElement('div');
+            nube.className = 'vivo-nube';
+            data.palabras.forEach((p) => {
+              const span = document.createElement('span');
+              span.className = 'vivo-nube__palabra';
+              span.style.fontSize = `${16 + p.cantidad * 8}px`;
+              span.textContent = p.palabra;
+              nube.append(span);
+            });
+            el.append(nube);
           } else if (data.semanas) {
-            el.innerHTML = data.semanas.map((s) => `<div>${s.semana}: ${s.cantidad}</div>`).join('');
+            data.semanas.forEach((s) => el.append(barra(String(s.semana), Number(s.cantidad))));
+          } else {
+            const p = document.createElement('p');
+            p.className = 'vivo__esperando';
+            p.textContent = 'Todavía no hay respuestas.';
+            el.append(p);
           }
         } catch {
-          /* seguir mostrando el último dato */
+          /* último dato visible */
         }
       }
       tick();

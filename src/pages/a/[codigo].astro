@@ -24,46 +24,62 @@ if (codigo) {
   }
 }
 ---
-<Layout title="Participar" noindex={true}>
-  <div class="page-shell gn-prose">
-    {!encontrada && (
-      <>
-        <h1>Esta actividad no está disponible</h1>
-        <p>Prestá atención a la pantalla para la próxima.</p>
-      </>
-    )}
-    {encontrada && !activa && (
-      <p>Esta actividad ya cerró. Prestá atención a la pantalla para la próxima.</p>
-    )}
-    {encontrada && activa && (
-      <>
-        <h1>{consigna}</h1>
-        <form id="form-respuesta" class="admin-form">
-          <input type="hidden" name="actividadId" value={actividadId} />
-          {tipo === 'si_no' && (
-            <div class="si-no">
-              <button type="button" data-valor="true">Sí</button>
-              <button type="button" data-valor="false">No</button>
-            </div>
-          )}
-          {tipo === 'seleccion_unica' &&
-            opciones.map((op) => (
-              <label><input type="radio" name="opcion" value={op} required /> {op}</label>
-            ))}
-          {tipo === 'seleccion_multiple' &&
-            opciones.map((op) => (
-              <label><input type="checkbox" name="opciones" value={op} /> {op}</label>
-            ))}
-          {tipo === 'numero' && <label>Número <input type="number" name="numero" required /></label>}
-          {tipo === 'fecha' && <label>Fecha <input type="date" name="fecha" required /></label>}
-          {tipo === 'texto_libre' && (
-            <label>Tu respuesta <textarea name="texto" maxlength="60" rows="2" required></textarea></label>
-          )}
-          {tipo !== 'si_no' && <button type="submit">Enviar</button>}
-        </form>
-        <p id="msg" class="msg-ok" hidden></p>
-      </>
-    )}
+<Layout title="Participar" noindex={true} whatsapp={false}>
+  <div class="participate">
+    <div class="participate__card">
+      {!encontrada && (
+        <div class="empty-state">
+          <h1>Esta actividad no está disponible</h1>
+          <p>Prestá atención a la pantalla para la próxima.</p>
+        </div>
+      )}
+      {encontrada && !activa && (
+        <div class="empty-state">
+          <h1>Esta actividad ya cerró</h1>
+          <p>Prestá atención a la pantalla para la próxima.</p>
+        </div>
+      )}
+      {encontrada && activa && (
+        <>
+          <p class="eyebrow">Participar</p>
+          <h1>{consigna}</h1>
+          <form id="form-respuesta" class="participate__form">
+            <input type="hidden" name="actividadId" value={actividadId} />
+            {tipo === 'si_no' && (
+              <div class="si-no">
+                <button type="button" data-valor="true">Sí</button>
+                <button type="button" data-valor="false">No</button>
+              </div>
+            )}
+            {tipo === 'seleccion_unica' &&
+              opciones.map((op) => (
+                <label class="opcion-tap">
+                  <input type="radio" name="opcion" value={op} required />
+                  <span>{op}</span>
+                </label>
+              ))}
+            {tipo === 'seleccion_multiple' &&
+              opciones.map((op) => (
+                <label class="opcion-tap">
+                  <input type="checkbox" name="opciones" value={op} />
+                  <span>{op}</span>
+                </label>
+              ))}
+            {tipo === 'numero' && (
+              <label>Número <input type="number" name="numero" required /></label>
+            )}
+            {tipo === 'fecha' && (
+              <label>Fecha <input type="date" name="fecha" required /></label>
+            )}
+            {tipo === 'texto_libre' && (
+              <label>Tu respuesta <textarea name="texto" maxlength="60" rows="2" required></textarea></label>
+            )}
+            {tipo !== 'si_no' && <button class="participate__enviar" type="submit">Enviar</button>}
+          </form>
+          <p id="msg" class="msg-ok" hidden></p>
+        </>
+      )}
+    </div>
   </div>
 </Layout>
 

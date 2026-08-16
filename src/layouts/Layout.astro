@@ -8,6 +8,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppFlotante from '../components/WhatsAppFlotante.astro';
 import MarcaMotion from '../components/MarcaMotion.astro';
+import GoTop from '../components/GoTop.astro';
 
 interface Props {
   title?: string;
@@ -15,6 +16,7 @@ interface Props {
   noindex?: boolean;
   ogImage?: string | null;
   whatsapp?: boolean;
+  chrome?: boolean;
 }
 
 const {
@@ -23,6 +25,7 @@ const {
   noindex = false,
   ogImage = null,
   whatsapp = true,
+  chrome = true,
 } = Astro.props;
 ---
 <!doctype html>
@@ -45,14 +48,15 @@ const {
     <meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
   </head>
-  <body>
+  <body class:list={[!chrome && 'is-vivo']}>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <Header />
+    {chrome && <Header />}
     <main id="contenido">
       <slot />
     </main>
-    <Footer />
-    {whatsapp && <WhatsAppFlotante />}
-    <MarcaMotion />
+    {chrome && <Footer />}
+    {chrome && whatsapp && <WhatsAppFlotante />}
+    {chrome && <GoTop />}
+    {chrome && <MarcaMotion />}
   </body>
 </html>

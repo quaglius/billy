@@ -17,4 +17,6 @@
   --tj-color-border-1: #27354d;
   --tj-color-border-2: #ced7e0;
   --tj-color-border-3: #d7d8db;
+  --focus-ring: 2px solid #0075ff;
+  --focus-offset: 3px;
 }

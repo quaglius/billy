@@ -1,0 +1,17 @@
+---
+---
+<a class="go-top" href="#contenido" aria-label="Volver arriba">
+  <span class="go-top__arrow" aria-hidden="true"></span>
+  <span class="go-top__label">GO TOP</span>
+</a>
+<script>
+  const el = document.querySelector('.go-top');
+  const desktop = window.matchMedia('(min-width: 768px)');
+  function tick() {
+    const show = desktop.matches && window.scrollY > 400;
+    el?.classList.toggle('is-visible', show);
+  }
+  window.addEventListener('scroll', tick, { passive: true });
+  desktop.addEventListener('change', tick);
+  tick();
+</script>
