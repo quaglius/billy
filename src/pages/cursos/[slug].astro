@@ -1,11 +1,47 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { db } from '../../lib/firebase-admin';
+import { renderMarkdown } from '../../lib/markdown';
 
 const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/cursos');
+
+const cursoSnap = await db().collection('cursos').where('slug', '==', slug).limit(1).get();
+const instSnap = await db().collection('instancias').where('slug', '==', slug).limit(1).get();
+
+let titulo = '';
+let descripcion = '';
+let noindex = false;
+let extra = '';
+
+if (!cursoSnap.empty) {
+  const c = cursoSnap.docs[0]!.data();
+  if (!c.publicado) return Astro.redirect('/cursos');
+  titulo = String(c.titulo ?? '');
+  descripcion = String(c.descripcion ?? '');
+} else if (!instSnap.empty) {
+  const inst = instSnap.docs[0]!;
+  const data = inst.data();
+  const visibilidad = String(data.visibilidad ?? 'privada');
+  noindex = visibilidad === 'privada';
+  const curso = await db().collection('cursos').doc(String(data.cursoId)).get();
+  const cursoData = curso.data() ?? {};
+  titulo = String(data.tituloParticular ?? cursoData.titulo ?? '');
+  descripcion = String(cursoData.descripcion ?? '');
+  extra = String(data.particularidades ?? '');
+} else {
+  return Astro.redirect('/cursos');
+}
+
+const html = renderMarkdown(descripcion);
+const extraHtml = extra ? renderMarkdown(extra) : '';
 ---
-<Layout title={`Curso — ${slug}`} noindex={true}>
-  <div class="page-shell gn-prose">
-    <h1>Curso</h1>
-    <p>Esta instancia se carga desde Firestore cuando el panel y el seed estén listos.</p>
-  </div>
+<Layout title={titulo} noindex={noindex}>
+  <article class="page-shell gn-prose">
+    <p class="eyebrow">Cursos</p>
+    <h1>{titulo}</h1>
+    <div set:html={html} />
+    {extraHtml && <div set:html={extraHtml} />}
+    <p><a href="/ayuda">Si necesitás ayuda</a></p>
+  </article>
 </Layout>

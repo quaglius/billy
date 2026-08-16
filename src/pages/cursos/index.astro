@@ -1,11 +1,63 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-export const prerender = true;
+import { db } from '../../lib/firebase-admin';
+
+let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string }[] = [];
+let instancias: { slug: string; titulo: string; visibilidad: string }[] = [];
+try {
+  const [cursoSnap, instSnap] = await Promise.all([
+    db().collection('cursos').where('publicado', '==', true).get(),
+    db().collection('instancias').where('visibilidad', 'in', ['publica', 'anonimizada']).get(),
+  ]);
+  cursos = cursoSnap.docs.map((d) => ({
+    slug: String(d.data().slug ?? ''),
+    titulo: String(d.data().titulo ?? ''),
+    descripcionCorta: String(d.data().descripcionCorta ?? ''),
+    formato: String(d.data().formato ?? ''),
+  }));
+  const cursoTitulo = new Map(cursoSnap.docs.map((d) => [d.id, String(d.data().titulo ?? '')]));
+  instancias = instSnap.docs.map((d) => {
+    const data = d.data();
+    const visibilidad = String(data.visibilidad ?? 'privada');
+    const tituloBase = cursoTitulo.get(String(data.cursoId)) ?? 'Curso';
+    return {
+      slug: String(data.slug ?? ''),
+      titulo:
+        visibilidad === 'anonimizada'
+          ? String(data.tituloParticular ?? tituloBase)
+          : String(data.tituloParticular ?? tituloBase),
+      visibilidad,
+    };
+  });
+} catch {
+  cursos = [];
+  instancias = [];
+}
 ---
 <Layout title="Cursos — Guille Nuesch">
   <div class="page-shell gn-prose">
     <p class="eyebrow">Cursos</p>
     <h1>Encuentro, Taller y Programa</h1>
-    <p>El catálogo público de cursos-tipo e instancias visibles se carga desde el panel de administración.</p>
+    <ul>
+      {cursos.map((c) => (
+        <li>
+          <a href={`/cursos/${c.slug}`}>{c.titulo}</a>
+          <p>{c.formato} — {c.descripcionCorta}</p>
+        </li>
+      ))}
+    </ul>
+    {instancias.length > 0 && (
+      <>
+        <h2>Cursadas visibles</h2>
+        <ul>
+          {instancias.map((i) => (
+            <li>
+              <a href={`/cursos/${i.slug}`}>{i.titulo}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+    <p><a href="/ayuda">Si necesitás ayuda</a></p>
   </div>
 </Layout>
