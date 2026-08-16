@@ -95,6 +95,7 @@ export type Post = {
   imagenPortadaUrl: string | null;
   keywordPrincipal: string | null;
   estado: EstadoPost;
+  archivado: boolean;
   publicadoEn: Date | null;
   creadoEn: Date;
 };

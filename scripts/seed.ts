@@ -152,6 +152,7 @@ async function main() {
       await db.collection('posts').add({
         ...payload,
         imagenPortadaUrl: null,
+        archivado: false,
         creadoEn: now,
       });
     } else {

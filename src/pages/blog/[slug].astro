@@ -12,7 +12,7 @@ if (!slug) return Astro.redirect('/blog');
 const snap = await db().collection('posts').where('slug', '==', slug).limit(1).get();
 if (snap.empty) return Astro.redirect('/blog');
 const post = snap.docs[0]!.data();
-if (post.estado !== 'publicado') return Astro.redirect('/blog');
+if (post.estado !== 'publicado' || post.archivado === true) return Astro.redirect('/blog');
 
 const html = renderMarkdown(String(post.cuerpoMd ?? ''));
 const titulo = String(post.titulo ?? '');

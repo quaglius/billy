@@ -22,7 +22,9 @@ export const GET: APIRoute = async ({ site }) => {
     ]);
 
     postsSnap.docs.forEach((d) => {
-      const slug = String(d.data().slug ?? '');
+      const data = d.data();
+      if (data.archivado === true) return;
+      const slug = String(data.slug ?? '');
       if (slug) urls.push({ loc: `/blog/${slug}`, changefreq: 'monthly', priority: '0.7' });
     });
     cursosSnap.docs.forEach((d) => {

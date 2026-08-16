@@ -1,9 +1,11 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
-let posts: { id: string; titulo: string; slug: string; estado: string; imagen: string | null }[] = [];
+type PostFila = { id: string; titulo: string; slug: string; estado: string; imagen: string | null; archivado: boolean };
+let posts: PostFila[] = [];
 let errorCarga = '';
 try {
   const snap = await db().collection('posts').get();
@@ -15,20 +17,29 @@ try {
       slug: String(data.slug ?? ''),
       estado: String(data.estado ?? 'borrador'),
       imagen: data.imagenPortadaUrl ? String(data.imagenPortadaUrl) : null,
+      archivado: data.archivado === true,
     };
-  });
+  }).sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'));
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudieron leer los posts.';
 }
+const vigentes = posts.filter((p) => !p.archivado);
+const archivados = posts.filter((p) => p.archivado);
+const ok = Astro.url.searchParams.get('ok');
+const error = Astro.url.searchParams.get('error');
 ---
 <Layout title="Posts — Admin" noindex={true} whatsapp={false}>
   <AdminChrome
     titulo="Posts"
     subtitulo="El blog del sitio. Un post en borrador nunca se ve en /blog, aunque tenga todo el contenido cargado — tenés que abrirlo y marcarlo como publicado a propósito."
   >
+    {ok === 'archivado' && <p class="admin-ok">Post eliminado del blog. Podés restaurarlo más abajo.</p>}
+    {ok === 'restaurado' && <p class="admin-ok">Post restaurado.</p>}
+    {error && <p class="admin-alert">{error === 'post' ? 'No se encontró el post.' : 'Falta el título.'}</p>}
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
-    {posts.length === 0 && !errorCarga && <p>No hay posts todavía. Van a cargarse con el seed.</p>}
-    {posts.length > 0 && (
+    <p><a class="admin-btn-secondary" href="#nuevo-post">+ Agregar post</a></p>
+    {vigentes.length === 0 && !errorCarga && <p>No hay posts activos todavía. Cargá el primero con el formulario de abajo.</p>}
+    {vigentes.length > 0 && (
       <div data-table-wrap>
         <div class="admin-table-tools">
           <input type="search" class="admin-search" data-table-search placeholder="Buscar post…" aria-label="Buscar post" />
@@ -39,7 +50,7 @@ try {
             <tr><th></th><th data-sort="text">Título</th><th data-sort="text">Estado</th><th></th></tr>
           </thead>
           <tbody>
-            {posts.map((p) => (
+            {vigentes.map((p) => (
               <tr>
                 <td class="admin-table__thumb-cell">
                   {p.imagen ? (
@@ -54,13 +65,53 @@ try {
                     {p.estado}
                   </span>
                 </td>
-                <td><a href={`/admin/posts/${p.id}`}>Editar</a></td>
+                <td class="admin-table__acciones">
+                  <a href={`/admin/posts/${p.id}`}>Editar</a>
+                  <form method="post" action="/api/admin/posts" onsubmit="return confirm('¿Eliminar este post? Podrás restaurarlo después.')">
+                    <input type="hidden" name="id" value={p.id} />
+                    <input type="hidden" name="_action" value="archivar" />
+                    <button class="admin-link-danger" type="submit">Eliminar</button>
+                  </form>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
         <nav class="admin-pager" data-pager aria-label="Paginado de posts"></nav>
       </div>
+    )}
+
+    <h2 id="nuevo-post">Agregar post</h2>
+    <form class="admin-form" method="post" action="/api/admin/posts">
+      <AdminCampo titulo="Título" ayuda="Se crea como borrador y después se abre el editor completo para cargar la bajada, el contenido y la imagen.">
+        <input type="text" name="titulo" required />
+      </AdminCampo>
+      <button type="submit">Crear post</button>
+    </form>
+
+    {archivados.length > 0 && (
+      <section class="admin-danger">
+        <h2>Posts eliminados</h2>
+        <p>No aparecen en el blog ni en el sitemap. Podés restaurarlos sin perder el contenido.</p>
+        <table class="admin-table">
+          <thead><tr><th>Título</th><th>Estado anterior</th><th></th></tr></thead>
+          <tbody>
+            {archivados.map((p) => (
+              <tr>
+                <td class="admin-table__titulo">{p.titulo}</td>
+                <td>{p.estado}</td>
+                <td>
+                  <form method="post" action="/api/admin/posts">
+                    <input type="hidden" name="id" value={p.id} />
+                    <input type="hidden" name="_action" value="restaurar" />
+                    <button class="admin-btn-secondary" type="submit">Restaurar</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     )}
   </AdminChrome>
 </Layout>

@@ -38,10 +38,10 @@ export async function listarPostsPublicados(): Promise<PostPublico[]> {
       .where('estado', '==', 'publicado')
       .orderBy('publicadoEn', 'desc')
       .get();
-    return mapDocs(snap.docs);
+    return mapDocs(snap.docs.filter((d) => d.data().archivado !== true));
   } catch {
     const snap = await db().collection('posts').where('estado', '==', 'publicado').get();
-    return mapDocs(snap.docs);
+    return mapDocs(snap.docs.filter((d) => d.data().archivado !== true));
   }
 }
 

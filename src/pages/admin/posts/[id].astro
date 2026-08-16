@@ -10,12 +10,14 @@ if (!id) return Astro.redirect('/admin/posts');
 const doc = await db().collection('posts').doc(id).get();
 if (!doc.exists) return Astro.redirect('/admin/posts');
 const p = doc.data()!;
+const archivado = p.archivado === true;
 const ok = Astro.url.searchParams.get('ok');
 const error = Astro.url.searchParams.get('error');
 ---
 <Layout title={`Editar post — ${p.titulo}`} noindex={true} whatsapp={false}>
   <AdminChrome titulo="Editar post">
     <p><a href="/admin/posts">← Posts</a> · slug <code>{p.slug}</code></p>
+    {archivado && <p class="admin-alert">Este post está eliminado y no se muestra en el blog. Podés restaurarlo al final de la página.</p>}
     {ok && <p class="admin-ok">Guardado.</p>}
     {error && <p class="admin-alert">Falta el título.</p>}
     {p.slug === 'protocolo-salud-mental-laboral-srt-2026' && (
@@ -46,5 +48,21 @@ const error = Astro.url.searchParams.get('error');
       </AdminCampo>
       <button type="submit">Guardar</button>
     </form>
+
+    <section class="admin-danger">
+      <h2>{archivado ? 'Restaurar post' : 'Eliminar post'}</h2>
+      <p>{archivado ? 'Vuelve al listado activo conservando todo el contenido.' : 'Lo oculta del blog y del sitemap, pero conserva el contenido para poder restaurarlo.'}</p>
+      <form
+        method="post"
+        action="/api/admin/posts"
+        onsubmit={archivado ? undefined : "return confirm('¿Eliminar este post? Podrás restaurarlo después.')"}
+      >
+        <input type="hidden" name="id" value={id} />
+        <input type="hidden" name="_action" value={archivado ? 'restaurar' : 'archivar'} />
+        <button class={archivado ? 'admin-btn-secondary' : 'admin-btn-danger'} type="submit">
+          {archivado ? 'Restaurar post' : 'Eliminar post'}
+        </button>
+      </form>
+    </section>
   </AdminChrome>
 </Layout>
