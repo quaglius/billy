@@ -1,0 +1,20 @@
+:root {
+  --tj-ff-body: 'Lato', sans-serif;
+  --tj-ff-heading: 'Libre Franklin', sans-serif;
+
+  --tj-color-common-white: #f7f7f7;
+  --tj-color-common-white-2: #a9b0b8;
+  --tj-color-common-black: #000000;
+  --tj-color-common-black-2: #676e7a;
+  --tj-color-common-black-3: #969ca5;
+  --tj-color-heading-primary: #051229;
+  --tj-color-text-body: #364052;
+  --tj-color-text-body-2: #7e8590;
+  --tj-color-theme-primary: #0075ff;
+  --tj-color-theme-dark: #051229;
+  --tj-color-theme-bg: #e1e8f0;
+  --tj-color-theme-bg-2: #dfecfd;
+  --tj-color-border-1: #27354d;
+  --tj-color-border-2: #ced7e0;
+  --tj-color-border-3: #d7d8db;
+}

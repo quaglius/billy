@@ -1,0 +1,25 @@
+---
+import { INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL } from '../lib/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <a class="site-footer__logo" href="/">
+      <img src="/marca/logo-horizontal-oscuro.svg" alt="Guille Nuesch" height="36" />
+    </a>
+    <nav aria-label="Redes">
+      <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram</a>
+      {' · '}
+      <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">YouTube</a>
+      {LINKEDIN_URL && (
+        <>
+          {' · '}
+          <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </>
+      )}
+      {' · '}
+      <a href="/ayuda">Si necesitás ayuda</a>
+    </nav>
+  </div>
+  <div class="site-footer__copy">© {year} Guille Nuesch</div>
+</footer>

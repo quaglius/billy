@@ -1,0 +1,26 @@
+---
+interface Props {
+  href: string;
+  texto: string;
+  variante?: 'default' | 'header';
+  target?: '_self' | '_blank';
+}
+
+const { href, texto, variante = 'default', target = '_self' } = Astro.props;
+---
+<a
+  class:list={['tj-primary-btn', variante === 'header' && 'header_btn']}
+  href={href}
+  target={target}
+  rel={target === '_blank' ? 'noopener noreferrer' : undefined}
+>
+  <span class="btn_inner">
+    <span class="btn_icon">
+      <span>
+        <i class="tji-arrow-right"></i>
+        <i class="tji-arrow-right"></i>
+      </span>
+    </span>
+    <span class="btn_text"><span>{texto}</span></span>
+  </span>
+</a>
