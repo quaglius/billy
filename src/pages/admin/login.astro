@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AdminCampo from '../../components/AdminCampo.astro';
 ---
 <Layout title="Entrar — Admin" noindex={true} whatsapp={false}>
   <div class="admin-login">
@@ -7,14 +8,12 @@ import Layout from '../../layouts/Layout.astro';
       <h1>Panel de administración</h1>
       {Astro.url.searchParams.get('error') && <p class="admin-alert">Usuario o contraseña incorrectos.</p>}
       <form class="admin-form" method="post" action="/api/login">
-        <label>
-          Usuario
+        <AdminCampo titulo="Usuario" ayuda="El usuario que te pasamos para este panel. No es un mail.">
           <input type="text" name="username" autocomplete="username" required />
-        </label>
-        <label>
-          Contraseña
+        </AdminCampo>
+        <AdminCampo titulo="Contraseña" ayuda="La clave del panel. Si no entra, pedila de nuevo: no se recupera desde acá.">
           <input type="password" name="password" autocomplete="current-password" required />
-        </label>
+        </AdminCampo>
         <button type="submit">Entrar</button>
       </form>
     </div>

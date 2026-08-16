@@ -2,6 +2,7 @@
 import Layout from '../../../../../../layouts/Layout.astro';
 import AdminChrome from '../../../../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../../../../components/AdminBreadcrumb.astro';
+import AdminCampo from '../../../../../../components/AdminCampo.astro';
 import { db } from '../../../../../../lib/firebase-admin';
 import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../../../lib/admin-instancia';
 
@@ -94,20 +95,28 @@ const error = Astro.url.searchParams.get('error');
     <form class="admin-form" method="post" action="/api/admin/actividades">
       <input type="hidden" name="encuentroId" value={encuentroId} />
       <input type="hidden" name="instanciaId" value={id} />
-      <label>Orden <input type="number" name="orden" value={actividades.length + 1} required /></label>
-      <label>
-        Tipo
+      <AdminCampo titulo="Orden" ayuda="El orden en que vas a pasar las consignas en vivo. 1 es la primera.">
+        <input type="number" name="orden" value={actividades.length + 1} required />
+      </AdminCampo>
+      <AdminCampo
+        titulo="Tipo"
+        ayuda="Sí/No: dos botones grandes. Opción única: una sola respuesta. Varias opciones: puede marcar más de una. Número o fecha: un valor. Texto libre: arma una nube de palabras con lo que escribe la gente."
+      >
         <select name="tipo">
-          <option value="si_no">si_no</option>
-          <option value="seleccion_unica">seleccion_unica</option>
-          <option value="seleccion_multiple">seleccion_multiple</option>
-          <option value="numero">numero</option>
-          <option value="fecha">fecha</option>
-          <option value="texto_libre">texto_libre</option>
+          <option value="si_no">Sí / No</option>
+          <option value="seleccion_unica">Opción única — una sola respuesta</option>
+          <option value="seleccion_multiple">Varias opciones — puede marcar más de una</option>
+          <option value="numero">Número</option>
+          <option value="fecha">Fecha</option>
+          <option value="texto_libre">Texto libre — nube de palabras</option>
         </select>
-      </label>
-      <label>Consigna <textarea name="consigna" rows="3" required></textarea></label>
-      <label>Opciones (una por línea, si aplica) <textarea name="opciones" rows="4"></textarea></label>
+      </AdminCampo>
+      <AdminCampo titulo="Consigna" ayuda="La pregunta que ve la gente en el celular. En primera persona, clara, sin jerga.">
+        <textarea name="consigna" rows="3" required></textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Opciones" ayuda="Solo para opción única o varias opciones: una por línea. En Sí/No, número, fecha o texto libre, dejalo vacío.">
+        <textarea name="opciones" rows="4"></textarea>
+      </AdminCampo>
       <button type="submit">Crear</button>
     </form>
   </AdminChrome>

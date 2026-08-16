@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -21,16 +22,24 @@ const error = Astro.url.searchParams.get('error');
     )}
     <form class="admin-form" method="post" action="/api/admin/posts">
       <input type="hidden" name="id" value={id} />
-      <label>Título <input type="text" name="titulo" value={p.titulo} required /></label>
-      <label>Bajada <textarea name="bajada" rows="3">{p.bajada}</textarea></label>
-      <label>Cuerpo (markdown) <textarea name="cuerpoMd" rows="16">{p.cuerpoMd}</textarea></label>
-      <label>
-        Estado
+      <AdminCampo titulo="Título" ayuda="El H1 de la nota y el título que se ve al compartir el link. Incluí la idea principal.">
+        <input type="text" name="titulo" value={p.titulo} required />
+      </AdminCampo>
+      <AdminCampo titulo="Bajada" ayuda="Resumen de 2 o 3 líneas. También se usa como descripción al pegar el link en LinkedIn o WhatsApp.">
+        <textarea name="bajada" rows="3">{p.bajada}</textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Cuerpo" ayuda="El artículo en markdown: títulos con ##, listas con -, negritas con **texto**. No hace falta pegar la firma: el sitio la agrega solo.">
+        <textarea name="cuerpoMd" rows="16">{p.cuerpoMd}</textarea>
+      </AdminCampo>
+      <AdminCampo
+        titulo="Estado"
+        ayuda="Borrador: solo lo ves en el panel. Publicado: aparece en /blog y en la home. El de la SRT conviene dejarlo en borrador hasta cotejar el Boletín Oficial."
+      >
         <select name="estado">
-          <option value="borrador" selected={p.estado !== 'publicado'}>borrador</option>
-          <option value="publicado" selected={p.estado === 'publicado'}>publicado</option>
+          <option value="borrador" selected={p.estado !== 'publicado'}>Borrador — no se ve en el sitio</option>
+          <option value="publicado" selected={p.estado === 'publicado'}>Publicado — visible en el blog</option>
         </select>
-      </label>
+      </AdminCampo>
       <button type="submit">Guardar</button>
     </form>
   </AdminChrome>

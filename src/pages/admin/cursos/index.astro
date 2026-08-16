@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let cursos: { id: string; titulo: string; slug: string; formato: string; publicado: boolean }[] = [];
@@ -51,22 +52,40 @@ try {
 
     <h2>Nuevo curso</h2>
     <form class="admin-form" method="post" action="/api/admin/cursos">
-      <label>Título <input type="text" name="titulo" required /></label>
-      <label>Descripción corta <input type="text" name="descripcionCorta" /></label>
-      <label>Descripción <textarea name="descripcion" rows="4"></textarea></label>
-      <label>
-        Formato
+      <AdminCampo titulo="Título" ayuda="Nombre público del curso-tipo, como se ve en el catálogo. Ejemplo: Encuentro de sensibilización.">
+        <input type="text" name="titulo" required />
+      </AdminCampo>
+      <AdminCampo titulo="Descripción corta" ayuda="Una o dos líneas para las tarjetas del listado. Sin jerga.">
+        <input type="text" name="descripcionCorta" />
+      </AdminCampo>
+      <AdminCampo titulo="Descripción" ayuda="Texto más largo de la ficha pública: para qué sirve, cómo se trabaja, qué se lleva la organización.">
+        <textarea name="descripcion" rows="4"></textarea>
+      </AdminCampo>
+      <AdminCampo
+        titulo="Formato"
+        ayuda="Encuentro: 90 min a media jornada, sensibilización. Taller: 1–2 jornadas, herramientas para delegados y mandos. Programa: 2–3 meses, protocolo propio y seguimiento."
+      >
         <select name="formato">
-          <option value="encuentro">encuentro</option>
-          <option value="taller">taller</option>
-          <option value="programa">programa</option>
+          <option value="encuentro">Encuentro — jornada corta de sensibilización</option>
+          <option value="taller">Taller — 1 a 2 jornadas con herramientas</option>
+          <option value="programa">Programa — varios meses, con protocolo</option>
         </select>
-      </label>
-      <label>Duración <input type="text" name="duracionTexto" /></label>
-      <label>Dirigido a <input type="text" name="dirigidoA" /></label>
-      <label>Objetivos (uno por línea) <textarea name="objetivos" rows="4"></textarea></label>
-      <label>Temario (uno por línea) <textarea name="temario" rows="4"></textarea></label>
-      <label><input type="checkbox" name="publicado" /> Publicado</label>
+      </AdminCampo>
+      <AdminCampo titulo="Duración" ayuda="Cómo se lo explica en el sitio, en palabras. Ejemplo: 90 min a media jornada.">
+        <input type="text" name="duracionTexto" />
+      </AdminCampo>
+      <AdminCampo titulo="Dirigido a" ayuda="A quién está pensado. Ejemplo: toda la planta, sin distinción de rango.">
+        <input type="text" name="dirigidoA" />
+      </AdminCampo>
+      <AdminCampo titulo="Objetivos" ayuda="Uno por línea. Aparecen como lista en la ficha del curso.">
+        <textarea name="objetivos" rows="4"></textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Temario" ayuda="Uno por línea. Los bloques o temas que se recorren.">
+        <textarea name="temario" rows="4"></textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Publicado" ayuda="Si está marcado, el curso se ve en /cursos. Si no, queda solo en el panel.">
+        <span class="admin-campo__check"><input type="checkbox" name="publicado" /> Visible en el catálogo público</span>
+      </AdminCampo>
       <button type="submit">Crear</button>
     </form>
   </AdminChrome>

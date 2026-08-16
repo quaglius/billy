@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
 import { db } from '../../../lib/firebase-admin';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { etiquetaInstancia, migasInstancia } from '../../../lib/admin-instancia';
 
 let instancias: {
@@ -77,42 +78,50 @@ try {
 
     <h2>Nueva instancia</h2>
     <form class="admin-form" method="post" action="/api/admin/instancias">
-      <label>
-        Curso
+      <AdminCampo titulo="Curso" ayuda="Elegí el formato-tipo que se va a dictar: Encuentro, Taller o Programa. Es la plantilla; esta instancia es esa cursada para una organización concreta.">
         <select name="cursoId" required>
           {Array.from(cursos.entries()).map(([id, titulo]) => (
             <option value={id}>{titulo}</option>
           ))}
         </select>
-      </label>
-      <label>
-        Empresa
+      </AdminCampo>
+      <AdminCampo titulo="Empresa" ayuda="Organización, sindicato o área para la que se arma esta cursada. Si no está en la lista, cargala antes en Empresas.">
         <select name="empresaId" required>
           {Array.from(empresas.entries()).map(([id, nombre]) => (
             <option value={id}>{nombre}</option>
           ))}
         </select>
-      </label>
-      <label>Slug público <input type="text" name="slug" required /></label>
-      <label>
-        Visibilidad
+      </AdminCampo>
+      <AdminCampo titulo="Slug público" ayuda="La parte de la URL, en minúsculas y con guiones. Ejemplo: taller-sitos-2026. Tiene que ser único. No uses espacios ni tildes.">
+        <input type="text" name="slug" required placeholder="taller-sitos-2026" />
+      </AdminCampo>
+      <AdminCampo
+        titulo="Visibilidad"
+        ayuda="Privada: solo entra quien tiene el link o el QR; no aparece en el sitio. Pública: se puede listar y compartir con el nombre de la organización. Anonimizada: pública, pero sin nombrar a la empresa (por ejemplo “Programa para un sindicato ferroviario”)."
+      >
         <select name="visibilidad">
-          <option value="privada">privada</option>
-          <option value="publica">publica</option>
-          <option value="anonimizada">anonimizada</option>
+          <option value="privada">Privada — solo con link o QR</option>
+          <option value="publica">Pública — visible con el nombre de la organización</option>
+          <option value="anonimizada">Anonimizada — visible, sin nombrar a la empresa</option>
         </select>
-      </label>
-      <label>
-        Modalidad
+      </AdminCampo>
+      <AdminCampo
+        titulo="Modalidad"
+        ayuda="Presencial: en el lugar de trabajo. Virtual: por videollamada. Híbrida: parte en sala y parte conectada. Si todavía no está definido, dejá “Sin definir”."
+      >
         <select name="modalidad">
-          <option value="">—</option>
-          <option value="presencial">presencial</option>
-          <option value="virtual">virtual</option>
-          <option value="hibrida">hibrida</option>
+          <option value="">Sin definir</option>
+          <option value="presencial">Presencial</option>
+          <option value="virtual">Virtual</option>
+          <option value="hibrida">Híbrida</option>
         </select>
-      </label>
-      <label>Fecha inicio <input type="date" name="fechaInicio" /></label>
-      <label>Fecha fin <input type="date" name="fechaFin" /></label>
+      </AdminCampo>
+      <AdminCampo titulo="Fecha inicio" ayuda="Primer día de esta cursada. Se usa para ordenar y para el cronograma.">
+        <input type="date" name="fechaInicio" />
+      </AdminCampo>
+      <AdminCampo titulo="Fecha fin" ayuda="Último día previsto. En un encuentro de un solo día puede coincidir con el inicio. Podés dejarlo vacío y completarlo después.">
+        <input type="date" name="fechaFin" />
+      </AdminCampo>
       <button type="submit">Crear</button>
     </form>
   </AdminChrome>

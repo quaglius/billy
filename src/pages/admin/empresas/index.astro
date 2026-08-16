@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
 let empresas: { id: string; nombre: string; slug: string }[] = [];
@@ -41,12 +42,24 @@ try {
 
     <h2>Nueva empresa</h2>
     <form class="admin-form" method="post" action="/api/admin/empresas">
-      <label>Nombre <input type="text" name="nombre" required /></label>
-      <label>Rubro <input type="text" name="rubro" /></label>
-      <label>Contacto <input type="text" name="contactoNombre" /></label>
-      <label>Email (interno, nunca público) <input type="email" name="contactoEmail" /></label>
-      <label>Teléfono (interno, nunca público) <input type="text" name="contactoTelefono" /></label>
-      <label>Notas internas <textarea name="notasInternas" rows="3"></textarea></label>
+      <AdminCampo titulo="Nombre" ayuda="Cómo figura la organización en el panel. No se publica si la instancia es privada o anonimizada.">
+        <input type="text" name="nombre" required />
+      </AdminCampo>
+      <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno. Ejemplo: ferroviario, saneamiento, sindicato.">
+        <input type="text" name="rubro" />
+      </AdminCampo>
+      <AdminCampo titulo="Contacto" ayuda="Nombre de la persona de referencia (RRHH, delegado, etc.). Solo lo ves vos.">
+        <input type="text" name="contactoNombre" />
+      </AdminCampo>
+      <AdminCampo titulo="Email" ayuda="Interno: nunca se muestra en el sitio. Sirve para que vos sepas a quién escribir.">
+        <input type="email" name="contactoEmail" />
+      </AdminCampo>
+      <AdminCampo titulo="Teléfono" ayuda="Interno: nunca se muestra en el sitio.">
+        <input type="text" name="contactoTelefono" />
+      </AdminCampo>
+      <AdminCampo titulo="Notas internas" ayuda="Recordatorios para vos: cómo se llegó a esta organización, acuerdos, lo que no conviene olvidar.">
+        <textarea name="notasInternas" rows="3"></textarea>
+      </AdminCampo>
       <button type="submit">Crear</button>
     </form>
   </AdminChrome>

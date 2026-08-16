@@ -78,6 +78,7 @@ const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
     <form class="obs-filters" method="get" action="/admin/observatorio">
       <label>
         Curso
+        <span class="admin-campo__ayuda">Filtrá las respuestas de un curso-tipo. “Todos” suma Encuentro, Taller y Programa.</span>
         <select name="curso">
           <option value="">Todos los cursos</option>
           {cursos.map((c) => (
@@ -89,10 +90,12 @@ const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
       </label>
       <label>
         Desde
+        <span class="admin-campo__ayuda">Primera fecha a incluir, en zona Argentina.</span>
         <input type="date" name="desde" value={filtros.desde} />
       </label>
       <label>
         Hasta
+        <span class="admin-campo__ayuda">Última fecha a incluir. Si lo dejás vacío, no hay tope.</span>
         <input type="date" name="hasta" value={filtros.hasta} />
       </label>
       <div class="obs-filters__actions">

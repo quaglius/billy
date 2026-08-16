@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -20,22 +21,40 @@ const temario = Array.isArray(c.temario) ? c.temario.join('\n') : '';
     {error && <p class="admin-alert">Falta el título.</p>}
     <form class="admin-form" method="post" action="/api/admin/cursos">
       <input type="hidden" name="id" value={id} />
-      <label>Título <input type="text" name="titulo" value={c.titulo ?? ''} required /></label>
-      <label>Descripción corta <input type="text" name="descripcionCorta" value={c.descripcionCorta ?? ''} /></label>
-      <label>Descripción <textarea name="descripcion" rows="5">{c.descripcion ?? ''}</textarea></label>
-      <label>
-        Formato
+      <AdminCampo titulo="Título" ayuda="Nombre público del curso-tipo, como se ve en el catálogo.">
+        <input type="text" name="titulo" value={c.titulo ?? ''} required />
+      </AdminCampo>
+      <AdminCampo titulo="Descripción corta" ayuda="Una o dos líneas para las tarjetas del listado.">
+        <input type="text" name="descripcionCorta" value={c.descripcionCorta ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Descripción" ayuda="Texto de la ficha pública: para qué sirve y qué se lleva la organización.">
+        <textarea name="descripcion" rows="5">{c.descripcion ?? ''}</textarea>
+      </AdminCampo>
+      <AdminCampo
+        titulo="Formato"
+        ayuda="Encuentro: jornada corta. Taller: 1–2 jornadas con herramientas. Programa: varios meses, con protocolo."
+      >
         <select name="formato">
-          <option value="encuentro" selected={c.formato === 'encuentro'}>encuentro</option>
-          <option value="taller" selected={c.formato === 'taller'}>taller</option>
-          <option value="programa" selected={c.formato === 'programa'}>programa</option>
+          <option value="encuentro" selected={c.formato === 'encuentro'}>Encuentro — jornada corta de sensibilización</option>
+          <option value="taller" selected={c.formato === 'taller'}>Taller — 1 a 2 jornadas con herramientas</option>
+          <option value="programa" selected={c.formato === 'programa'}>Programa — varios meses, con protocolo</option>
         </select>
-      </label>
-      <label>Duración <input type="text" name="duracionTexto" value={c.duracionTexto ?? ''} /></label>
-      <label>Dirigido a <input type="text" name="dirigidoA" value={c.dirigidoA ?? ''} /></label>
-      <label>Objetivos (uno por línea) <textarea name="objetivos" rows="4">{objetivos}</textarea></label>
-      <label>Temario (uno por línea) <textarea name="temario" rows="4">{temario}</textarea></label>
-      <label><input type="checkbox" name="publicado" checked={Boolean(c.publicado)} /> Publicado</label>
+      </AdminCampo>
+      <AdminCampo titulo="Duración" ayuda="Cómo se lo explica en el sitio. Ejemplo: 90 min a media jornada.">
+        <input type="text" name="duracionTexto" value={c.duracionTexto ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Dirigido a" ayuda="A quién está pensado este formato.">
+        <input type="text" name="dirigidoA" value={c.dirigidoA ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Objetivos" ayuda="Uno por línea. Se muestran como lista en la ficha.">
+        <textarea name="objetivos" rows="4">{objetivos}</textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Temario" ayuda="Uno por línea. Los bloques o temas que se recorren.">
+        <textarea name="temario" rows="4">{temario}</textarea>
+      </AdminCampo>
+      <AdminCampo titulo="Publicado" ayuda="Si está marcado, el curso se ve en /cursos. Si no, queda solo en el panel.">
+        <span class="admin-campo__check"><input type="checkbox" name="publicado" checked={Boolean(c.publicado)} /> Visible en el catálogo público</span>
+      </AdminCampo>
       <button type="submit">Guardar</button>
     </form>
   </AdminChrome>

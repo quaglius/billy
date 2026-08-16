@@ -2,6 +2,7 @@
 import Layout from '../../../../layouts/Layout.astro';
 import AdminChrome from '../../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../../components/AdminBreadcrumb.astro';
+import AdminCampo from '../../../../components/AdminCampo.astro';
 import { db } from '../../../../lib/firebase-admin';
 import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../../lib/admin-instancia';
 
@@ -39,17 +40,20 @@ const error = Astro.url.searchParams.get('error');
     {error && <p class="admin-alert">Faltan la empresa o la fecha de inicio.</p>}
     <form class="admin-form" method="post" action="/api/admin/instancias/duplicar">
       <input type="hidden" name="id" value={id} />
-      <label>
-        Empresa o sindicato
+      <AdminCampo titulo="Empresa o sindicato" ayuda="La organización nueva. Se copian encuentros y actividades, con códigos QR nuevos. La copia arranca privada.">
         <select name="empresaId" required>
           <option value="">Elegí una empresa</option>
           {empresas.map((e) => (
             <option value={e.id}>{e.nombre}</option>
           ))}
         </select>
-      </label>
-      <label>Fecha de inicio <input type="date" name="fechaInicio" required /></label>
-      <label>Fecha de fin <input type="date" name="fechaFin" /></label>
+      </AdminCampo>
+      <AdminCampo titulo="Fecha de inicio" ayuda="Primer día de la cursada nueva. Obligatorio.">
+        <input type="date" name="fechaInicio" required />
+      </AdminCampo>
+      <AdminCampo titulo="Fecha de fin" ayuda="Último día previsto. Si es un solo encuentro, puede ser el mismo día. Podés dejarlo vacío.">
+        <input type="date" name="fechaFin" />
+      </AdminCampo>
       <button type="submit">Duplicar</button>
     </form>
   </AdminChrome>

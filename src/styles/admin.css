@@ -88,6 +88,40 @@
   max-width: 640px;
 }
 
+.admin-campo {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-campo__titulo {
+  font-weight: 700;
+  color: var(--tj-color-heading-primary);
+}
+
+.admin-campo__ayuda {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--tj-color-text-body);
+}
+
+.admin-form select,
+.obs-filters select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.2 5.8 8 10.6l4.8-4.8' stroke='%23051229' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 44px;
+}
+
+.admin-form select::-ms-expand,
+.obs-filters select::-ms-expand {
+  display: none;
+}
+
 .admin-form input:not([type='checkbox']),
 .admin-form select,
 .admin-form textarea {
@@ -313,6 +347,21 @@
   color: var(--tj-color-text-body-2);
 }
 
+.obs-filters .admin-campo__ayuda {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--tj-color-text-body);
+}
+
+.admin-campo__check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 400;
+}
+
 .obs-filters select,
 .obs-filters input[type='date'] {
   min-height: 48px;
@@ -325,6 +374,10 @@
   letter-spacing: 0;
   color: var(--tj-color-heading-primary);
   background: var(--tj-color-common-white);
+}
+
+.obs-filters select {
+  padding-right: 44px;
 }
 
 .obs-filters__actions {

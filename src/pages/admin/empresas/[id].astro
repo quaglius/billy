@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 
 const { id } = Astro.params;
@@ -18,12 +19,24 @@ const error = Astro.url.searchParams.get('error');
     {error && <p class="admin-alert">Falta el nombre.</p>}
     <form class="admin-form" method="post" action="/api/admin/empresas">
       <input type="hidden" name="id" value={id} />
-      <label>Nombre <input type="text" name="nombre" value={e.nombre ?? ''} required /></label>
-      <label>Rubro <input type="text" name="rubro" value={e.rubro ?? ''} /></label>
-      <label>Contacto <input type="text" name="contactoNombre" value={e.contactoNombre ?? ''} /></label>
-      <label>Email (interno, nunca público) <input type="email" name="contactoEmail" value={e.contactoEmail ?? ''} /></label>
-      <label>Teléfono (interno, nunca público) <input type="text" name="contactoTelefono" value={e.contactoTelefono ?? ''} /></label>
-      <label>Notas internas <textarea name="notasInternas" rows="3">{e.notasInternas ?? ''}</textarea></label>
+      <AdminCampo titulo="Nombre" ayuda="Cómo figura la organización en el panel. No se publica si la instancia es privada o anonimizada.">
+        <input type="text" name="nombre" value={e.nombre ?? ''} required />
+      </AdminCampo>
+      <AdminCampo titulo="Rubro" ayuda="Sector o actividad, para tu orden interno.">
+        <input type="text" name="rubro" value={e.rubro ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Contacto" ayuda="Nombre de la persona de referencia. Solo lo ves vos.">
+        <input type="text" name="contactoNombre" value={e.contactoNombre ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Email" ayuda="Interno: nunca se muestra en el sitio.">
+        <input type="email" name="contactoEmail" value={e.contactoEmail ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Teléfono" ayuda="Interno: nunca se muestra en el sitio.">
+        <input type="text" name="contactoTelefono" value={e.contactoTelefono ?? ''} />
+      </AdminCampo>
+      <AdminCampo titulo="Notas internas" ayuda="Recordatorios para vos: acuerdos, contexto, lo que no conviene olvidar.">
+        <textarea name="notasInternas" rows="3">{e.notasInternas ?? ''}</textarea>
+      </AdminCampo>
       <button type="submit">Guardar</button>
     </form>
   </AdminChrome>

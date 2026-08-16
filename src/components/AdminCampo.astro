@@ -1,0 +1,13 @@
+---
+interface Props {
+  titulo: string;
+  ayuda: string;
+}
+
+const { titulo, ayuda } = Astro.props;
+---
+<label class="admin-campo">
+  <span class="admin-campo__titulo">{titulo}</span>
+  <span class="admin-campo__ayuda">{ayuda}</span>
+  <slot />
+</label>

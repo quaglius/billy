@@ -2,6 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdminChrome from '../../../components/AdminChrome.astro';
 import AdminBreadcrumb from '../../../components/AdminBreadcrumb.astro';
+import AdminCampo from '../../../components/AdminCampo.astro';
 import { db } from '../../../lib/firebase-admin';
 import { estadoEncuentro, fechaDeDoc, formatFechaEncuentro } from '../../../lib/encuentro';
 import { etiquetaInstancia, migasInstancia, rutasInstancia } from '../../../lib/admin-instancia';
@@ -137,11 +138,21 @@ const mensajesOk: Record<string, string> = {
     <form class="admin-form" method="post" action="/api/admin/encuentros">
       <input type="hidden" name="instanciaId" value={id} />
       <input type="hidden" name="_action" value="crear" />
-      <label>Orden <input type="number" name="orden" value={proximoOrden} required /></label>
-      <label>Título <input type="text" name="titulo" required /></label>
-      <label>Fecha y hora <input type="datetime-local" name="fechaHora" required /></label>
-      <label>Duración (minutos) <input type="number" name="duracionMinutos" value="120" /></label>
-      <label>Descripción <textarea name="descripcion" rows="3"></textarea></label>
+      <AdminCampo titulo="Orden" ayuda="Número de aparición en el cronograma. 1 es el primero. Si hay dos el mismo día, el más chico va arriba.">
+        <input type="number" name="orden" value={proximoOrden} required />
+      </AdminCampo>
+      <AdminCampo titulo="Título" ayuda="Cómo se llama este encuentro. Ejemplo: Diagnóstico y apertura.">
+        <input type="text" name="titulo" required />
+      </AdminCampo>
+      <AdminCampo titulo="Fecha y hora" ayuda="Cuándo empieza. El estado (próximo / en curso / completado) se calcula solo a partir de esta fecha y la duración.">
+        <input type="datetime-local" name="fechaHora" required />
+      </AdminCampo>
+      <AdminCampo titulo="Duración (minutos)" ayuda="Cuánto dura la sesión. Si no lo cargás, se asumen 120 minutos para saber cuándo termina.">
+        <input type="number" name="duracionMinutos" value="120" />
+      </AdminCampo>
+      <AdminCampo titulo="Descripción" ayuda="Notas para vos o para la ficha: qué se trabaja ese día. No es obligatorio.">
+        <textarea name="descripcion" rows="3"></textarea>
+      </AdminCampo>
       <button type="submit">Crear encuentro</button>
     </form>
   </AdminChrome>
