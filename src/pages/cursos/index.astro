@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { db } from '../../lib/firebase-admin';
-import { coverForFormato } from '../../lib/covers';
+import { coverForFormato, coverPositionForFormato } from '../../lib/covers';
 
 let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string }[] = [];
 let instancias: { slug: string; titulo: string; visibilidad: string }[] = [];
@@ -41,7 +41,13 @@ try {
       {cursos.map((c) => (
         <a class="curso-card" href={`/cursos/${c.slug}`}>
           <span class="curso-card__thumb">
-            <img src={coverForFormato(c.formato)} alt="" width="640" height="400" />
+            <img
+              src={coverForFormato(c.formato)}
+              alt=""
+              width="640"
+              height="400"
+              style={`object-position: ${coverPositionForFormato(c.formato)}`}
+            />
           </span>
           <div class="curso-card__body">
             <span class="curso-card__chip">{c.formato}</span>

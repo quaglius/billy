@@ -1,5 +1,5 @@
 ---
-import { coverForSlug } from '../lib/covers';
+import { coverMeta } from '../lib/covers';
 import { formatFecha } from '../lib/posts';
 import BotonPrimario from './BotonPrimario.astro';
 
@@ -12,12 +12,12 @@ interface Props {
 }
 
 const { slug, titulo, bajada, imagenPortadaUrl, publicadoEn } = Astro.props;
-const cover = coverForSlug(slug, imagenPortadaUrl);
+const cover = coverMeta(slug, imagenPortadaUrl);
 const fecha = formatFecha(publicadoEn ?? null);
 ---
 <article class="post-card">
   <a class="post-card__thumb" href={`/blog/${slug}`}>
-    <img src={cover} alt="" width="800" height="500" />
+    <img src={cover.src} alt="" width="800" height="500" style={`object-position: ${cover.position}`} />
     {fecha.mes && (
       <span class="post-card__date">
         <span class="post-card__day">{fecha.dia}</span>

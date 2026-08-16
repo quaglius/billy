@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import { db } from '../../lib/firebase-admin';
 import { renderMarkdown } from '../../lib/markdown';
-import { coverForSlug } from '../../lib/covers';
+import { coverMeta } from '../../lib/covers';
 import { formatFecha } from '../../lib/posts';
 
 const { slug } = Astro.params;
@@ -17,15 +17,15 @@ if (post.estado !== 'publicado') return Astro.redirect('/blog');
 const html = renderMarkdown(String(post.cuerpoMd ?? ''));
 const titulo = String(post.titulo ?? '');
 const bajada = String(post.bajada ?? '');
-const imagen = coverForSlug(slug, post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null);
+const cover = coverMeta(slug, post.imagenPortadaUrl ? String(post.imagenPortadaUrl) : null);
 const pub = post.publicadoEn?.toDate?.() ?? null;
 const fecha = formatFecha(pub);
 ---
-<Layout title={titulo} description={bajada} ogImage={imagen}>
+<Layout title={titulo} description={bajada} ogImage={cover.src}>
   <PageHeader titulo={titulo} actual="Nota" crumbs={[{ href: '/', label: 'Inicio' }, { href: '/blog', label: 'Blog' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
-      <img src={imagen} alt="" width="1200" height="630" />
+      <img src={cover.src} alt="" width="1200" height="630" style={`object-position: ${cover.position}`} />
     </div>
     {fecha.largo && <p class="post-meta">{fecha.largo}</p>}
     <p>{bajada}</p>

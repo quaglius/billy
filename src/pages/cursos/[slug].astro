@@ -4,7 +4,7 @@ import PageHeader from '../../components/PageHeader.astro';
 import BotonPrimario from '../../components/BotonPrimario.astro';
 import { db } from '../../lib/firebase-admin';
 import { renderMarkdown } from '../../lib/markdown';
-import { coverForFormato } from '../../lib/covers';
+import { coverForFormato, coverPositionForFormato } from '../../lib/covers';
 import { WHATSAPP_URL } from '../../lib/site';
 
 const { slug } = Astro.params;
@@ -49,12 +49,13 @@ if (!cursoSnap.empty) {
 const html = renderMarkdown(descripcion);
 const extraHtml = extra ? renderMarkdown(extra) : '';
 const cover = coverForFormato(formato);
+const coverPos = coverPositionForFormato(formato);
 ---
 <Layout title={titulo} noindex={noindex}>
   <PageHeader titulo={titulo} actual={titulo} crumbs={[{ href: '/', label: 'Inicio' }, { href: '/cursos', label: 'Cursos' }]} />
   <article class="page-shell gn-prose">
     <div class="post-hero">
-      <img src={cover} alt="" width="1200" height="630" />
+      <img src={cover} alt="" width="1200" height="630" style={`object-position: ${coverPos}`} />
     </div>
     {formato && <p class="curso-card__chip">{formato}</p>}
     <div set:html={html} />
