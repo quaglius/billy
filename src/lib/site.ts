@@ -9,6 +9,7 @@ export const WHATSAPP_METODO = whatsappConTexto(
 );
 export const INSTAGRAM_URL = 'https://www.instagram.com/equilibrarprosalud';
 export const INSTAGRAM_HANDLE = '@equilibrarprosalud';
+export const FACEBOOK_URL = 'https://www.facebook.com/equilibrarprosalud';
 export const SITE_URL = 'https://guillenuesch.netlify.app';
 export const YOUTUBE_URL = 'https://www.youtube.com/@EquilibrarSaludMentalyAdicciones';
 export const LINKEDIN_URL = 'https://www.linkedin.com/in/guillermo-billy-nuesch-a9257b77/';

@@ -1,0 +1,63 @@
+---
+import IconoRed from './IconoRed.astro';
+import { FACEBOOK_URL, INSTAGRAM_HANDLE, INSTAGRAM_URL } from '../lib/site';
+---
+<section class="redes-feed page-shell wow fadeInUp" data-wow-delay="0.4s">
+  <div class="redes-feed__grid">
+    <article class="redes-card">
+      <a class="redes-card__brand" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">
+        <span class="redes-card__logo" aria-hidden="true"><IconoRed red="instagram" /></span>
+        <span>
+          <span class="eyebrow">Instagram</span>
+          <span class="redes-card__titulo">{INSTAGRAM_HANDLE}</span>
+        </span>
+      </a>
+      <p>Salud mental en el trabajo. Charlas, talleres y programas en plantas, sindicatos y ART.</p>
+      <div class="redes-card__embed">
+        <iframe
+          title="Feed de Instagram de Equilibrar ProSalud"
+          src={`${INSTAGRAM_URL}/embed`}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </article>
+
+    <article class="redes-card">
+      <a class="redes-card__brand" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer">
+        <span class="redes-card__logo" aria-hidden="true"><IconoRed red="facebook" /></span>
+        <span>
+          <span class="eyebrow">Facebook</span>
+          <span class="redes-card__titulo">Equilibrar ProSalud</span>
+        </span>
+      </a>
+      <p>Novedades, encuentros y el mismo espacio de Equilibrar en Facebook.</p>
+      <div class="redes-card__embed redes-card__embed--fb">
+        <div
+          class="fb-page"
+          data-href={FACEBOOK_URL}
+          data-tabs="timeline"
+          data-width="500"
+          data-height="560"
+          data-small-header="false"
+          data-adapt-container-width="true"
+          data-hide-cover="false"
+          data-show-facepile="false"
+        >
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+<script>
+  const root = document.getElementById('fb-root') ?? Object.assign(document.createElement('div'), { id: 'fb-root' });
+  if (!root.isConnected) document.body.prepend(root);
+  if (!document.querySelector('script[src*="connect.facebook.net"]')) {
+    const s = document.createElement('script');
+    s.async = true;
+    s.defer = true;
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v21.0';
+    document.body.append(s);
+  }
+</script>

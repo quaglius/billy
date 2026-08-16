@@ -1,6 +1,13 @@
 ---
-import { INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL, NAV } from '../lib/site';
+import IconoRed from './IconoRed.astro';
+import { FACEBOOK_URL, INSTAGRAM_URL, YOUTUBE_URL, LINKEDIN_URL, NAV } from '../lib/site';
 const year = new Date().getFullYear();
+const redes = [
+  { href: INSTAGRAM_URL, label: 'Instagram', red: 'instagram' as const },
+  { href: FACEBOOK_URL, label: 'Facebook', red: 'facebook' as const },
+  { href: YOUTUBE_URL, label: 'YouTube', red: 'youtube' as const },
+  { href: LINKEDIN_URL, label: 'LinkedIn', red: 'linkedin' as const },
+];
 ---
 <footer class="site-footer">
   <div class="site-footer__inner">
@@ -31,9 +38,11 @@ const year = new Date().getFullYear();
     <div class="site-footer__col">
       <h2>Seguime</h2>
       <div class="site-footer__social">
-        <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram">Ig</a>
-        <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" aria-label="YouTube">Yt</a>
-        <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a>
+        {redes.map((r) => (
+          <a href={r.href} target="_blank" rel="noopener noreferrer" aria-label={r.label}>
+            <IconoRed red={r.red} />
+          </a>
+        ))}
       </div>
     </div>
   </div>

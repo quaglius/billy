@@ -5,11 +5,8 @@ import Layout from '../layouts/Layout.astro';
 import BotonPrimario from '../components/BotonPrimario.astro';
 import ProcesoTrabajo from '../components/ProcesoTrabajo.astro';
 import OrganizacionesSlider from '../components/OrganizacionesSlider.astro';
-import {
-  WHATSAPP_URL,
-  INSTAGRAM_URL,
-  INSTAGRAM_HANDLE,
-} from '../lib/site';
+import RedesFeed from '../components/RedesFeed.astro';
+import { WHATSAPP_URL } from '../lib/site';
 import { listarPostsPublicados } from '../lib/posts';
 import { coverMeta, CURSO_COVERS } from '../lib/covers';
 
@@ -44,13 +41,6 @@ const pilares = [
     texto: 'Seguimiento en el tiempo, no una charla suelta.',
     icono: '/shapes/feature-efficient-operations.svg',
   },
-];
-
-const igPilares = [
-  { titulo: 'Del campo', texto: 'El encuentro de la semana y qué se trabajó.' },
-  { titulo: 'Señales', texto: 'Cómo detectar, qué decir, qué no decir, cómo acompañar sin diagnosticar.' },
-  { titulo: 'Tus derechos', texto: 'Normativa en criollo: Ley 26.657, licencias, CyMAT, protocolo SRT.' },
-  { titulo: '25 años', texto: 'Frases, aprendizajes y anécdotas de trayectoria.' },
 ];
 
 const servicios = [
@@ -214,22 +204,7 @@ const testimonios = [
     <p><a class="line-hover" href="/blog">Ir al blog</a></p>
   </section>
 
-  <section class="ig-home page-shell wow fadeInUp" data-wow-delay="0.5s">
-    <p class="eyebrow">Instagram</p>
-    <h2 class="text-anim">{INSTAGRAM_HANDLE}</h2>
-    <p>Salud mental en el trabajo. Charlas, talleres y programas en plantas, sindicatos y ART.</p>
-    <p>
-      <a class="line-hover" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Ver en Instagram</a>
-    </p>
-    <div class="ig-pilares">
-      {igPilares.map((p) => (
-        <article>
-          <h3>{p.titulo}</h3>
-          <p>{p.texto}</p>
-        </article>
-      ))}
-    </div>
-  </section>
+  <RedesFeed />
 
   <section class="page-shell cta-final">
     <h2 class="text-anim">Si estás buscando generar un impacto real en tu equipo de trabajo, podemos trabajar juntos.</h2>

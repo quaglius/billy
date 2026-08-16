@@ -158,6 +158,10 @@ img {
   color: #fff;
 }
 
+.site-footer__social svg {
+  display: block;
+}
+
 .site-footer__copy {
   background: var(--tj-color-theme-dark);
   border-top: 0;
@@ -352,26 +356,64 @@ img {
   padding-left: 20px;
 }
 
-.ig-pilares {
+.redes-feed__grid {
   display: grid;
-  gap: 16px;
-  margin: 32px 0;
+  gap: 28px;
 }
 
-.ig-pilares article {
+.redes-card {
   background: #fff;
   padding: 24px;
   box-shadow: 0 10px 40px rgba(5, 18, 41, 0.08);
 }
 
-.ig-pilares h3 {
-  margin: 0 0 8px;
-  font-size: 18px;
+.redes-card__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 12px;
 }
 
-.ig-pilares p {
-  margin: 0;
-  color: var(--tj-color-text-body-2);
+.redes-card__brand:hover .redes-card__titulo {
+  color: var(--tj-color-theme-primary);
+}
+
+.redes-card__logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--tj-color-theme-dark);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.redes-card__titulo {
+  display: block;
+  font-family: var(--tj-ff-heading);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--tj-color-heading-primary);
+}
+
+.redes-card__embed {
+  margin-top: 16px;
+  min-height: 540px;
+  background: var(--tj-color-theme-bg);
+}
+
+.redes-card__embed iframe,
+.redes-card__embed .fb-page,
+.redes-card__embed .fb-page > span,
+.redes-card__embed .fb-page iframe {
+  width: 100% !important;
+  min-height: 540px;
+  border: 0;
+  display: block;
 }
 
 .ig-feed-placeholder {
@@ -548,6 +590,7 @@ html.js .wow:not(.animated) {
 
 .cta-final {
   background: var(--tj-color-theme-bg);
+  margin-bottom: 72px;
 }
 
 .gn-prose h1 {
@@ -578,8 +621,8 @@ html.js .wow:not(.animated) {
     padding-bottom: 80px;
   }
 
-  .ig-pilares {
-    grid-template-columns: repeat(4, 1fr);
+  .redes-feed__grid {
+    grid-template-columns: 1fr 1fr;
   }
 
   .hero-title {
