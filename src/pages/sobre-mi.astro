@@ -94,13 +94,18 @@ const organizaciones = [
 <Layout title="Sobre mí — Guille Nuesch">
   <PageHeader titulo="Sobre mí" actual="Sobre mí" />
   <article class="page-shell gn-prose wow fadeInUp" data-wow-delay="0.2s">
-    {aboutSrc && (
-      <p>
-        <img src={aboutSrc} alt="Guillermo Nuesch en una charla" width="640" height="640" />
-      </p>
-    )}
-    <h2 class="text-anim">Guillermo “Billy” Nuesch</h2>
-    <p>Capacitador externo en Salud Mental y Prevención de Consumos Problemáticos en los ámbitos laborales. Bienestar ocupacional.</p>
+    <div class="about-split">
+      <div class="about-photo">
+        <img class="hero-shapes-img" src="/shapes/h5-hero-shape-1.svg" alt="" aria-hidden="true" />
+        {aboutSrc && (
+          <img src={aboutSrc} alt="Guillermo Nuesch en una charla" width="640" height="640" />
+        )}
+      </div>
+      <div>
+        <h2 class="text-anim">Guillermo “Billy” Nuesch</h2>
+        <p>Capacitador externo en Salud Mental y Prevención de Consumos Problemáticos en los ámbitos laborales. Bienestar ocupacional.</p>
+      </div>
+    </div>
 
     <p>
       Vivimos un tiempo donde las organizaciones laborales enfrentan desafíos vinculados al estrés, la salud mental y los consumos problemáticos. En este contexto, todas las acciones preventivas tienen como premisa acompañar a las organizaciones a construir entornos laborales más saludables, abordando dos desafíos cada vez más presentes: la salud mental y los consumos problemáticos.
@@ -125,6 +130,7 @@ const organizaciones = [
     </ol>
 
     <h2>Los tres productos</h2>
+    <div class="about-productos">
     {productos.map((p) => (
       <section>
         <h3>{p.nombre}</h3>
@@ -133,6 +139,7 @@ const organizaciones = [
         <p><strong>Qué se lleva:</strong> {p.queSeLleva}</p>
       </section>
     ))}
+    </div>
 
     <h2>Organizaciones donde trabajó</h2>
     <ul class="org-list">
