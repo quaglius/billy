@@ -1,6 +1,7 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
-import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp, getFirestore } from 'firebase-admin/firestore';
 import { generarCodigoActividad } from '../src/lib/codigo';
+import { postsDesdePlan } from './plan-posts';
 
 function init() {
   if (getApps().length) return;
@@ -19,171 +20,7 @@ function init() {
   });
 }
 
-function esqueleto(opts: {
-  angulo: string;
-  idea: string;
-  dato: string;
-  fuente: string;
-  avisoSrt?: boolean;
-}): string {
-  const aviso = opts.avisoSrt
-    ? `> ⚠️ **No publicar sin verificar el texto completo de la Resolución 8/2026 de la SRT contra el Boletín Oficial.** Ver blog-content-plan.md, post #6.\n\n`
-    : '';
-  return `${aviso}> **Borrador — pendiente de redacción final.** Este texto es un esqueleto armado a partir del brief de contenido, no la nota terminada.
-
-## ${opts.angulo}
-
-${opts.idea}
-
-### El dato
-
-> ${opts.dato}
-
-Fuente: ${opts.fuente}
-
-### Desarrollo
-
-<!-- TODO: desarrollar el cuerpo del artículo. No inventar estadísticas, cifras ni citas normativas que no estén en blog-content-plan.md o guillermo-perfil.md. -->
-
-### Para seguir leyendo
-
-- [Ayuda: Línea 141 y recursos de derivación](/ayuda)
-`;
-}
-
-const posts = [
-  {
-    slug: 'salud-mental-laboral-desde-el-piso',
-    titulo: 'Lo que nadie te cuenta de la salud mental laboral: la mirada desde el piso, no desde la oficina',
-    bajada:
-      'Casi todo el bienestar laboral habla de oficinas. Guillermo escribe desde 25 años con guardas, casinos y sindicatos: el piso, no el escritorio.',
-    keywordPrincipal: 'salud mental laboral Argentina',
-    cuerpoMd: esqueleto({
-      angulo: 'casi todo el contenido de 2026 habla de oficinas; Guillermo escribe desde 25 años con guardas de tren, saneamiento, casinos, penitenciarios.',
-      idea: 'Contrastar las estadísticas de burnout "de oficina" (ej. datos de Wellhub sobre estrés/burnout en Argentina) con la experiencia real de trabajadores operativos y de servicios esenciales, donde el discurso de bienestar casi no llega. Reflexión: el bienestar laboral no puede ser un beneficio de oficina con pelota de yoga, tiene que llegar también al que maneja un tren o recolecta residuos.',
-      dato: 'cifras de estrés/burnout en Argentina 2026 (fuente: notas de Wellhub sobre bienestar laboral 2026).',
-      fuente: 'notas de Wellhub sobre bienestar laboral 2026',
-    }),
-  },
-  {
-    slug: 'delegado-sindical-salud-mental',
-    titulo: 'El delegado sindical como primera línea de cuidado: una guía práctica',
-    bajada:
-      'Nadie escribió una guía de primeros auxilios psicológicos para el delegado gremial argentino. Cómo abrir la charla, qué no decir y cuándo derivar.',
-    keywordPrincipal: 'delegado sindical salud mental',
-    cuerpoMd: esqueleto({
-      angulo: 'nadie escribió una guía de primeros auxilios psicológicos pensada específicamente para el delegado gremial argentino.',
-      idea: 'A partir de su experiencia con SITOS y otros sindicatos, proponer un mini-protocolo: cómo abrir una conversación difícil con un compañero, qué NO decir, cuándo derivar, cómo cuidarse el delegado a sí mismo (el "cuidado de quien cuida"). Diferenciar el rol del delegado del rol del profesional de salud mental (no diagnostica, acompaña y deriva).',
-      dato: 'marco de primeros auxilios psicológicos (PAP) usado institucionalmente en Argentina (Ministerio de Trabajo, SRT).',
-      fuente: 'Ministerio de Trabajo, SRT — marco de primeros auxilios psicológicos (PAP)',
-    }),
-  },
-  {
-    slug: 'ludopatia-en-el-trabajo',
-    titulo: 'Ludopatía en el trabajo: la adicción silenciosa que nadie está mirando',
-    bajada:
-      'Mientras el país discute las apuestas online, en el trabajo ya se ven adelantos de sueldo, ausentismo e irritabilidad. Se previene como cualquier consumo.',
-    keywordPrincipal: 'ludopatía en el trabajo',
-    cuerpoMd: esqueleto({
-      angulo: 'el debate 2026 es legislativo (proyectos en el Congreso sobre apuestas online); falta la lectura organizacional/preventiva.',
-      idea: 'Explicar que mientras el país discute cómo regular las apuestas online, las empresas y sindicatos tienen un problema concreto y silencioso hoy: pedidos de adelanto de sueldo, ausentismo, irritabilidad, deudas. Dar señales de alerta específicas para mandos medios y una postura clara: esto se previene igual que cualquier otro consumo problemático, no es "un vicio menor".',
-      dato: 'Las consultas por juego compulsivo a la Línea 141 de SEDRONAR crecieron 27% en 2025. Más de 1 de cada 4 estudiantes secundarios apostó dinero online en el último año (Observatorio Argentino de Drogas).',
-      fuente: 'https://chequeado.com/el-explicador/en-2025-crecieron-un-27-las-consultas-por-juego-compulsivo-a-la-linea-141/ — Observatorio Argentino de Drogas',
-    }),
-  },
-  {
-    slug: 'consumo-de-alcohol-en-el-trabajo',
-    titulo: 'El after office también se diseña: cómo prevenir sin prohibir',
-    bajada:
-      'El after office no es solo lifestyle: es política de prevención. Cómo diseñar eventos que no naturalicen el alcohol como condición para pertenecer.',
-    keywordPrincipal: 'consumo de alcohol en el trabajo',
-    cuerpoMd: esqueleto({
-      angulo: 'las notas sobre after office/daycaps son de lifestyle; falta la lectura de prevención organizacional.',
-      idea: 'Tomar la tendencia real de "consumo consciente" (daycaps, opciones sin alcohol) y traducirla a una guía para RRHH/mandos: cómo diseñar eventos de la empresa (aniversarios, fin de año, after office) que no naturalicen el consumo como parte de "pertenecer al equipo", sin caer en la prohibición vacía. Tono: no es sobre prohibir la fiesta, es sobre no dejar afuera al que no toma y no empujar al que ya tiene un problema.',
-      dato: 'la tendencia de "after 0.0" / daycaps como señal de cambio cultural real en Argentina (nota de Vinomanos/Luján Hoy).',
-      fuente: 'Vinomanos / Luján Hoy — tendencia after 0.0 y daycaps',
-    }),
-  },
-  {
-    slug: 'presentismo-laboral',
-    titulo: "Presentismo: cuando 'estar siempre' es la primera señal de alarma",
-    bajada:
-      'El presentismo no es solo productividad: a veces se sostiene con café, energizantes, psicofármacos o alcohol para dormir. Hay que nombrarlo sin estigmatizar.',
-    keywordPrincipal: 'presentismo laboral',
-    cuerpoMd: esqueleto({
-      angulo: 'se habla del presentismo como problema de productividad; falta la lectura clínica/preventiva de qué sostiene ese presentismo (estimulantes, ansiolíticos, alcohol nocturno "para bajar").',
-      idea: 'Explicar la diferencia entre ausentismo y presentismo, y proponer una idea incómoda pero real de su experiencia de campo: mucha gente "aguanta" en el puesto gracias a sustancias (café en exceso, energizantes, psicofármacos sin control, alcohol para dormir), y eso rara vez se nombra como consumo problemático porque la persona "sigue rindiendo". Dar pautas para que un mando medio identifique este patrón sin estigmatizar.',
-      dato: 'cifras de presentismo/burnout Argentina 2026 (Wellhub, Punto Biz).',
-      fuente: 'Wellhub, Punto Biz — presentismo/burnout Argentina 2026',
-    }),
-  },
-  {
-    slug: 'protocolo-salud-mental-laboral-srt-2026',
-    titulo: 'Qué dice (en criollo) el nuevo protocolo de salud mental laboral de la SRT',
-    bajada:
-      'La Resolución 8/2026 de la SRT es normativa reciente y casi no tiene explicación en lenguaje llano. Qué cambia para el trabajador, la empresa y la ART.',
-    keywordPrincipal: 'protocolo salud mental laboral SRT 2026',
-    cuerpoMd: esqueleto({
-      avisoSrt: true,
-      angulo: 'normativa muy reciente (enero 2026), casi sin contenido explicativo en lenguaje llano; oportunidad SEO de baja competencia y alta vigencia.',
-      idea: 'Traducir en lenguaje simple qué cambia con el nuevo protocolo de servicios de psiquiatría/salud mental de la Superintendencia de Riesgos del Trabajo: qué implica para el trabajador, qué implica para la empresa/ART, y por qué esto refuerza (según su mirada) la necesidad de trabajar la prevención antes de que el caso llegue a una licencia. Es un post más "informativo/legal" pero con su bajada de prevención al final.',
-      dato: 'Resolución 8/2026, Superintendencia de Riesgos del Trabajo (Boletín Oficial, 30/01/2026) y su relación con la Ley 26.657.',
-      fuente: 'Boletín Oficial, 30/01/2026 — Resolución 8/2026 SRT; Ley 26.657',
-    }),
-  },
-  {
-    slug: 'condiciones-y-medio-ambiente-de-trabajo-cymat',
-    titulo: 'CyMAT: la palabra técnica que explica por qué tu trabajo te enferma (o te cuida)',
-    bajada:
-      'CyMAT no es solo clima laboral: es organización del trabajo, ritmos y jerarquías. Cuando las condiciones son malas, el consumo a veces es una forma de aguantar.',
-    keywordPrincipal: 'condiciones y medio ambiente de trabajo CyMAT',
-    cuerpoMd: esqueleto({
-      angulo: 'marco académico (Julio C. Neffa) clave en la formación de Guillermo (UBA), casi inexistente en formato blog accesible. Nicho SEO con poquísima competencia.',
-      idea: 'Explicar en criollo el concepto de CyMAT (condiciones y medio ambiente de trabajo): no es solo "el clima laboral", incluye la organización del trabajo, los ritmos, las relaciones jerárquicas, el ambiente físico. Conectar con consumos problemáticos: cuando las condiciones de trabajo son malas, el consumo muchas veces aparece como forma de "aguantar" el puesto, no como una debilidad individual. Este post da autoridad académica al resto del contenido.',
-      dato: 'marco conceptual de Julio César Neffa (CONICET/CEIL) sobre CyMAT, ya presente en la bibliografía del curso INAP/Sedronar.',
-      fuente: 'Julio César Neffa (CONICET/CEIL) — CyMAT; bibliografía INAP/Sedronar',
-    }),
-  },
-  {
-    slug: 'inteligencia-artificial-salud-mental-trabajo',
-    titulo: 'La incertidumbre por la IA también es un riesgo de salud mental laboral',
-    bajada:
-      'El 41% de los empleados en Argentina cree que la IA reemplazará su trabajo. Eso es un riesgo psicosocial, no solo un tema de capacitación técnica.',
-    keywordPrincipal: 'inteligencia artificial y salud mental en el trabajo',
-    cuerpoMd: esqueleto({
-      angulo: 'la IA y el empleo se cubren como nota económica/tecnológica; falta la lectura de salud mental ocupacional.',
-      idea: 'Partir del dato de que crece el temor al reemplazo laboral por IA en Argentina y leerlo como lo que es en su campo: un factor de riesgo psicosocial (incertidumbre, pérdida de sentido, ansiedad anticipatoria) que puede derivar en desgaste emocional y, en algunos casos, en consumos como forma de manejar esa ansiedad. Proponer que las organizaciones incorporen este tema a sus espacios de escucha, no solo a sus políticas de capacitación técnica.',
-      dato: 'el 41% de los empleados en Argentina cree que la IA reemplazará su trabajo en el corto plazo (nota Infobae, abril 2026), subiendo desde 36% el año anterior.',
-      fuente: 'Infobae, abril 2026 — temor al reemplazo laboral por IA en Argentina',
-    }),
-  },
-  {
-    slug: 'generacion-z-salud-mental-trabajo',
-    titulo: 'Generación Z en trabajos que no son de oficina: lo que todavía no se está hablando',
-    bajada:
-      'La Gen Z prioriza la salud mental, pero en transporte, saneamiento y sector público no hay día de salud mental ni flexibilidad. La prevención necesita otro diseño.',
-    keywordPrincipal: 'generación Z salud mental trabajo',
-    cuerpoMd: esqueleto({
-      angulo: 'el contenido sobre Gen Z y salud mental habla de flexibilidad/propósito de oficina; falta la mirada de jóvenes que entran a trabajos operativos, sindicalizados o del sector público, donde esos beneficios "de oficina" no existen.',
-      idea: 'Usar el dato de que la Generación Z prioriza la salud mental por sobre el salario o la estabilidad, y preguntarse qué pasa con los jóvenes que entran a trabajar en rubros donde no hay "día de salud mental" ni flexibilidad horaria (transporte, saneamiento, salud, seguridad). Proponer que la prevención en estos ámbitos necesita otro diseño, no copiar el manual corporativo de oficina.',
-      dato: '52% de la Generación Z en Argentina reporta altos niveles de estrés laboral diario, vs. 33% de baby boomers (nota sobre radiografía de Gen Z).',
-      fuente: 'nota sobre radiografía de Gen Z — estrés laboral diario Argentina',
-    }),
-  },
-  {
-    slug: '25-anos-escuchando-al-mundo-del-trabajo',
-    titulo: '25 años escuchando al mundo del trabajo: lo que cambió y lo que no cambió',
-    bajada:
-      'De tabú a tema instalado, pero todavía mal abordado. 25 años con Ministerio, ART, sindicatos y ferrocarril, y la misma premisa: lo peor es no hacer nada.',
-    keywordPrincipal: 'salud mental en el trabajo Argentina',
-    cuerpoMd: esqueleto({
-      angulo: 'post de autoridad y marca personal, distinto a los otros 9 (que parten de un hueco de mercado). Sirve de "post ancla" para presentar quién es Guillermo y linkear a los demás.',
-      idea: 'Recorrido personal por sus 25+ años de trabajo (Ministerio de Salud de la Provincia de Buenos Aires desde 1999, ART, sindicatos, sector ferroviario, casinos, saneamiento), qué cambió en la forma de hablar de salud mental y consumos en el trabajo (de tabú a tema instalado, pero todavía mal abordado en muchos ámbitos), y qué se mantiene igual (la premisa de que "lo peor que podemos hacer es no hacer nada"). Cierra presentando su propuesta de charlas/talleres/programas.',
-      dato: 'ninguno externo necesario — el dato es su propia trayectoria (usar CV real del perfil).',
-      fuente: 'guillermo-perfil.md — trayectoria de Guillermo Nuesch',
-    }),
-  },
-];
+const posts = postsDesdePlan();
 
 const testimonios = [
   {
@@ -302,13 +139,25 @@ async function main() {
   for (const p of posts) {
     const existente = await db.collection('posts').where('slug', '==', p.slug).limit(1).get();
     const payload = {
-      ...p,
-      imagenPortadaUrl: null,
-      estado: 'borrador',
-      publicadoEn: null,
-      creadoEn: now,
+      slug: p.slug,
+      titulo: p.titulo,
+      bajada: p.bajada,
+      keywordPrincipal: p.keywordPrincipal,
+      cuerpoMd: p.cuerpoMd,
+      estado: p.publicar ? 'publicado' : 'borrador',
+      publicadoEn: p.publicar && p.publicadoEn ? Timestamp.fromDate(p.publicadoEn) : null,
+      actualizadoEn: now,
     };
-    if (existente.empty) await db.collection('posts').add(payload);
+    if (existente.empty) {
+      await db.collection('posts').add({
+        ...payload,
+        imagenPortadaUrl: null,
+        creadoEn: now,
+      });
+    } else {
+      await existente.docs[0]!.ref.set(payload, { merge: true });
+    }
+    console.log(`post ${p.slug} → ${payload.estado}`);
   }
 
   for (const t of testimonios) {
