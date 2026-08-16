@@ -1,0 +1,11 @@
+{
+  "name": "carrusel-ig",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "node exportar.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0"
+  }
+}

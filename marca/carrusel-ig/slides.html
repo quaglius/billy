@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Carrusel IG — Guille Nuesch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Libre+Franklin:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --navy: #051229;
+        --blue: #0075ff;
+        --ice: #f7f7f7;
+        --mist: #e1e8f0;
+        --body: #a9b0b8;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: #1a1a1a;
+        font-family: Lato, sans-serif;
+        color: var(--ice);
+      }
+      .pack { padding: 24px; }
+      .label {
+        color: #888;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 28px 0 12px;
+      }
+      .row { display: flex; flex-wrap: wrap; gap: 16px; }
+      .slide {
+        position: relative;
+        overflow: hidden;
+        background: var(--navy);
+        flex-shrink: 0;
+      }
+      .slide--post { width: 1080px; height: 1350px; }
+      .slide--story { width: 1080px; height: 1920px; }
+      .photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .scrim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(5, 18, 41, 0.25) 0%, rgba(5, 18, 41, 0.55) 42%, rgba(5, 18, 41, 0.94) 100%);
+      }
+      .scrim--side {
+        background: linear-gradient(90deg, rgba(5, 18, 41, 0.92) 0%, rgba(5, 18, 41, 0.72) 48%, rgba(5, 18, 41, 0.35) 100%);
+      }
+      .pad {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 72px 72px 80px;
+      }
+      .slide--story .pad { padding: 280px 80px 360px; }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .mark { width: 64px; height: 64px; }
+      .eyebrow {
+        color: var(--blue);
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+      }
+      h1 {
+        font-family: 'Libre Franklin', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+        font-size: 92px;
+        margin-top: 18px;
+      }
+      .slide--story h1 { font-size: 108px; }
+      .lead {
+        margin-top: 28px;
+        font-size: 36px;
+        line-height: 1.35;
+        color: var(--mist);
+        max-width: 18ch;
+      }
+      .grow { flex: 1; }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--blue);
+        color: #fff;
+        font-weight: 900;
+        font-size: 28px;
+        padding: 18px 28px;
+        border-radius: 999px;
+      }
+      .url {
+        margin-top: 18px;
+        font-weight: 700;
+        font-size: 28px;
+        letter-spacing: 0.02em;
+        color: var(--ice);
+      }
+      .list { display: grid; gap: 28px; margin-top: 48px; }
+      .item {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .num {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 2px solid var(--blue);
+        display: grid;
+        place-items: center;
+        font-family: 'Libre Franklin', sans-serif;
+        font-weight: 800;
+        font-size: 22px;
+      }
+      .item strong {
+        display: block;
+        font-family: 'Libre Franklin', sans-serif;
+        font-size: 34px;
+        font-weight: 700;
+      }
+      .item span { color: var(--mist); font-size: 26px; line-height: 1.3; }
+      .quote {
+        font-family: 'Libre Franklin', sans-serif;
+        font-size: 56px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+      .name {
+        margin-top: 12px;
+        font-size: 28px;
+        color: var(--mist);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pack">
+      <p class="label">Post — 1080 × 1350</p>
+      <div class="row">
+        <article class="slide slide--post" data-file="post-01">
+          <img class="photo" src="../../public/fotos/guille/hero-brazos-cruzados.png" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <div class="top">
+              <img class="mark" src="../../public/marca/icono-claro.svg" alt="" />
+              <p class="eyebrow">Nueva web</p>
+            </div>
+            <div class="grow"></div>
+            <h1>Guillermo<br />Nuesch</h1>
+            <p class="lead">Salud mental y prevención de consumos en el trabajo. Ahora con casa propia.</p>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--post" data-file="post-02">
+          <img class="photo" src="../../public/fotos/campo/piso-operativos.jpg" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <p class="eyebrow">25 años</p>
+            <div class="grow"></div>
+            <h1>Desde el piso, no desde la oficina</h1>
+            <p class="lead">Sindicatos, ART, plantas y Estado. El mismo oficio: abrir la conversación donde se trabaja de verdad.</p>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--post" data-file="post-03">
+          <img class="photo" src="../../public/fotos/campo/guille-exponiendo.jpg" alt="" />
+          <div class="scrim scrim--side"></div>
+          <div class="pad">
+            <p class="eyebrow">Qué vas a encontrar</p>
+            <h1 style="font-size: 72px; margin-top: 28px">Un sitio para usar, no un brochure</h1>
+            <div class="list">
+              <div class="item"><span class="num">1</span><div><strong>Blog</strong><span>Notas desde el mundo del trabajo operativo.</span></div></div>
+              <div class="item"><span class="num">2</span><div><strong>Cursos</strong><span>Encuentro, taller y programa.</span></div></div>
+              <div class="item"><span class="num">3</span><div><strong>Método</strong><span>Escuchar, nombrar, equipar, sostener.</span></div></div>
+            </div>
+            <div class="grow"></div>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--post" data-file="post-04">
+          <div class="pad">
+            <p class="eyebrow">Cómo trabajo</p>
+            <h1 style="font-size: 68px">Un proceso, no una charla suelta</h1>
+            <div class="list">
+              <div class="item"><span class="num">1</span><div><strong>Escuchar</strong><span>Diagnóstico con mandos y delegados.</span></div></div>
+              <div class="item"><span class="num">2</span><div><strong>Nombrar</strong><span>Abrir el tema sin estigmatizar.</span></div></div>
+              <div class="item"><span class="num">3</span><div><strong>Equipar</strong><span>Herramientas para la primera línea.</span></div></div>
+              <div class="item"><span class="num">4</span><div><strong>Sostener</strong><span>Seguimiento en el tiempo.</span></div></div>
+            </div>
+            <div class="grow"></div>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--post" data-file="post-05">
+          <img class="photo" src="../../public/fotos/campo/reunion-mesa.jpg" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <p class="eyebrow">Si tu equipo lo necesita</p>
+            <div class="grow"></div>
+            <p class="quote">Lo peor que podemos hacer, es no hacer nada.</p>
+            <p class="name">Guillermo Nuesch</p>
+            <div class="grow"></div>
+            <p class="cta">Entrá a la web →</p>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+      </div>
+
+      <p class="label">Historia — 1080 × 1920</p>
+      <div class="row">
+        <article class="slide slide--story" data-file="historia-01">
+          <img class="photo" src="../../public/fotos/guille/hero-brazos-cruzados.png" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <div class="top">
+              <img class="mark" src="../../public/marca/icono-claro.svg" alt="" />
+              <p class="eyebrow">Nueva web</p>
+            </div>
+            <div class="grow"></div>
+            <h1>Ya está<br />online</h1>
+            <p class="lead">Guillermo Nuesch. Salud mental en el trabajo.</p>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--story" data-file="historia-02">
+          <img class="photo" src="../../public/fotos/campo/piso-operativos.jpg" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <p class="eyebrow">Marca personal</p>
+            <div class="grow"></div>
+            <h1>25 años<br />en el piso</h1>
+            <p class="lead">Plantas, sindicatos, ART y Estado. No es wellness de oficina.</p>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--story" data-file="historia-03">
+          <div class="pad">
+            <p class="eyebrow">Adentro</p>
+            <h1 style="font-size: 88px">Blog, cursos y el método</h1>
+            <div class="list" style="margin-top: 64px">
+              <div class="item"><span class="num">1</span><div><strong>Escuchar</strong></div></div>
+              <div class="item"><span class="num">2</span><div><strong>Nombrar</strong></div></div>
+              <div class="item"><span class="num">3</span><div><strong>Equipar</strong></div></div>
+              <div class="item"><span class="num">4</span><div><strong>Sostener</strong></div></div>
+            </div>
+            <div class="grow"></div>
+            <p class="url">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+
+        <article class="slide slide--story" data-file="historia-04">
+          <img class="photo" src="../../public/fotos/campo/guille-exponiendo.jpg" alt="" />
+          <div class="scrim"></div>
+          <div class="pad">
+            <p class="eyebrow">Link en la bio</p>
+            <div class="grow"></div>
+            <h1>Mirá el sitio</h1>
+            <p class="lead">Charlas, talleres y programas a medida.</p>
+            <p class="cta">guillenuesch.netlify.app</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </body>
+</html>
