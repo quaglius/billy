@@ -882,116 +882,105 @@ body.is-vivo {
 }
 
 .flujo {
-  list-style: none;
-  margin: 32px 0 0;
+  margin: 40px 0 0;
+}
+
+.flujo__pasos {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0;
   padding: 0;
 }
 
-.flujo__paso {
-  position: relative;
-  padding: 0 0 28px 80px;
-}
-
-.flujo__paso:not(:last-child)::before {
+.flujo__pasos::before {
   content: '';
   position: absolute;
-  left: 27px;
-  top: 56px;
-  bottom: 0;
-  width: 2px;
+  left: 12%;
+  right: 12%;
+  top: 27px;
+  height: 2px;
   background: var(--tj-color-theme-primary);
-  opacity: 0.35;
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.flujo__tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--tj-color-text-body);
+  cursor: pointer;
+}
+
+.flujo__tab:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 .flujo__num {
-  position: absolute;
-  left: 0;
-  top: 0;
   width: 56px;
   height: 56px;
   border-radius: 50%;
   display: grid;
   place-items: center;
+  background: #fff;
+  color: var(--tj-color-heading-primary);
+  border: 2px solid var(--tj-color-theme-dark);
+  font-family: var(--tj-ff-heading);
+  font-size: 20px;
+  font-weight: 700;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.flujo__tab[aria-selected='true'] .flujo__num {
   background: var(--tj-color-theme-dark);
   color: #fff;
-  font-family: var(--tj-ff-heading);
-  font-size: 22px;
-  font-weight: 700;
+  border-color: var(--tj-color-theme-dark);
 }
 
-.flujo__titulo {
-  margin: 0;
-  font-size: 20px;
-}
-
-.flujo__btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  min-height: 56px;
-  margin: 0;
-  padding: 8px 0;
-  border: 0;
-  background: transparent;
-  font: inherit;
+.flujo__nombre {
   font-weight: 700;
+  font-size: 16px;
   color: var(--tj-color-heading-primary);
-  text-align: left;
-  cursor: pointer;
+  text-align: center;
 }
 
-.flujo__btn:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
+.flujo__detalle {
+  margin-top: 28px;
+  padding: 24px 28px;
+  background: #fff;
+  border-left: 4px solid var(--tj-color-theme-primary);
+  box-shadow: 0 8px 24px rgba(5, 18, 41, 0.06);
 }
 
-.flujo__plus {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.flujo__plus::before,
-.flujo__plus::after {
-  content: '';
-  position: absolute;
-  background: var(--tj-color-theme-primary);
-}
-
-.flujo__plus::before {
-  left: 0;
-  right: 0;
-  top: 5px;
-  height: 2px;
-}
-
-.flujo__plus::after {
-  top: 0;
-  bottom: 0;
-  left: 5px;
-  width: 2px;
-}
-
-.flujo__btn[aria-expanded='true'] .flujo__plus::after {
-  display: none;
-}
-
-.flujo__panel {
+.flujo__detalle p {
+  margin: 0;
+  max-width: 62ch;
   color: var(--tj-color-text-body);
-}
-
-.flujo__panel p {
-  margin: 0 0 8px;
+  line-height: 1.7;
 }
 
 .flujo-cta {
-  margin-top: 16px;
+  margin-top: 28px;
   display: grid;
   gap: 16px;
   justify-items: start;
+}
+
+.orgs__titulo {
+  margin: 20px 0 0;
+  text-align: center;
+  font-size: clamp(1.4rem, 2vw, 1.85rem);
 }
 
 .org-slider {
@@ -999,7 +988,6 @@ body.is-vivo {
   grid-template-columns: 48px 1fr 48px;
   align-items: center;
   gap: 8px;
-  margin-top: 24px;
 }
 
 .org-slider__nav {
@@ -1020,8 +1008,14 @@ body.is-vivo {
 
 .org-slider__viewport {
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.org-slider__viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .org-slider__track {
@@ -1029,7 +1023,7 @@ body.is-vivo {
   gap: 16px;
   list-style: none;
   margin: 0;
-  padding: 8px 4px 16px;
+  padding: 8px 4px;
 }
 
 .org-slider__item {
@@ -1081,41 +1075,22 @@ body.is-vivo {
   display: block;
 }
 
-@media (min-width: 768px) {
-  .flujo {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+@media (max-width: 767px) {
+  .flujo__pasos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .flujo__paso {
-    padding: 0;
-  }
-
-  .flujo__paso:not(:last-child)::before {
-    left: calc(50% + 32px);
-    right: calc(-50% + 32px);
-    top: 27px;
-    bottom: auto;
-    width: auto;
-    height: 2px;
+  .flujo__nombre {
+    font-size: 13px;
   }
 
   .flujo__num {
-    position: relative;
-    margin: 0 auto 12px;
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
   }
 
-  .flujo__titulo {
-    text-align: center;
-  }
-
-  .flujo__btn {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .flujo__panel {
-    text-align: left;
+  .flujo__pasos::before {
+    top: 21px;
   }
 }

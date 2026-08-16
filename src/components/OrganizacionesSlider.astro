@@ -2,8 +2,6 @@
 import { ORGANIZACIONES } from '../lib/organizaciones';
 ---
 <section class="orgs page-shell wow fadeInUp" data-wow-delay="0.35s">
-  <p class="eyebrow">Organizaciones</p>
-  <h2 class="text-anim">Donde trabajó</h2>
   <div class="org-slider">
     <button class="org-slider__nav" type="button" data-dir="-1" aria-label="Organizaciones anteriores">
       <span aria-hidden="true">←</span>
@@ -22,6 +20,7 @@ import { ORGANIZACIONES } from '../lib/organizaciones';
       <span aria-hidden="true">→</span>
     </button>
   </div>
+  <h2 class="orgs__titulo">Donde trabajé</h2>
 </section>
 <script>
   document.querySelectorAll('.org-slider').forEach((root) => {
