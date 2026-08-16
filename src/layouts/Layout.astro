@@ -5,6 +5,7 @@ import '../styles/boton.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppFlotante from '../components/WhatsAppFlotante.astro';
+import MarcaMotion from '../components/MarcaMotion.astro';
 
 interface Props {
   title?: string;
@@ -37,6 +38,7 @@ const {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
     {noindex && <meta name="robots" content="noindex" />}
   </head>
   <body>
@@ -46,5 +48,6 @@ const {
     </main>
     <Footer />
     <WhatsAppFlotante />
+    <MarcaMotion />
   </body>
 </html>

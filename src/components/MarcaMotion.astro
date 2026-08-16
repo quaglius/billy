@@ -1,0 +1,95 @@
+---
+---
+<script>
+  import Lenis from 'lenis';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const desktop = window.matchMedia('(min-width: 768px)').matches;
+
+  if (!reduce && desktop) {
+    const lenis = new Lenis({ duration: 1.1 });
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  }
+
+  if (!reduce) {
+    document.documentElement.classList.add('js');
+    const nodes = document.querySelectorAll<HTMLElement>('.wow');
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          const delay = el.dataset.wowDelay ?? '0s';
+          el.style.animationDelay = delay;
+          el.classList.add('animated');
+          io.unobserve(el);
+        });
+      },
+      { rootMargin: '0px 0px -100px 0px', threshold: 0.15 },
+    );
+    nodes.forEach((n) => io.observe(n));
+  }
+
+  if (!reduce && desktop) {
+    const load = (src: string) =>
+      new Promise<void>((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => resolve();
+        s.onerror = () => reject();
+        document.head.appendChild(s);
+      });
+
+    type GsapWin = {
+      gsap?: {
+        registerPlugin: (...p: unknown[]) => void;
+        from: (targets: unknown, vars: object) => void;
+      };
+      ScrollTrigger?: unknown;
+      SplitText?: new (el: Element, opts: object) => { words: Element[]; chars: Element[] };
+    };
+
+    load('/vendor/gsap.min.js')
+      .then(() => load('/vendor/gsap-scroll-trigger.min.js'))
+      .then(() => load('/vendor/gsap-split-text.min.js'))
+      .then(() => {
+        const w = window as unknown as GsapWin;
+        const { gsap, ScrollTrigger, SplitText } = w;
+        if (!gsap || !SplitText) return;
+        if (ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+        document.querySelectorAll('.text-anim').forEach((el, i) => {
+          const split = new SplitText(el, { type: 'words' });
+          (split.words as HTMLElement[]).forEach((word) => {
+            word.style.display = 'inline-block';
+            word.style.overflow = 'hidden';
+            word.style.paddingBottom = '0.08em';
+            word.style.verticalAlign = 'bottom';
+          });
+          const vars = {
+            yPercent: 100,
+            opacity: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            stagger: 0.03,
+            ...(i === 0
+              ? {}
+              : {
+                  scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                  },
+                }),
+          };
+          gsap.from(split.words, vars);
+        });
+      })
+      .catch(() => {
+        /* el sitio sigue usable sin GSAP */
+      });
+  }
+</script>
