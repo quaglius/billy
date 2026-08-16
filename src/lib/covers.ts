@@ -1,18 +1,54 @@
 export type CoverMeta = { src: string; position: string };
 
+/** Encuadre vertical centrado: el recorte ancho no se queda en la coronilla. */
+const CENTRO: CoverMeta['position'] = 'center';
+
 export const BLOG_COVERS = [
-  '/fotos/guille/blog-laptop.png',
-  '/fotos/guille/blog-cuerpo-entero-oficina.png',
-  '/fotos/guille/blog-camisa-blanca-escritorio.png',
+  '/fotos/campo/piso-operativos.jpg',
+  '/fotos/campo/reunion-mesa.jpg',
+  '/fotos/campo/oficina-reunion.jpg',
 ] as const;
 
-/** Retratos de estudio: la cabeza pega al borde. Anclar arriba. */
-const ESTUDIO: CoverMeta['position'] = 'top';
-
 export const POST_COVERS: Record<string, CoverMeta> = {
+  'salud-mental-laboral-desde-el-piso': {
+    src: '/fotos/campo/piso-operativos.jpg',
+    position: CENTRO,
+  },
   'delegado-sindical-salud-mental': {
     src: '/fotos/campo/delegado-ate.jpg',
-    position: 'center 18%',
+    position: CENTRO,
+  },
+  'ludopatia-en-el-trabajo': {
+    src: '/fotos/campo/oficina-reunion.jpg',
+    position: CENTRO,
+  },
+  'consumo-de-alcohol-en-el-trabajo': {
+    src: '/fotos/campo/reunion-mesa.jpg',
+    position: CENTRO,
+  },
+  'presentismo-laboral': {
+    src: '/fotos/campo/equipo-arba.jpg',
+    position: CENTRO,
+  },
+  'protocolo-salud-mental-laboral-srt-2026': {
+    src: '/fotos/campo/charla-isrpi.jpg',
+    position: 'center 22%',
+  },
+  'condiciones-y-medio-ambiente-de-trabajo-cymat': {
+    src: '/fotos/campo/capacitacion-sala.jpg',
+    position: CENTRO,
+  },
+  'inteligencia-artificial-salud-mental-trabajo': {
+    src: '/fotos/campo/centro-monitores.jpg',
+    position: CENTRO,
+  },
+  'generacion-z-salud-mental-trabajo': {
+    src: '/fotos/campo/juventud-ferroviaria.jpg',
+    position: CENTRO,
+  },
+  '25-anos-escuchando-al-mundo-del-trabajo': {
+    src: '/fotos/campo/guille-exponiendo.jpg',
+    position: 'center 22%',
   },
 };
 
@@ -33,16 +69,16 @@ export function coverPositionForFormato(formato: string): string {
   if (formato in CURSO_COVERS) {
     return CURSO_COVERS[formato as keyof typeof CURSO_COVERS].position;
   }
-  return ESTUDIO;
+  return CENTRO;
 }
 
 export function coverMeta(slug: string, imagenPortadaUrl?: string | null): CoverMeta {
-  if (imagenPortadaUrl) return { src: imagenPortadaUrl, position: ESTUDIO };
   const mapped = POST_COVERS[slug];
   if (mapped) return mapped;
+  if (imagenPortadaUrl) return { src: imagenPortadaUrl, position: CENTRO };
   let n = 0;
   for (let i = 0; i < slug.length; i += 1) n += slug.charCodeAt(i);
-  return { src: BLOG_COVERS[n % BLOG_COVERS.length]!, position: ESTUDIO };
+  return { src: BLOG_COVERS[n % BLOG_COVERS.length]!, position: CENTRO };
 }
 
 export function coverForSlug(slug: string, imagenPortadaUrl?: string | null): string {
