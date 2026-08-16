@@ -39,7 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
     slug,
     tituloParticular,
     particularidades,
-    visibilidad: String(form.get('visibilidad') ?? 'privada'),
+    visibilidad: 'privada',
     fechaInicio: fechaInicioRaw ? new Date(`${fechaInicioRaw}T00:00:00`) : null,
     fechaFin: fechaFinRaw ? new Date(`${fechaFinRaw}T00:00:00`) : null,
     modalidad,

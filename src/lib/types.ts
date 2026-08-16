@@ -1,5 +1,5 @@
 export type FormatoCurso = 'encuentro' | 'taller' | 'programa';
-export type VisibilidadInstancia = 'privada' | 'publica' | 'anonimizada';
+export type VisibilidadInstancia = 'privada';
 export type Modalidad = 'presencial' | 'virtual' | 'hibrida';
 export type TipoActividad =
   | 'si_no'

@@ -14,7 +14,6 @@ let instancias: {
   id: string;
   slug: string;
   nombre: string;
-  visibilidad: string;
   cursoId: string;
   empresaId: string;
   creadoEn: Date;
@@ -36,7 +35,6 @@ try {
       id: d.id,
       slug: String(data.slug ?? ''),
       nombre: etiquetaInstancia(data),
-      visibilidad: String(data.visibilidad ?? 'privada'),
       cursoId: String(data.cursoId ?? ''),
       empresaId: String(data.empresaId ?? ''),
       creadoEn: fechaDeDoc(data.creadoEn),
@@ -47,27 +45,16 @@ try {
 }
 
 const kpiTotal = instancias.length;
-const kpiVisibles = instancias.filter((i) => i.visibilidad !== 'privada').length;
 const inicioMes = new Date();
 inicioMes.setDate(1);
 inicioMes.setHours(0, 0, 0, 0);
 const kpiEsteMes = instancias.filter((i) => i.creadoEn >= inicioMes).length;
-
-const porVisibilidad = new Map<string, number>();
-instancias.forEach((i) => porVisibilidad.set(i.visibilidad, (porVisibilidad.get(i.visibilidad) ?? 0) + 1));
 
 const meses = ultimosNMeses(6);
 const porMes = meses.map((m) => instancias.filter((i) => m.pertenece(i.creadoEn)).length);
 
 const charts: ChartSpec[] = [];
 if (kpiTotal > 0) {
-  charts.push({
-    id: 'inst-chart-visibilidad',
-    tipo: 'doughnut',
-    titulo: 'Por visibilidad',
-    labels: [...porVisibilidad.keys()],
-    values: [...porVisibilidad.values()],
-  });
   charts.push({
     id: 'inst-chart-mes',
     tipo: 'line',
@@ -80,7 +67,7 @@ if (kpiTotal > 0) {
 <Layout title="Instancias — Admin" noindex={true} whatsapp={false}>
   <AdminChrome
     titulo="Instancias"
-    subtitulo="Una instancia es un curso dictado a una empresa concreta, con fechas reales. Acá también gestionás el cronograma de encuentros y las actividades de cada una. Por defecto quedan privadas: no se ven en el sitio hasta que cambies la visibilidad."
+    subtitulo="Una instancia es un curso dictado a una empresa concreta, con fechas reales. Acá también gestionás el cronograma de encuentros y las actividades de cada una. Son siempre privadas: solo entra quien tiene el link o el QR, nunca aparecen listadas en el sitio."
   >
     <AdminBreadcrumb slot="breadcrumb" crumbs={migasInstancia({ pagina: 'listado' })} />
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
@@ -95,11 +82,6 @@ if (kpiTotal > 0) {
             <p class="obs-kpi__label">Total</p>
             <p class="obs-kpi__value">{kpiTotal}</p>
             <p class="obs-kpi__hint">Instancias cargadas en total</p>
-          </article>
-          <article class="obs-kpi">
-            <p class="obs-kpi__label">Visibles en el sitio</p>
-            <p class="obs-kpi__value">{kpiVisibles}</p>
-            <p class="obs-kpi__hint">Públicas o anonimizadas</p>
           </article>
           <article class="obs-kpi">
             <p class="obs-kpi__label">Este mes</p>
@@ -119,7 +101,7 @@ if (kpiTotal > 0) {
         </div>
         <table class="admin-table" data-admin-table data-page-size="20">
           <thead>
-            <tr><th data-sort="text">Instancia</th><th data-sort="text">Curso</th><th data-sort="text">Empresa</th><th data-sort="text">Visibilidad</th><th>Acciones</th></tr>
+            <tr><th data-sort="text">Instancia</th><th data-sort="text">Curso</th><th data-sort="text">Empresa</th><th>Acciones</th></tr>
           </thead>
           <tbody>
             {instancias.map((i) => (
@@ -129,11 +111,6 @@ if (kpiTotal > 0) {
                 </td>
                 <td>{cursos.get(i.cursoId) ?? i.cursoId}</td>
                 <td>{empresas.get(i.empresaId) ?? i.empresaId}</td>
-                <td data-value={i.visibilidad}>
-                  <span class:list={['pill-estado', i.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
-                    {i.visibilidad}
-                  </span>
-                </td>
                 <td class="admin-table__acciones">
                   <a href={`/admin/instancias/${i.id}`}>Cronograma</a>
                   <a href={`/admin/instancias/${i.id}/duplicar`}>Duplicar</a>
@@ -165,16 +142,6 @@ if (kpiTotal > 0) {
       </AdminCampo>
       <AdminCampo titulo="Slug público" ayuda="La parte de la URL, en minúsculas y con guiones. Ejemplo: taller-sitos-2026. Tiene que ser único. No uses espacios ni tildes.">
         <input type="text" name="slug" required placeholder="taller-sitos-2026" />
-      </AdminCampo>
-      <AdminCampo
-        titulo="Visibilidad"
-        ayuda="Privada: solo entra quien tiene el link o el QR; no aparece en el sitio. Pública: se puede listar y compartir con el nombre de la organización. Anonimizada: pública, pero sin nombrar a la empresa (por ejemplo “Programa para un sindicato ferroviario”)."
-      >
-        <select name="visibilidad">
-          <option value="privada">Privada — solo con link o QR</option>
-          <option value="publica">Pública — visible con el nombre de la organización</option>
-          <option value="anonimizada">Anonimizada — visible, sin nombrar a la empresa</option>
-        </select>
       </AdminCampo>
       <AdminCampo
         titulo="Modalidad"

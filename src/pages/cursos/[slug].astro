@@ -34,8 +34,7 @@ if (!cursoSnap.empty) {
 } else if (!instSnap.empty) {
   const inst = instSnap.docs[0]!;
   const data = inst.data();
-  const visibilidad = String(data.visibilidad ?? 'privada');
-  noindex = visibilidad === 'privada';
+  noindex = true;
   const curso = await db().collection('cursos').doc(String(data.cursoId)).get();
   const cursoData = curso.data() ?? {};
   titulo = String(data.tituloParticular ?? cursoData.titulo ?? '');

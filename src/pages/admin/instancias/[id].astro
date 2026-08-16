@@ -75,17 +75,11 @@ const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
     {error && <p class="admin-alert">Faltan el título o la fecha.</p>}
     <p class="admin-meta">
       <span>{nombre}</span>
-      <span>
-        Visibilidad:
-        <span class:list={['pill-estado', inst.visibilidad === 'publica' ? 'pill-estado--ok' : 'pill-estado--off']}>
-          {inst.visibilidad}
-        </span>
-      </span>
       <a href={rutas.duplicar}>Duplicar instancia</a>
     </p>
 
     <details class="inst-editar">
-      <summary>Editar datos de la instancia (empresa, curso, visibilidad, fechas)</summary>
+      <summary>Editar datos de la instancia (empresa, curso, fechas)</summary>
       {errorInstancia && <p class="admin-alert">{errorInstancia}</p>}
       <form class="admin-form" method="post" action="/api/admin/instancias">
         <input type="hidden" name="id" value={id} />
@@ -108,16 +102,6 @@ const errorInstancia = Astro.url.searchParams.get('errorInst') === 'slug'
         </AdminCampo>
         <AdminCampo titulo="Título particular" ayuda="Opcional: si querés que esta cursada tenga un nombre propio distinto al del curso base.">
           <input type="text" name="tituloParticular" value={inst.tituloParticular ?? ''} />
-        </AdminCampo>
-        <AdminCampo
-          titulo="Visibilidad"
-          ayuda="Privada: solo con link o QR, no aparece en el sitio. Pública: se lista con el nombre de la organización. Anonimizada: se lista sin nombrar a la empresa."
-        >
-          <select name="visibilidad">
-            <option value="privada" selected={inst.visibilidad === 'privada'}>Privada — solo con link o QR</option>
-            <option value="publica" selected={inst.visibilidad === 'publica'}>Pública — visible con el nombre de la organización</option>
-            <option value="anonimizada" selected={inst.visibilidad === 'anonimizada'}>Anonimizada — visible, sin nombrar a la empresa</option>
-          </select>
         </AdminCampo>
         <AdminCampo titulo="Modalidad" ayuda="Presencial, virtual o híbrida. Dejalo sin definir si todavía no se decidió.">
           <select name="modalidad">

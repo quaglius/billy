@@ -5,12 +5,8 @@ import { db } from '../../lib/firebase-admin';
 import { coverForCurso, coverPositionForCurso } from '../../lib/covers';
 
 let cursos: { slug: string; titulo: string; descripcionCorta: string; formato: string; imagen: string | null }[] = [];
-let instancias: { slug: string; titulo: string; visibilidad: string }[] = [];
 try {
-  const [cursoSnap, instSnap] = await Promise.all([
-    db().collection('cursos').where('publicado', '==', true).get(),
-    db().collection('instancias').where('visibilidad', 'in', ['publica', 'anonimizada']).get(),
-  ]);
+  const cursoSnap = await db().collection('cursos').where('publicado', '==', true).get();
   cursos = cursoSnap.docs.map((d) => ({
     slug: String(d.data().slug ?? ''),
     titulo: String(d.data().titulo ?? ''),
@@ -18,20 +14,8 @@ try {
     formato: String(d.data().formato ?? ''),
     imagen: d.data().imagenPortadaUrl ? String(d.data().imagenPortadaUrl) : null,
   }));
-  const cursoTitulo = new Map(cursoSnap.docs.map((d) => [d.id, String(d.data().titulo ?? '')]));
-  instancias = instSnap.docs.map((d) => {
-    const data = d.data();
-    const visibilidad = String(data.visibilidad ?? 'privada');
-    const tituloBase = cursoTitulo.get(String(data.cursoId)) ?? 'Curso';
-    return {
-      slug: String(data.slug ?? ''),
-      titulo: String(data.tituloParticular ?? tituloBase),
-      visibilidad,
-    };
-  });
 } catch {
   cursos = [];
-  instancias = [];
 }
 ---
 <Layout
@@ -65,18 +49,6 @@ try {
       <div class="empty-state">
         <p>Los cursos se publican desde el panel.</p>
       </div>
-    )}
-    {instancias.length > 0 && (
-      <>
-        <h2>Cursadas visibles</h2>
-        <ul>
-          {instancias.map((i) => (
-            <li>
-              <a class="line-hover" href={`/cursos/${i.slug}`}>{i.titulo}</a>
-            </li>
-          ))}
-        </ul>
-      </>
     )}
     <p><a class="line-hover" href="/ayuda">Si necesitás ayuda</a></p>
   </div>

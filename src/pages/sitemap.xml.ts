@@ -16,10 +16,9 @@ export const GET: APIRoute = async ({ site }) => {
   ];
 
   try {
-    const [postsSnap, cursosSnap, instSnap] = await Promise.all([
+    const [postsSnap, cursosSnap] = await Promise.all([
       db().collection('posts').where('estado', '==', 'publicado').get(),
       db().collection('cursos').where('publicado', '==', true).get(),
-      db().collection('instancias').where('visibilidad', 'in', ['publica', 'anonimizada']).get(),
     ]);
 
     postsSnap.docs.forEach((d) => {
@@ -29,10 +28,6 @@ export const GET: APIRoute = async ({ site }) => {
     cursosSnap.docs.forEach((d) => {
       const slug = String(d.data().slug ?? '');
       if (slug) urls.push({ loc: `/cursos/${slug}`, changefreq: 'monthly', priority: '0.6' });
-    });
-    instSnap.docs.forEach((d) => {
-      const slug = String(d.data().slug ?? '');
-      if (slug) urls.push({ loc: `/cursos/${slug}`, changefreq: 'monthly', priority: '0.5' });
     });
   } catch {
     // Si Firestore falla, se sirve igual el sitemap con las páginas fijas — mejor eso que un 500.
