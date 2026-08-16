@@ -1,10 +1,11 @@
 ---
 interface Props {
   titulo: string;
+  subtitulo?: string;
 }
 
 const path = Astro.url.pathname;
-const { titulo } = Astro.props;
+const { titulo, subtitulo } = Astro.props;
 const links = [
   { href: '/admin', label: 'Inicio' },
   { href: '/admin/cursos', label: 'Cursos' },
@@ -16,6 +17,7 @@ const links = [
 ---
 <div class="admin-chrome page-shell">
   <h1>{titulo}</h1>
+  {subtitulo && <p class="admin-chrome__subtitulo">{subtitulo}</p>}
   <nav class="admin-chrome__nav" aria-label="Admin">
     {links.map((l) => (
       <a href={l.href} aria-current={path === l.href || (l.href !== '/admin' && path.startsWith(l.href + '/')) ? 'page' : undefined}>{l.label}</a>
@@ -24,5 +26,6 @@ const links = [
       <button class="admin-logout" type="submit">Salir</button>
     </form>
   </nav>
+  <slot name="breadcrumb" />
   <slot />
 </div>

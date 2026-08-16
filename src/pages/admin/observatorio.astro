@@ -1,56 +1,201 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AdminChrome from '../../components/AdminChrome.astro';
+import ObservatorioCharts from '../../components/ObservatorioCharts.astro';
 import { db } from '../../lib/firebase-admin';
+import {
+  OBS_MIN,
+  armarDashboard,
+  etiquetaTipo,
+  parseFiltros,
+  type ActividadObs,
+  type CursoObs,
+  type DashboardObs,
+  type RespuestaObs,
+} from '../../lib/observatorio';
 
-const MIN = 30;
-let bloques: { consigna: string; total: number; listo: boolean }[] = [];
+const filtros = parseFiltros(Astro.url.searchParams);
+
 let errorCarga = '';
+let cursos: CursoObs[] = [];
+let dash: DashboardObs | null = null;
+
 try {
-  const cursos = await db().collection('cursos').get();
-  for (const curso of cursos.docs) {
-    const acts = await db().collection('actividades').where('cursoId', '==', curso.id).get();
-    const porConsigna = new Map<string, string[]>();
-    acts.docs.forEach((a) => {
-      const consigna = String(a.data().consigna ?? '');
-      const list = porConsigna.get(consigna) ?? [];
-      list.push(a.id);
-      porConsigna.set(consigna, list);
-    });
-    for (const [consigna, ids] of porConsigna) {
-      let total = 0;
-      for (const aid of ids) {
-        const r = await db().collection('respuestas').where('actividadId', '==', aid).get();
-        total += r.size;
-      }
-      bloques.push({
-        consigna: `${curso.data().titulo}: ${consigna}`,
-        total,
-        listo: total >= MIN,
-      });
-    }
-  }
+  const [cursosSnap, actsSnap, respSnap] = await Promise.all([
+    db().collection('cursos').orderBy('titulo').get(),
+    db().collection('actividades').get(),
+    filtros.cursoId
+      ? db().collection('respuestas').where('cursoId', '==', filtros.cursoId).get()
+      : db().collection('respuestas').get(),
+  ]);
+
+  cursos = cursosSnap.docs.map((d) => ({
+    id: d.id,
+    titulo: String(d.data().titulo ?? ''),
+  }));
+
+  const actividades: ActividadObs[] = actsSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      id: d.id,
+      cursoId: String(data.cursoId ?? ''),
+      tipo: String(data.tipo ?? ''),
+      consigna: String(data.consigna ?? ''),
+      opciones: Array.isArray(data.opciones) ? data.opciones.map(String) : null,
+      activa: Boolean(data.activa),
+    };
+  });
+
+  const respuestas: RespuestaObs[] = respSnap.docs.map((d) => {
+    const data = d.data();
+    const creado = data.creadoEn;
+    let creadoEn = new Date();
+    if (creado && typeof creado.toDate === 'function') creadoEn = creado.toDate();
+    else if (creado instanceof Date) creadoEn = creado;
+    return {
+      actividadId: String(data.actividadId ?? ''),
+      cursoId: String(data.cursoId ?? ''),
+      valor: data.valor,
+      creadoEn,
+    };
+  });
+
+  dash = armarDashboard({ filtros, cursos, actividades, respuestas });
 } catch (err) {
   errorCarga = err instanceof Error ? err.message : 'No se pudo cargar el Observatorio.';
 }
+
+const kpiSi = dash?.kpis.pctSi;
+const hayRecorte = Boolean(filtros.cursoId || filtros.desde || filtros.hasta);
 ---
 <Layout title="Observatorio — Admin" noindex={true} whatsapp={false}>
-  <AdminChrome titulo="Observatorio">
-    <p>Agregados por curso. Nunca se muestra la empresa.</p>
+  <AdminChrome
+    titulo="Observatorio"
+    subtitulo="Mirá la participación agregada por curso, en el rango de fechas que elijas. Las respuestas son anónimas: no se muestra la empresa ni quién contestó."
+  >
     {errorCarga && <p class="admin-alert">{errorCarga}</p>}
-    {bloques.map((b) => (
-      <div class="obs-item">
-        <div class="obs-item__meta">
-          <span>{b.consigna}</span>
-          <span>{b.listo ? `${b.total} respuestas` : `${b.total}/${MIN}`}</span>
-        </div>
-        <div class="obs-track" aria-hidden="true">
-          <div class:list={['obs-fill', b.listo && 'is-ready']} style={`width: ${Math.min(100, Math.round((b.total / MIN) * 100))}%`}></div>
-        </div>
-        {!b.listo && (
-          <p>Todavía no hay suficientes respuestas acumuladas para este dato (mínimo 30).</p>
-        )}
+
+    <form class="obs-filters" method="get" action="/admin/observatorio">
+      <label>
+        Curso
+        <select name="curso">
+          <option value="">Todos los cursos</option>
+          {cursos.map((c) => (
+            <option value={c.id} selected={filtros.cursoId === c.id}>
+              {c.titulo}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Desde
+        <input type="date" name="desde" value={filtros.desde} />
+      </label>
+      <label>
+        Hasta
+        <input type="date" name="hasta" value={filtros.hasta} />
+      </label>
+      <div class="obs-filters__actions">
+        <button type="submit">Aplicar</button>
+        {hayRecorte && <a class="obs-filters__clear" href="/admin/observatorio">Limpiar</a>}
       </div>
-    ))}
+    </form>
+
+    {dash && (
+      <>
+        <section class="obs-kpis" aria-label="Indicadores">
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Participación</p>
+            <p class="obs-kpi__value">
+              {dash.kpis.participacionPct === null ? '—' : `${dash.kpis.participacionPct}%`}
+            </p>
+            <p class="obs-kpi__hint">
+              {dash.kpis.consignasListas} de {dash.kpis.consignasTotal} consignas con umbral ({OBS_MIN})
+            </p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">% Sí</p>
+            <p class="obs-kpi__value">{kpiSi === null ? '—' : `${kpiSi}%`}</p>
+            <p class="obs-kpi__hint">
+              {kpiSi === null
+                ? `Hace falta ${OBS_MIN} respuestas sí/no en el recorte`
+                : `${dash.kpis.siTotal} respuestas sí/no en el recorte`}
+            </p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Actividades activas</p>
+            <p class="obs-kpi__value">{dash.kpis.actividadesActivas}</p>
+            <p class="obs-kpi__hint">En vivo ahora, en el recorte de curso</p>
+          </article>
+          <article class="obs-kpi">
+            <p class="obs-kpi__label">Respuestas en el rango</p>
+            <p class="obs-kpi__value">{dash.kpis.respuestasEnRango}</p>
+            <p class="obs-kpi__hint">Agregado anónimo, sin empresa ni persona</p>
+          </article>
+        </section>
+
+        <ObservatorioCharts charts={dash.charts} />
+
+        <h2 class="obs-section-title">Por consigna</h2>
+        <p class="obs-section-note">
+          El detalle se muestra a partir de {OBS_MIN} respuestas en el recorte elegido. Hasta entonces solo se ve el avance al umbral.
+        </p>
+
+        {dash.bloques.length === 0 && (
+          <p class="obs-empty">No hay consignas para este recorte.</p>
+        )}
+
+        <div class="obs-bloques">
+          {dash.bloques.map((b, i) => {
+            const chartId = `obs-chart-act-${i}`;
+            const tieneChart = dash.charts.some((c) => c.id === chartId);
+            return (
+              <article class:list={['obs-card', b.listo && 'is-ready']}>
+                <header class="obs-card__head">
+                  <p class="obs-card__curso">{b.cursoTitulo}</p>
+                  <span class="obs-card__tipo">{etiquetaTipo(b.tipo)}</span>
+                </header>
+                <h3 class="obs-card__consigna">{b.consigna}</h3>
+                {b.listo && b.agregado ? (
+                  <>
+                    <p class="obs-card__meta">
+                      {b.total} respuestas
+                      {b.agregado.numero &&
+                        ` · promedio ${b.agregado.numero.promedio.toFixed(1)} (mín ${b.agregado.numero.min}, máx ${b.agregado.numero.max})`}
+                    </p>
+                    {tieneChart && (
+                      <div class="obs-chart-card__canvas obs-chart-card__canvas--tall">
+                        <canvas id={chartId} aria-label={b.consigna}></canvas>
+                      </div>
+                    )}
+                    {b.agregado.palabras && b.agregado.palabras.length > 0 && (
+                      <ul class="obs-words">
+                        {b.agregado.palabras.slice(0, 12).map((p) => (
+                          <li>
+                            {p.palabra} <span>{p.cantidad}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div class="obs-track" aria-hidden="true">
+                      <div
+                        class="obs-fill"
+                        style={`width: ${Math.min(100, Math.round((b.total / OBS_MIN) * 100))}%`}
+                      />
+                    </div>
+                    <p class="obs-card__meta">
+                      {b.total}/{OBS_MIN} — todavía no hay suficientes respuestas acumuladas para este dato (mínimo {OBS_MIN}).
+                    </p>
+                  </>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </>
+    )}
   </AdminChrome>
 </Layout>

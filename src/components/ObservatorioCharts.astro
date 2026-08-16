@@ -1,0 +1,114 @@
+---
+import type { ChartSpec } from '../lib/observatorio';
+
+interface Props {
+  charts: ChartSpec[];
+}
+
+const { charts } = Astro.props;
+const overview = charts.filter((c) => !c.id.startsWith('obs-chart-act-'));
+const chartsJson = JSON.stringify(charts).replace(/</g, '\\u003c');
+---
+{overview.length > 0 && (
+  <div class="obs-charts obs-charts--overview">
+    {overview.map((c) => (
+      <figure class="obs-chart-card">
+        <figcaption>{c.titulo}</figcaption>
+        <div class="obs-chart-card__canvas">
+          <canvas id={c.id} aria-label={c.titulo}></canvas>
+        </div>
+      </figure>
+    ))}
+  </div>
+)}
+
+{charts.length > 0 && (
+  <script id="obs-charts-data" type="application/json" set:html={chartsJson} />
+}
+
+<script>
+  import Chart from 'chart.js/auto';
+
+  type Spec = {
+    id: string;
+    tipo: 'bar' | 'doughnut' | 'line';
+    titulo: string;
+    labels: string[];
+    values: number[];
+    horizontal?: boolean;
+  };
+
+  const PALETTE = ['#0075ff', '#051229', '#3d8bfd', '#7e8590', '#1a3a5c', '#6ea8fe', '#364052', '#9bb8d4'];
+
+  Chart.defaults.font.family = 'Lato, sans-serif';
+  Chart.defaults.color = '#364052';
+  Chart.defaults.plugins.legend.labels.boxWidth = 12;
+  Chart.defaults.plugins.legend.labels.padding = 16;
+
+  function pintar() {
+    const node = document.getElementById('obs-charts-data');
+    if (!node?.textContent) return;
+    const specs = JSON.parse(node.textContent) as Spec[];
+    for (const spec of specs) {
+      const canvas = document.getElementById(spec.id);
+      if (!(canvas instanceof HTMLCanvasElement)) continue;
+      const colors = spec.labels.map((_, i) => PALETTE[i % PALETTE.length]!);
+      const horizontal = Boolean(spec.horizontal);
+
+      const config = {
+        type: spec.tipo,
+        data: {
+          labels: spec.labels,
+          datasets: [
+            {
+              label: spec.titulo,
+              data: spec.values,
+              backgroundColor: spec.tipo === 'line' ? 'rgba(0, 117, 255, 0.18)' : colors,
+              borderColor: spec.tipo === 'line' ? '#0075ff' : colors,
+              borderWidth: spec.tipo === 'line' ? 2 : 0,
+              fill: spec.tipo === 'line',
+              tension: 0.35,
+              pointRadius: spec.tipo === 'line' ? 3 : 0,
+              borderRadius: spec.tipo === 'bar' ? 8 : 0,
+            },
+          ],
+        },
+        options: {
+          indexAxis: spec.tipo === 'bar' && horizontal ? 'y' : 'x',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: spec.tipo === 'doughnut',
+              position: 'bottom',
+            },
+            tooltip: { intersect: false, mode: 'index' },
+          },
+          cutout: spec.tipo === 'doughnut' ? '62%' : undefined,
+          scales:
+            spec.tipo === 'doughnut'
+              ? {}
+              : {
+                  x: {
+                    grid: { display: !horizontal, color: '#e1e8f0' },
+                    ticks: { maxRotation: 0, autoSkip: true },
+                    beginAtZero: true,
+                  },
+                  y: {
+                    grid: { display: horizontal, color: '#e1e8f0' },
+                    ticks: { precision: 0 },
+                    beginAtZero: true,
+                  },
+                },
+        },
+      };
+      new Chart(canvas, config as never);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', pintar);
+  } else {
+    pintar();
+  }
+</script>
