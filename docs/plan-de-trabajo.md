@@ -81,17 +81,16 @@ Esta tabla existe para que nadie pierda tiempo "decidiendo" algo que ya está re
 4. Un middleware de Astro (`src/middleware.ts`) revisa esa cookie en cada request a `/admin/*` y `/api/admin/*`. Si no es válida, redirige a `/admin/login`.
 5. No hay "olvidé mi contraseña" ni recuperación automática en esta fase — si hace falta cambiar la contraseña, se cambia el valor de `ADMIN_PASSWORD` en Netlify y listo.
 
-**Credenciales de arranque** (pedidas explícitamente para esta primera versión):
+**Credenciales de arranque:**
 
 ```
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=Billymagic1$
+ADMIN_PASSWORD=            # solo en Netlify / .env local, nunca en este documento
 ```
 
 > 🔒 **Nota de seguridad, no es opcional:**
-> - Esta contraseña **no debe quedar commiteada en texto plano en ningún archivo del repositorio** (ni en código, ni en `.env` versionado). Va **solo** en las variables de entorno de Netlify (Site settings → Environment variables) y, si hace falta un `.env` local para desarrollar, ese archivo tiene que estar listado en `.gitignore` desde el primer commit.
-> - Este documento (`plan-de-trabajo.md`) menciona la contraseña en texto plano porque así se pidió explícitamente. **Si el repositorio de GitHub es público, esta contraseña queda expuesta apenas se suba este archivo.** Ver la pregunta pendiente sobre visibilidad del repo al final de este documento — hasta tener esa respuesta, tratar el repo como si fuera público y no confiarse.
-> - Recomendación: una vez que el panel funcione y Guillermo lo haya probado, cambiar `ADMIN_PASSWORD` por una contraseña nueva que no haya estado nunca escrita en un documento compartido.
+> - La contraseña **no debe quedar commiteada en texto plano en ningún archivo del repositorio** (ni en código, ni en este documento, ni en un `.env` versionado). Va **solo** en las variables de entorno de Netlify (Site settings → Environment variables) y en un `.env` local listado en `.gitignore`.
+> - El repositorio de GitHub es **público**. Una versión anterior de este documento tuvo la contraseña real en texto plano y en algún momento se commiteó también el `.env` real — ambos quedaron expuestos. Ya se rotaron todas las credenciales afectadas (service account key de Firebase, `ADMIN_PASSWORD`, `SESSION_SECRET`); las viejas quedan inválidas.
 
 ### 2.3 Cómo se accede a Firestore/Storage — Admin SDK del lado del servidor, no SDK de cliente
 
@@ -118,7 +117,7 @@ FIREBASE_STORAGE_BUCKET=
 
 # Login del panel
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=Billymagic1$
+ADMIN_PASSWORD=             # solo en Netlify / .env local, nunca en este documento
 SESSION_SECRET=            # generar una cadena aleatoria larga, distinta para cada entorno (no reusar entre local y producción)
 ```
 
@@ -606,7 +605,7 @@ Cada etapa tiene: objetivo, tareas, y una lista **"Hecho quiere decir"** que son
 - [ ] El deploy a Netlify funciona automáticamente al hacer push a `main`
 - [ ] Firestore y Storage existen en el proyecto de Firebase, en plan Spark
 - [ ] Las reglas de seguridad cerradas están publicadas
-- [ ] Entrar a `/admin` sin sesión redirige a `/admin/login`; loguearse con `admin` / `Billymagic1$` deja entrar y la sesión persiste al recargar
+- [x] Entrar a `/admin` sin sesión redirige a `/admin/login`; loguearse con las credenciales de `.env` deja entrar y la sesión persiste al recargar
 - [ ] El favicon de Guille Nuesch aparece en la pestaña del navegador
 - [ ] Ningún archivo con secretos (`.env`, la clave de cuenta de servicio) quedó commiteado — revisar el historial de git, no solo el estado actual
 

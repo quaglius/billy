@@ -1,39 +1,73 @@
-# Proyecto Guille Nuesch — sitio, blog y plataforma de cursos
+# Guille Nuesch — sitio, blog y plataforma de cursos
 
 Sitio de marca personal para **Guillermo "Billy" Nuesch**, capacitador en salud mental y prevención de consumos problemáticos en el ámbito laboral (25+ años de trayectoria con sindicatos, ART, organismos públicos, transporte, salud e industria).
 
-El proyecto tiene tres patas: **marca personal + blog con foco SEO + una plataforma de cursos con actividades interactivas en vivo** que hoy no ofrece nadie en el nicho.
+El proyecto tiene tres patas: **marca personal + blog con foco SEO + una plataforma de cursos con actividades interactivas en vivo** (preguntas con QR, respuestas anónimas desde el celular, resultados proyectados en el momento).
+
+**En producción:** [guillenuesch.netlify.app](https://guillenuesch.netlify.app)
+
+## Stack
+
+- **[Astro](https://astro.build)** en modo `server` (SSR), adaptador `@astrojs/netlify`
+- **Firebase Admin SDK** (`firebase-admin`) para todo el acceso a datos — nunca se usa el SDK de cliente ni se expone una API key al navegador
+- **Firestore** como única base de datos, plan Spark (gratuito). No se usa Firebase Storage: desde feb/2026 exige el plan Blaze con tarjeta, así que las imágenes que sube el admin se comprimen con `sharp` y se guardan como base64 dentro del propio documento de Firestore (`src/pages/api/admin/imagenes/subir.ts`, servidas por `src/pages/img/[id].ts`)
+- **Netlify** para hosting y deploy continuo (push a `main` → deploy automático)
+- Login de admin propio (usuario/contraseña + cookie de sesión firmada), no Firebase Auth
+
+## Estructura
+
+```
+src/
+  pages/            rutas públicas y del panel de admin (Astro file-based routing)
+    admin/          panel privado (requiere login, noindex)
+    api/            endpoints server-side (formularios, login, actividades en vivo)
+  components/       componentes .astro reutilizables
+  layouts/          Layout.astro (head, header, footer, GA)
+  lib/              lógica compartida: firebase-admin, tipos, observatorio, covers, etc.
+  styles/           CSS (tokens, base, páginas, admin)
+scripts/            scripts one-off (seed de datos, corridos con tsx --env-file=.env)
+public/
+  fotos/            fotos reales del sitio (guille/, campo/) — estas sí están en el repo
+  marca/            logo, favicon e íconos ya exportados en los formatos que sirve el sitio
+marca/              fuente de los SVG del logo (ver marca/README.md)
+docs/               documentos de planificación y contenido (ver docs/README.md)
+```
+
+## Desarrollo local
+
+```bash
+npm install
+npm run dev
+```
+
+Necesita un `.env` local (nunca se commitea — ver `.env.example`) con:
+
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_SERVICE_ACCOUNT_KEY_BASE64` — el JSON completo de la cuenta de servicio de Firebase, en base64 (Firebase Console → Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada)
+- `FIREBASE_STORAGE_BUCKET`
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD` — credenciales del panel
+- `SESSION_SECRET` — cadena aleatoria larga para firmar la cookie de sesión
+
+Las mismas variables van cargadas en Netlify (Site settings → Environment variables) para producción. **Nunca en un archivo commiteado.**
+
+```bash
+npm run build      # build de producción
+npm run seed:imagenes   # carga el banco de imágenes estáticas en Firestore
+```
+
+## Seguridad y datos sensibles
+
+- Las respuestas a las actividades en vivo son **anónimas por diseño** — sin login, sin dato personal, sin forma de rastrear una respuesta a una persona (Ley 25.326: salud y afiliación sindical son datos sensibles).
+- Las instancias (un curso dictado a una empresa concreta) son **siempre privadas**: no se listan ni se indexan, solo se accede por link o QR directo.
+- Los datos de contacto y notas internas de una empresa nunca se exponen en páginas públicas.
+- Este repositorio es **público**. Ningún secreto (claves, contraseñas, tokens) va en el código ni en la documentación — solo en `.env` local (gitignored) o en las variables de entorno de Netlify.
 
 ## Documentos
 
-| Documento | Qué contiene |
-|---|---|
-| [plan-de-trabajo.md](plan-de-trabajo.md) | **Para ejecutar la construcción, empezar por acá.** Especificación completa: stack técnico, modelo de datos, mapa de páginas, etapas con criterios de aceptación, y el contenido final de la página exclusiva para Guillermo |
-| [revision-critica.md](revision-critica.md) | Revisión crítica de todo el proyecto: los tres problemas estructurales, mejoras de plataforma, plan de redes y qué hacer primero |
-| [estrategia-sitio-web.md](estrategia-sitio-web.md) | Análisis de competencia, arquitectura del sitio, metodología propia, productos, y el diseño de la plataforma de cursos (Fase 1 y backlog) |
-| [cursos-demo.md](cursos-demo.md) | Tres cursos completos con sus actividades y consignas ya redactadas, quiz final de ejemplo, y el diseño del Observatorio de datos anónimos |
-| [blog-content-plan.md](blog-content-plan.md) | Diagnóstico de huecos de contenido, 10 posts pilar con keywords y ángulos, y el plan de distribución en Instagram / LinkedIn / YouTube |
-| [guillermo-perfil.md](guillermo-perfil.md) | Perfil completo: bio, trayectoria, formación, clientes, temas, y el marco conceptual del curso SEDRONAR/INAP como referencia pedagógica |
-| [fotos-index.md](fotos-index.md) | Índice curado del banco de fotos: cuáles usar, para qué, cuáles evitar y las advertencias de consentimiento |
-| [fotos/solvior-home05-guia-visual.md](fotos/solvior-home05-guia-visual.md) | Guía visual de implementación del front: tokens, tipografía, animaciones y specs para clonar el layout de referencia |
-| [marca/README.md](marca/README.md) | Logo, ícono y favicon: concepto, archivos SVG listos para usar, y pendiente de exportar tamaños PNG/ICO |
-
-Datos crudos: [`linkedin.txt`](linkedin.txt) (perfil original) y [`fotos/descripciones.json`](fotos/descripciones.json) (análisis técnico de las imágenes).
+Ver [docs/README.md](docs/README.md) para el índice de documentos de planificación, contenido y estrategia (contexto histórico del proyecto, no reflejan necesariamente el estado actual del código).
 
 ## Canales
 
 - **WhatsApp (contacto principal):** +54 9 11 6831-3878
 - **Instagram:** [@equilibrarprosalud](https://www.instagram.com/equilibrarprosalud)
 - **YouTube:** @EquilibrarSaludMentalyAdicciones
-
-## Estado
-
-Fase de definición: no hay código todavía. Repositorio: [github.com/quaglius/billy](https://github.com/quaglius/billy.git) (privado). Se publica en **Netlify** bajo la marca "Guille Nuesch" (sin dominio propio por ahora), con **Firebase** (Firestore + Storage, plan gratuito) como base de datos y archivos. Login del panel de administración con usuario y contraseña propios (no Firebase Auth) — Guillermo es el único administrador. Ver [plan-de-trabajo.md](plan-de-trabajo.md) para el detalle completo antes de empezar a construir.
-
-**Lo más importante a tener presente:**
-
-- **Anonimato por diseño, pero midiendo todo.** Las actividades en vivo no piden identificación de ningún tipo. No es una decisión técnica: bajo la Ley 25.326 las respuestas sobre consumo y la afiliación sindical son datos sensibles, y si la persona se identifica, miente. Los datos se agregan **por curso**, nunca por persona ni por empresa — y ese acumulado es un activo propio (el Observatorio).
-- **Las páginas de curso son privadas por default.** Publicar que una empresa hace un programa de prevención de adicciones es información de esa empresa, no de Guillermo.
-- **El motor de actividades se construye propio**, no se terceriza a Mentimeter ni similares: es la capacidad diferencial y los datos quedan en su poder.
-- **Nunca publicar rostros de trabajadores sin autorización**, y con más razón en redes.
-- **El hero va con la foto del sweater azul, no con la de traje.** El diferencial es no parecer la consultora corporativa genérica. Ver [fotos-index.md](fotos-index.md), sección 0.

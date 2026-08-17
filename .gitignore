@@ -11,9 +11,18 @@ dist/
 # Firebase CLI cache
 .firebase/
 
+# Secretos locales — nunca deben commitearse
+.env
+.env.*
+!.env.example
+
 # OS / editor
 .DS_Store
 Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# Material fuente sin procesar / borradores de diseño
+/fotos/
+Presentaci_n_en_castellano_solicitada.*
